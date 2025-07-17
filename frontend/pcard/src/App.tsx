@@ -1,6 +1,5 @@
 import { 
     Refine,
-    GitHubBanner, 
     WelcomePage,
     Authenticated
 ,AuthBindings, 
@@ -18,6 +17,7 @@ import dataProvider from "@refinedev/simple-rest";
 import { App as AntdApp } from "antd"
 import { BrowserRouter, Route, Routes, Outlet } from "react-router";
 import { CalendarPage } from "./pages/calendar";
+import CalendarCreate from "./pages/calendar";
 import routerBindings, { NavigateToResource, CatchAllNavigate, UnsavedChangesNotifier, DocumentTitleHandler } from "@refinedev/react-router";
 import axios from "axios";
 import { BlogPostList, BlogPostCreate, BlogPostEdit, BlogPostShow } from "./pages/blog-posts";
@@ -27,6 +27,9 @@ import { Header } from "./components/header";
 import { Login } from "./pages/login";
 import { CredentialResponse } from "./interfaces/google";
 import { parseJwt } from "./utils/parse-jwt";
+import { CompaniesPage } from "./pages/companies";
+import { CompanyCreatePage } from "./pages/companies/create";
+import { CompanyEditPage } from "./pages/companies/edit";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
@@ -38,12 +41,7 @@ if (config.headers) {
 return config;
 });
 
-
-
 function App() {
-    
-
-    
             const authProvider: AuthBindings = {
                 login: async ({ credential }: CredentialResponse) => {
                     const profileObj = credential ? parseJwt(credential) : null;
@@ -123,7 +121,6 @@ localStorage.setItem("token", `${ credential }`);
     
     return (
         <BrowserRouter>
-        <GitHubBanner />
         <RefineKbarProvider>
             <ColorModeContextProvider>
 <AntdApp>
@@ -153,9 +150,23 @@ authProvider={authProvider}
                                     canDelete: true,
                                 },
                             },
-                                                        {
-                                name: "calendar",
+                            {
+                                name: "events",
                                 list: "/calendar",
+                                create: "/calendar/create",
+                                meta: {
+                                    canDelete: true,
+                                }
+                            },
+                            {
+                                name: "companies",
+                                list: "/companies",
+                                create: "/companies/create",
+                                edit: "/companies/edit/:id",
+                                show: "/companies/show/:id",
+                                meta: {
+                                canDelete: true,
+                                },
                             },
                         ]}
                     options={{
@@ -197,9 +208,15 @@ authProvider={authProvider}
                                 <Route path="edit/:id" element={<CategoryEdit />} />
                                 <Route path="show/:id" element={<CategoryShow />} />
                             </Route>
-                            <Route path="*" element={<ErrorComponent />} />
-                            <Route path="/calendar" element={<CalendarPage />} />
-
+                            <Route path="/calendar">
+                                <Route index element={<CalendarPage />} />
+                                <Route path="create" element={<CalendarCreate />} />
+                            </Route>
+                            <Route path="/companies">
+                                <Route index element={<CompaniesPage />} />
+                                <Route path="create" element={<CompanyCreatePage />} />
+                                <Route path="edit/:id" element={<CompanyEditPage />} />
+                            </Route>
                         </Route>
                         <Route
                             element={

@@ -1,7 +1,6 @@
 import { Edit, useForm, useSelect } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
 import { Form, Input, Select } from "antd";
-import React from "react";
 
 export const BlogPostEdit = () => {
     const { formProps, saveButtonProps, queryResult, formLoading } = useForm({
