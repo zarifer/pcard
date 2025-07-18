@@ -9,6 +9,7 @@ import {
 } from "@refinedev/antd";
 import { type BaseRecord, useMany } from "@refinedev/core";
 import { Space, Table } from "antd";
+import React from "react";
 
 export const BlogPostList = () => {
     const { tableProps } = useTable({

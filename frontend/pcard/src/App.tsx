@@ -1,5 +1,6 @@
 import { 
     Refine,
+    GitHubBanner, 
     WelcomePage,
     Authenticated
 ,AuthBindings, 
@@ -16,8 +17,6 @@ import "@refinedev/antd/dist/reset.css";
 import dataProvider from "@refinedev/simple-rest";
 import { App as AntdApp } from "antd"
 import { BrowserRouter, Route, Routes, Outlet } from "react-router";
-import { CalendarPage } from "./pages/calendar";
-import CalendarCreate from "./pages/calendar";
 import routerBindings, { NavigateToResource, CatchAllNavigate, UnsavedChangesNotifier, DocumentTitleHandler } from "@refinedev/react-router";
 import axios from "axios";
 import { BlogPostList, BlogPostCreate, BlogPostEdit, BlogPostShow } from "./pages/blog-posts";
@@ -27,9 +26,14 @@ import { Header } from "./components/header";
 import { Login } from "./pages/login";
 import { CredentialResponse } from "./interfaces/google";
 import { parseJwt } from "./utils/parse-jwt";
-import { CompaniesPage } from "./pages/companies";
-import { CompanyCreatePage } from "./pages/companies/create";
-import { CompanyEditPage } from "./pages/companies/edit";
+
+import { CalendarPage } from "./pages/calendar";
+import CalendarCreate from "./pages/calendar";
+
+import CompanyListPage from "./pages/companies/list";
+import CompanyCreatePage from "./pages/companies/create";
+import CompanyEditPage from "./pages/companies/edit";
+import CompanyShowPage from "./pages/companies/show";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
@@ -41,7 +45,12 @@ if (config.headers) {
 return config;
 });
 
+
+
 function App() {
+    
+
+    
             const authProvider: AuthBindings = {
                 login: async ({ credential }: CredentialResponse) => {
                     const profileObj = credential ? parseJwt(credential) : null;
@@ -125,7 +134,7 @@ localStorage.setItem("token", `${ credential }`);
             <ColorModeContextProvider>
 <AntdApp>
             <DevtoolsProvider>
-                <Refine dataProvider={dataProvider("https://api.fake-rest.refine.dev")}
+                <Refine dataProvider={dataProvider("http://localhost:3001")}
 notificationProvider={useNotificationProvider}
 routerProvider={routerBindings}
 authProvider={authProvider} 
@@ -150,7 +159,7 @@ authProvider={authProvider}
                                     canDelete: true,
                                 },
                             },
-                            {
+                                                        {
                                 name: "events",
                                 list: "/calendar",
                                 create: "/calendar/create",
@@ -164,16 +173,14 @@ authProvider={authProvider}
                                 create: "/companies/create",
                                 edit: "/companies/edit/:id",
                                 show: "/companies/show/:id",
-                                meta: {
-                                canDelete: true,
-                                },
-                            },
+                                meta: { canDelete: true }
+                            }
                         ]}
                     options={{
                         syncWithLocation: true,
                         warnWhenUnsavedChanges: true,
                         useNewQueryKeys: true,
-                            projectId: "wUlIW7-t4mQrQ-Va6YDB",
+                            projectId: "5zfHVV-J9HiD2-0sf6xU",
                         
                     }}
                 >
@@ -208,15 +215,17 @@ authProvider={authProvider}
                                 <Route path="edit/:id" element={<CategoryEdit />} />
                                 <Route path="show/:id" element={<CategoryShow />} />
                             </Route>
-                            <Route path="/calendar">
+                                                        <Route path="/calendar">
                                 <Route index element={<CalendarPage />} />
                                 <Route path="create" element={<CalendarCreate />} />
                             </Route>
-                            <Route path="/companies">
-                                <Route index element={<CompaniesPage />} />
+                              <Route path="/companies">
+                                <Route index element={<CompanyListPage />} />
                                 <Route path="create" element={<CompanyCreatePage />} />
                                 <Route path="edit/:id" element={<CompanyEditPage />} />
+                                <Route path="show/:id" element={<CompanyShowPage />} />
                             </Route>
+                            <Route path="*" element={<ErrorComponent />} />
                         </Route>
                         <Route
                             element={

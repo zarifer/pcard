@@ -1,0 +1,73 @@
+{
+  "companies": [
+    {
+      "id": 1,
+      "name": "Acme Ltd.",
+      "logo": "https://randomuser.me/api/portraits/men/99.jpg",
+      "industry": "IT",
+      "email": "contact@acme.com",
+      "phone": "+36-1-234-5678",
+      "location": "Budapest",
+      "content": "### Fő profil\n- IT security\n- Hálózatépítés\n\n**Kiemelt ügyfelek:** Telekom, MVM"
+    },
+    {
+      "id": "4c75",
+      "name": "cac",
+      "industry": "aca",
+      "email": "aca",
+      "phone": "ac",
+      "location": "cacac",
+      "content": "**acacaaccac**"
+    }
+  ],
+  "blog_posts": [
+    {
+      "id": 1,
+      "title": "Első bejegyzés",
+      "content": "Ez a blog első bejegyzése.",
+      "category": 1,
+      "status": "published"
+    },
+    {
+      "id": "5fe1",
+      "title": "regerg",
+      "content": "egeg",
+      "category": {
+        "id": 1
+      },
+      "status": "draft"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "title": "Too many FNs"
+    },
+    {
+      "id": 2,
+      "title": "Too many FPs"
+    },
+    {
+      "id": "ffd9",
+      "title": "Real Time stopped"
+    },
+    {
+      "id": "f5fd",
+      "title": "OD scan stopped"
+    },
+    {
+      "id": "6e9e",
+      "title": "Other"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "title": "Refine Demo Day",
+      "date": "2025-07-19",
+      "type": "success",
+      "description": "Online bemutató",
+      "location": "Budapest"
+    }
+  ]
+}
