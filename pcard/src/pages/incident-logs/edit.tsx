@@ -1,19 +1,18 @@
 import { Edit, useForm, useSelect } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
 import { Form, Input, Select } from "antd";
-import React from "react";
 
-export const BlogPostEdit = () => {
+export const IncidentLogEdit = () => {
     const { formProps, saveButtonProps, queryResult, formLoading } = useForm({
     });
 
-    const blogPostsData = queryResult?.data?.data;
+    const incidentLogsData = queryResult?.data?.data;
 
     const { selectProps: categorySelectProps } = useSelect({
         resource: "categories",
-    defaultValue: blogPostsData?.category,
+    defaultValue: incidentLogsData?.category,
     queryOptions: {
-        enabled: !!blogPostsData?.category,
+        enabled: !!incidentLogsData?.category,
     },
     });
 
@@ -67,7 +66,7 @@ export const BlogPostEdit = () => {
                 >
                     <Select
                         defaultValue={"draft"}
-                        options={[{"value":"draft","label":"Draft"},{"value":"published","label":"Published"},{"value":"rejected","label":"Rejected"}]}
+                        options={[{"value":"draft","label":"Draft"},{"value":"open","label":"Open"},{"value":"closed","label":"Closed"}]}
                         style={{ width: 120 }}
                     />
                 </Form.Item>

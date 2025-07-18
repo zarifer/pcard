@@ -10,11 +10,11 @@ export default function CompanyCreatePage() {
         <Create saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">
                 <Form.Item label="Company Name" name="name" rules={[{ required: true }]}><Input /></Form.Item>
-                <Form.Item label="Industry" name="industry"><Input /></Form.Item>
-                <Form.Item label="Email" name="email"><Input /></Form.Item>
-                <Form.Item label="Phone" name="phone"><Input /></Form.Item>
-                <Form.Item label="Location" name="location"><Input /></Form.Item>
-                <Form.Item label="Company description" name="content"><MDEditor /></Form.Item>
+                <Form.Item label="Product Name" name="product"><Input /></Form.Item>
+                <Form.Item label="Contact Email" name="email"><Input /></Form.Item>
+                <Form.Item label="GUI" name="gui"><Input /></Form.Item>
+                <Form.Item label="Log path" name="log"><Input /></Form.Item>
+                <Form.Item label="Spec features description" name="features"><MDEditor /></Form.Item>
             </Form>
         </Create>
     );

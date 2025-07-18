@@ -1,70 +1,68 @@
 {
   "companies": [
     {
-      "id": 1,
-      "name": "Acme Ltd.",
-      "logo": "https://randomuser.me/api/portraits/men/99.jpg",
-      "industry": "IT",
+      "id": "1",
+      "name": "Alibaba Cloud Security Center",
+      "logo": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimg.alicdn.com%2Ftfs%2FTB1O.0zsMHqK1RjSZFEXXcGMXXa-765-245.png&f=1&nofb=1&ipt=d7e5805b7e8c967a67778833803d362107f80b32ecc0a21e1e294dac1ab68048",
+      "product": "Ali CLI",
       "email": "contact@acme.com",
-      "phone": "+36-1-234-5678",
-      "location": "Budapest",
-      "content": "### Fő profil\n- IT security\n- Hálózatépítés\n\n**Kiemelt ügyfelek:** Telekom, MVM"
+      "gui": "Terminal",
+      "log": "No log",
+      "features": ".dat files + fileddetected_*.txt should go to Scotty together. No RT, don't be scared, on a 102000 set it will go up to 119964 with OD scanning. It will stop don't worry."
     },
     {
-      "id": "4c75",
-      "name": "cac",
-      "industry": "aca",
-      "email": "aca",
-      "phone": "ac",
-      "location": "cacac",
-      "content": "**acacaaccac**"
+      "id": "ea14",
+      "name": "Acronis",
+      "product": "Acronis Cyber Protect",
+      "email": "sanyika@gmail.com",
+      "gui": "Yes, it has",
+      "log": "https://kb.acronis.com/content/54608",
+      "features": "open web GUI. Go to devices/VB100. Choose the machine. On the right go to Protection -> the deployed plan -> choose the antiviru s service -> scrool down to \"run\" and choose customer scan."
     }
   ],
-  "blog_posts": [
+  "incident_logs": [
     {
-      "id": 1,
-      "title": "Első bejegyzés",
-      "content": "Ez a blog első bejegyzése.",
-      "category": 1,
-      "status": "published"
+      "id": "1",
+      "title": "RT no detection",
+      "content": "No RT, don't be scared, on a 102000 set it will go up to 119964 with OD scanning. It will stop don't worry.",
+      "category": "Other",
+      "status": "Open"
     },
     {
-      "id": "5fe1",
-      "title": "regerg",
-      "content": "egeg",
-      "category": {
-        "id": 1
-      },
-      "status": "draft"
+      "id": "2",
+      "title": "Hajaj",
+      "content": "![image](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.-yunHKHDnlbDLZXFYuvUqwHaE8%3Fpid%3DApi&f=1&ipt=909997dd5d8fad17c921ff8548045083616fac015b4793e1a4905cc366ca00b0&ipo=images)",
+      "category": "Other",
+      "status": "Draft"
     }
   ],
   "categories": [
     {
-      "id": 1,
+      "id": "1",
       "title": "Too many FNs"
     },
     {
-      "id": 2,
+      "id": "2",
       "title": "Too many FPs"
     },
     {
-      "id": "ffd9",
+      "id": "3",
       "title": "Real Time stopped"
     },
     {
-      "id": "f5fd",
+      "id": "4",
       "title": "OD scan stopped"
     },
     {
-      "id": "6e9e",
+      "id": "5",
       "title": "Other"
     }
   ],
   "events": [
     {
-      "id": 1,
-      "title": "Refine Demo Day",
-      "date": "2025-07-19",
+      "id": "1",
+      "title": "Demo Day",
+      "date": "2025-07-18",
       "type": "success",
       "description": "Online bemutató",
       "location": "Budapest"

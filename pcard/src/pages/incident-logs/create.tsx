@@ -1,9 +1,8 @@
 import { Create, useForm, useSelect } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
 import { Form, Input, Select } from "antd";
-import React from "react";
 
-export const BlogPostCreate = () => {
+export const IncidentLogCreate = () => {
     const { formProps, saveButtonProps } = useForm({
     });
 
@@ -60,7 +59,7 @@ export const BlogPostCreate = () => {
                 >
                 <Select
                     defaultValue={"draft"}
-                    options={[{"value":"draft","label":"Draft"},{"value":"published","label":"Published"},{"value":"rejected","label":"Rejected"}]}
+                    options={[{"value":"draft","label":"Draft"},{"value":"open","label":"Open"},{"value":"closed","label":"Closed"}]}
                     style={{ width: 120 }}
                 />
                 </Form.Item>

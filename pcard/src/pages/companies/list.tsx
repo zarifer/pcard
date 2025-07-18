@@ -17,7 +17,7 @@ export default function CompanyListPage() {
             title="Companies"
         >
             <Input.Search
-                placeholder="Keresés cégnévre"
+                placeholder="Search by..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 style={{ marginBottom: 24, maxWidth: 350 }}

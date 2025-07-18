@@ -1,7 +1,6 @@
 import { useShow } from "@refinedev/core";
 import { Show } from "@refinedev/antd";
 import { Card, Typography, Avatar } from "antd";
-import MDEditor from "@uiw/react-md-editor";
 
 
 export default function CompanyShowPage() {
@@ -18,16 +17,16 @@ export default function CompanyShowPage() {
                     title={<Typography.Title level={4}>{company.name}</Typography.Title>}
                     description={
                         <>
-                            <Typography.Paragraph strong>Industry: </Typography.Paragraph>
-                            <Typography.Text>{company.industry}</Typography.Text><br/>
-                            <Typography.Paragraph strong>Email: </Typography.Paragraph>
+                            <Typography.Paragraph strong>Product name: </Typography.Paragraph>
+                            <Typography.Text>{company.product}</Typography.Text><br/>
+                            <Typography.Paragraph strong>Contact email: </Typography.Paragraph>
                             <Typography.Text>{company.email}</Typography.Text><br/>
-                            <Typography.Paragraph strong>Phone: </Typography.Paragraph>
-                            <Typography.Text>{company.phone}</Typography.Text><br/>
-                            <Typography.Paragraph strong>Location: </Typography.Paragraph>
-                            <Typography.Text>{company.location}</Typography.Text><br/>
-                            <Typography.Paragraph strong>Description: </Typography.Paragraph>
-                            <Typography.Text>{company.description}</Typography.Text>
+                            <Typography.Paragraph strong>Gui: </Typography.Paragraph>
+                            <Typography.Text>{company.gui}</Typography.Text><br/>
+                            <Typography.Paragraph strong>Log path: </Typography.Paragraph>
+                            <Typography.Text>{company.path}</Typography.Text><br/>
+                            <Typography.Paragraph strong>Spec features: </Typography.Paragraph>
+                            <Typography.Text>{company.features}</Typography.Text>
                         </>
                     }
                 />
