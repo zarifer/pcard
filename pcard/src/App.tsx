@@ -45,7 +45,8 @@ if (config.headers) {
 return config;
 });
 
-function App() {    
+function App() {
+    
             const authProvider: AuthBindings = {
                 login: async ({ credential }: CredentialResponse) => {
                     const profileObj = credential ? parseJwt(credential) : null;
@@ -187,16 +188,6 @@ localStorage.setItem("token", `${ credential }`);
                                     fallback={<CatchAllNavigate to="/login" />}
                                 >
                                         <ThemedLayoutV2
-                                            Title={
-                                                <a href="/">
-                                                    <img
-                                                        src="/public/logo.png"
-                                                        alt="VirusBulletin"
-                                                        style={{ height: 40, marginRight: 8 }}
-                                                    />
-                                                    <span style={{ fontWeight: 600, fontSize: 20, color: "#333" }}>VirusBulletin</span>
-                                                </a>
-                                            }
                                             Header={Header}
                                             Sider={(props) => <ThemedSiderV2 {...props} fixed />}
                                         >
