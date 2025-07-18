@@ -7,8 +7,6 @@ import {
 } from "@refinedev/antd";
 import type { BaseRecord } from "@refinedev/core";
 import { Space, Table } from "antd";
-import React from "react";
-
 
 export const CategoryList = () => {
     const { tableProps } = useTable({
