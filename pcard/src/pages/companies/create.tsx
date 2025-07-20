@@ -3,7 +3,7 @@ import { Form, Input } from "antd";
 import MDEditor from "@uiw/react-md-editor";
 
 
-export default function CompanyCreatePage() {
+export default function CompanyCreate() {
     const { formProps, saveButtonProps } = useForm({ resource: "companies" });
 
     return (

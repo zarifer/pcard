@@ -22,23 +22,31 @@ import routerBindings, {
     DocumentTitleHandler,
 } from "@refinedev/react-router";
 import axios from "axios";
-import { IncidentLogList, IncidentLogCreate, IncidentLogEdit, IncidentLogShow } from "./pages/incident-logs";
-import { CategoryList, CategoryCreate, CategoryEdit, CategoryShow } from "./pages/categories";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 import { Header } from "./components/header";
-import { Login } from "./pages/login";
+import { Helmet } from "react-helmet";
 import { CredentialResponse } from "./interfaces/google";
 import { parseJwt } from "./utils/parse-jwt";
 
-import { CalendarPage } from "./pages/calendar";
-import CalendarCreate from "./pages/calendar";
+//Login imports
+import { Login } from "./pages/login";
 
-import CompanyListPage from "./pages/companies/list";
-import CompanyCreatePage from "./pages/companies/create";
-import CompanyEditPage from "./pages/companies/edit";
-import CompanyShowPage from "./pages/companies/show";
+//Categories imports
+import { CategoryList, CategoryCreate, CategoryEdit, CategoryShow } from "./pages/categories";
 
-import { Helmet } from "react-helmet";
+//Calendar imports
+import CalendarList from "./pages/calendar/list";
+import CalendarCreate from "./pages/calendar/create";
+
+
+//Companies imports
+import CompanyList from "./pages/companies/list";
+import CompanyCreate from "./pages/companies/create";
+import CompanyEdit from "./pages/companies/edit";
+import CompanyShow from "./pages/companies/show";
+
+//Incident logs import
+import { IncidentLogList, IncidentLogCreate, IncidentLogEdit, IncidentLogShow } from "./pages/incident-logs";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
@@ -49,7 +57,7 @@ axiosInstance.interceptors.request.use((config) => {
     return config;
 });
 
-// **LOGO + cégnév komponens, FC-ként**
+// Logo + company name
 const LogoTitle = () => (
     <a href="/" style={{ display: "flex", alignItems: "center" }}>
         <img src="/logo.png" alt="VirusBulletin" style={{ height: 32, marginRight: 8 }} />
@@ -158,7 +166,7 @@ function App() {
                                             meta: { canDelete: true },
                                         },
                                         {
-                                            name: "events",
+                                            name: "calendar",
                                             list: "/calendar",
                                             create: "/calendar/create",
                                             meta: { canDelete: true }
@@ -212,14 +220,14 @@ function App() {
                                                 <Route path="show/:id" element={<CategoryShow />} />
                                             </Route>
                                             <Route path="/calendar">
-                                                <Route index element={<CalendarPage />} />
+                                                <Route index element={<CalendarList />} />
                                                 <Route path="create" element={<CalendarCreate />} />
                                             </Route>
                                             <Route path="/companies">
-                                                <Route index element={<CompanyListPage />} />
-                                                <Route path="create" element={<CompanyCreatePage />} />
-                                                <Route path="edit/:id" element={<CompanyEditPage />} />
-                                                <Route path="show/:id" element={<CompanyShowPage />} />
+                                                <Route index element={<CompanyList />} />
+                                                <Route path="create" element={<CompanyCreate />} />
+                                                <Route path="edit/:id" element={<CompanyEdit />} />
+                                                <Route path="show/:id" element={<CompanyShow />} />
                                             </Route>
                                             <Route path="*" element={<ErrorComponent />} />
                                         </Route>

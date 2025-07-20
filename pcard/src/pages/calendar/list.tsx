@@ -5,11 +5,9 @@ import { Badge, type BadgeProps, Calendar } from "antd";
 import type { CalendarMode } from "antd/lib/calendar/generateCalendar";
 import dayjs from "dayjs";
 
-import type { IEvent } from "../../interfaces";
+import type { IEvent } from "src/interfaces";
 
-import "./index.css";
-
-export const CalendarPage = () => {
+export const CalendarList = () => {
   const { data } = useList<IEvent>({
     resource: "events",
     config: {
@@ -62,4 +60,4 @@ export const CalendarPage = () => {
     </Show>
   );
 };
-export default CalendarPage;
+export default CalendarList;

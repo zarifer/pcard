@@ -3,7 +3,7 @@ import { List, EditButton, DeleteButton, ShowButton, CreateButton } from "@refin
 import { Row, Col, Card, Avatar, Typography, Input } from "antd";
 import { useState } from "react";
 
-export default function CompanyListPage() {
+export default function CompanyList() {
     const { data } = useList({ resource: "companies" });
     const [search, setSearch] = useState("");
 

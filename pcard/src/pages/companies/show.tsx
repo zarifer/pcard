@@ -3,7 +3,7 @@ import { Show } from "@refinedev/antd";
 import { Card, Typography, Avatar } from "antd";
 
 
-export default function CompanyShowPage() {
+export default function CompanyShow() {
     const { queryResult } = useShow();
     const company = queryResult?.data?.data;
 
