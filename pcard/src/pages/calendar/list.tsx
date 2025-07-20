@@ -5,7 +5,7 @@ import { Badge, type BadgeProps, Calendar } from "antd";
 import type { CalendarMode } from "antd/lib/calendar/generateCalendar";
 import dayjs from "dayjs";
 
-import type { IEvent } from "src/interfaces";
+import type { IEvent } from "../../interfaces/ievent";
 
 export const CalendarList = () => {
   const { data } = useList<IEvent>({

@@ -1,13 +1,13 @@
 .login-root {
     display: flex;
     min-height: 100vh;
-    background: linear-gradient(120deg, #201a4a 0%, #4d3072 100%);
+    background: #160430 100%;
 }
 
 .login-left {
     flex: 1.5;
     position: relative;
-    background: #170e35;
+    background: #160430;
     display: flex;
     align-items: stretch;
     justify-content: stretch;
@@ -31,8 +31,8 @@
 
 .login-card {
     width: 100%;
-    max-width: 400px;
-    background: rgba(31, 13, 65, 0.97) !important;
+    max-width: 500px;
+    background: rgba(62, 34, 114, 0.97) !important;
     border-radius: 2rem !important;
     box-shadow: 0 6px 36px 0 #3b176c44;
     border: none;
@@ -43,7 +43,7 @@
 }
 
 .login-title {
-    color: #fff !important;
+    color: #c1a0e0 !important;
     font-size: 3rem !important;
     font-weight: 800 !important;
     text-align: center;
@@ -67,4 +67,12 @@
         height: 200px;
         object-fit: cover;
     }
+}
+
+.google-btn-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 16px 0 24px 0;
 }

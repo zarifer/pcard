@@ -1,13 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useLogin } from "@refinedev/core";
+import { Typography, Card } from "antd";
+import { CredentialResponse } from "../../interfaces/google";
 
-import { ThemedTitleV2 } from "@refinedev/antd";
-import { Typography, Layout, Space } from "antd";
-
-import { CredentialResponse } from "../interfaces/google"; 
-
-// Todo: Update your Google Client ID here
-const GOOGLE_CLIENT_ID = "1041339102270-e1fpe2b6v6u1didfndh7jkjmpcashs4f.apps.googleusercontent.com";
+// Google client ID
+const GOOGLE_CLIENT_ID = "979184695640-8k3tsbn5r11b7cf4ahsdrrj6p123o31i.apps.googleusercontent.com";
 
 export const Login: React.FC = () => {
     const { mutate: login } = useLogin<CredentialResponse>();
@@ -23,7 +20,6 @@ export const Login: React.FC = () => {
             ) {
                 return;
             }
-
             try {
                 window.google.accounts.id.initialize({
                     ux_mode: "popup",
@@ -35,9 +31,11 @@ export const Login: React.FC = () => {
                     },
                 });
                 window.google.accounts.id.renderButton(divRef.current, {
-                    theme: "filled_blue",
-                    size: "medium",
                     type: "standard",
+                    theme: "filled_blue",
+                    size: "large",
+                    shape: "pill",
+                    width: "300",
                 });
             } catch (error) {
                 console.log(error);
@@ -47,36 +45,26 @@ export const Login: React.FC = () => {
         return <div ref={divRef} />;
     };
 
-
-        return (
-            <Layout
-            style={{
-                height: "100vh",
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-            >
-            <Space direction="vertical" align="center">
-                <ThemedTitleV2
-                collapsed={false}
-                wrapperStyles={{
-                    fontSize: "22px",
-                    marginBottom: "36px",
-                }}
-                />
-                <GoogleButton />
-                <Typography.Text type="secondary">
-                Powered by
-          <img
-            style={{ padding: "0 5px" }}
-            alt="Google"
-            src="https://refine.ams3.cdn.digitaloceanspaces.com/superplate-auth-icons%2Fgoogle.svg"
-          />
-          Google
-                </Typography.Text>
-            </Space>
-            </Layout>
-        );
-    
-
+    return (
+        <div className="login-root">
+            <div className="login-left">
+                <img src="/login_bck.png" alt="Background" className="login-bg" />
+            </div>
+            <div className="login-right">
+                <Card className="login-card">
+                    <Typography.Title level={1} className="login-title">
+                        Sign In to VB Product Cards
+                    </Typography.Title>
+                    <div className="google-btn-wrapper">
+                        <GoogleButton />
+                    </div>
+                    <div style={{ margin: "32px 0 0 0", textAlign: "center", color: "#aaa" }}>
+                        By registering you with our <a href="#" style={{ color: "#bc80fc" }}>Terms</a> and <a href="#" style={{ color: "#bc80fc" }}>Conditions</a>
+                    </div>
+                </Card>
+            </div>
+        </div>
+    );
 };
+
+export default Login;
