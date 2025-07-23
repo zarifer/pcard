@@ -26,6 +26,8 @@ export const ColorModeContextProvider: React.FC<PropsWithChildren> = ({
 
     useEffect(() => {
         window.localStorage.setItem("colorMode", mode);
+        // ITT A LÉNYEG: ez a sor teszi fel a data-theme attribútumot!
+        document.body.setAttribute("data-theme", mode);
     }, [mode]);
 
     const setColorMode = () => {
@@ -46,7 +48,6 @@ export const ColorModeContextProvider: React.FC<PropsWithChildren> = ({
             }}
         >
             <ConfigProvider
-                // you can change the theme colors here. example: ...RefineThemes.Magenta,
                 theme={{
                     ...RefineThemes.Purple,
                     algorithm:

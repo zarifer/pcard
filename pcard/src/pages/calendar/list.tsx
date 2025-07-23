@@ -1,63 +1,214 @@
 import { useList } from "@refinedev/core";
-
-import { Show } from "@refinedev/antd";
-import { Badge, type BadgeProps, Calendar } from "antd";
+import { Badge, Calendar, Button, Segmented, Space } from "antd";
+import { PlusOutlined, LeftOutlined, RightOutlined, CalendarOutlined } from "@ant-design/icons";
+import { useNavigation } from "@refinedev/core";
+import dayjs, { Dayjs } from "dayjs";
 import type { CalendarMode } from "antd/lib/calendar/generateCalendar";
-import dayjs from "dayjs";
+import { useState } from "react";
 
+//Own stuff
+import { CategoriesBox } from './categoriesbox';
+import { CATEGORY_COLORS } from "./show";
+import { CalendarShow } from "./show";
+import "./index.css";
 import type { IEvent } from "../../interfaces/ievent";
 
+
 export const CalendarList = () => {
-  const { data } = useList<IEvent>({
-    resource: "events",
-    config: {
-      pagination: {
-        pageSize: 100,
-      },
-    },
-  });
+    const { data } = useList<IEvent>({
+        resource: "calendar",
+        config: { pagination: { pageSize: 100 } },
+    });
+    const { create } = useNavigation();
 
-  const monthCellRender = (value: dayjs.Dayjs) => {
-    const listData =
-      data?.data?.filter((p) => dayjs(p.date).isSame(value, "month")) ?? [];
-    return listData.length > 0 ? (
-      <div className="notes-month">
-        <section>{listData.length}</section>
-        <span>Events</span>
-      </div>
-    ) : null;
-  };
+    // Category filtering
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [allCategories, setAllCategories] = useState<string[]>([
+        "Pre-test", "Main test", "Post-test", "Debug"
+    ]);
 
-  const panelChange = (value: dayjs.Dayjs, mode: CalendarMode) => {
-    console.log(value.format("YYYY-MM-DD"), mode);
-  };
+    // View + date control
+    const [mode, setMode] = useState<CalendarMode | "week" | "day">("month");
+    const [value, setValue] = useState<Dayjs>(dayjs());
 
-  const dateCellRender = (value: dayjs.Dayjs) => {
-    const listData = data?.data?.filter((p) =>
-      dayjs(p.date).isSame(value, "day"),
-    );
-    return (
-      <ul className="events">
-        {listData?.map((item) => (
-          <li key={item.id}>
-            <Badge
-              status={item.type as BadgeProps["status"]}
-              text={item.title}
+    // Filtered events
+    const filteredData = data?.data?.filter(calendar =>
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(calendar.type)
+    ) ?? [];
+
+    // Custom Calendar renders
+    const monthCellRender = (value: dayjs.Dayjs) => {
+        const listData = filteredData.filter((p) =>
+            dayjs(p.date).isSame(value, "month")
+        );
+        return listData.length > 0 ? (
+            <div className="notes-month">
+                <section>{listData.length}</section>
+                <span>Events</span>
+            </div>
+        ) : null;
+    };
+
+    const [showId, setShowId] = useState<string | null>(null);
+
+    const dateCellRender = (value: dayjs.Dayjs) => {
+        const listData = filteredData.filter((p) =>
+            dayjs(p.date).isSame(value, "day")
+        );
+        return (
+            <ul className="events">
+                {listData?.map((item) => (
+                    <li key={item.id}>
+                       <Badge
+                            color={CATEGORY_COLORS[item.type] || "#808080"}
+                            text={
+                                <span
+                                    style={{
+                                        fontWeight: 700,
+                                        color: CATEGORY_COLORS[item.type] || "#808080",
+                                         cursor: "pointer"
+                                    }}
+                                    onClick={() => setShowId(item.id)}
+                                >
+                                    {item.title}
+                                </span>
+                            }
+                        />
+                    </li>
+                ))}
+            </ul>
+        );
+    };
+
+    // Gomb handler - hónap/év/week/day léptetés
+    const handlePrev = () => {
+        if (mode === "month") setValue(value.subtract(1, "month"));
+        else if (mode === "year") setValue(value.subtract(1, "year"));
+        else if (mode === "week") setValue(value.subtract(1, "week"));
+        else if (mode === "day") setValue(value.subtract(1, "day"));
+    };
+    const handleNext = () => {
+        if (mode === "month") setValue(value.add(1, "month"));
+        else if (mode === "year") setValue(value.add(1, "year"));
+        else if (mode === "week") setValue(value.add(1, "week"));
+        else if (mode === "day") setValue(value.add(1, "day"));
+    };
+    const handleToday = () => setValue(dayjs());
+
+    // View váltás (month, year, week, day)
+    const viewOptions = [
+        { value: "month", label: "Month" },
+        { value: "week", label: "Week" },
+        { value: "day", label: "Day" },
+        { value: "year", label: "Year" },
+    ];
+
+    // Ha week/day view: csak az aktuális hét/nap eventjeit rendereljük
+    const getCustomPanel = () => {
+        if (mode === "week") {
+            // Week nézet: az adott hét napjai + eventek
+            const weekStart = value.startOf("week");
+            const days = Array.from({ length: 7 }, (_, i) => weekStart.add(i, "day"));
+            return (
+                <div className="week-view">
+                    <div style={{ display: "flex", gap: 8 }}>
+                        {days.map(day => (
+                            <div key={day.format("YYYY-MM-DD")} style={{ flex: 1, minWidth: 120 }}>
+                                <div style={{ fontWeight: 600, textAlign: "center" }}>
+                                    {day.format("ddd, MMM D")}
+                                </div>
+                                <ul className="events">
+                                    {filteredData.filter(e => dayjs(e.date).isSame(day, "day"))
+                                        .map(e => (
+                                            <li key={e.id}>
+                                                <Badge status={e.type as any} text={e.title} />
+                                            </li>
+                                        ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        if (mode === "day") {
+            // Day nézet: csak az aktuális nap eventjei
+            return (
+                <div className="day-view">
+                    <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 8 }}>
+                        {value.format("dddd, MMMM D.")}
+                    </div>
+                    <ul className="events">
+                        {filteredData.filter(e => dayjs(e.date).isSame(value, "day"))
+                            .map(e => (
+                                <li key={e.id}>
+                                    <Badge status={e.type as any} text={e.title} />
+                                </li>
+                            ))}
+                    </ul>
+                </div>
+            );
+        }
+        // default: month/year nézet – az AntD Calendar
+        return (
+            <Calendar
+                value={value}
+                mode={mode === "month" || mode === "year" ? mode : "month"}
+                onPanelChange={(v, m) => { setValue(v); setMode(m); }}
+                onSelect={(v) => setValue(v)}
+                dateCellRender={dateCellRender}
+                monthCellRender={monthCellRender}
+                fullscreen={true}
             />
-          </li>
-        ))}
-      </ul>
-    );
-  };
+        );
+    };
 
-  return (
-    <Show headerProps={{ extra: null }}>
-      <Calendar
-        onPanelChange={panelChange}
-        dateCellRender={dateCellRender}
-        monthCellRender={monthCellRender}
-      />
-    </Show>
-  );
+    return (
+        <div className="calendar-page-container">
+            {/* Sidebar */}
+            <aside className="calendar-sidebar">
+                <button
+                    className="calendar-create-btn"
+                    onClick={() => create("calendar")}
+                >
+                    <PlusOutlined style={{ fontSize: 18, marginRight: 8 }} />
+                    Create event
+                </button>
+                <CategoriesBox
+                    categories={allCategories}
+                    selected={selectedCategories}
+                    onSelect={setSelectedCategories}
+                    onCategoriesChange={setAllCategories}
+                />
+            </aside>
+            {/* Main */}
+            <main style={{ flex: 1 }}>
+                <div className="calendar-header-row">
+                    <h2 className="calendar-title">Calendar</h2>
+                    <Space>
+                        <Button icon={<LeftOutlined />} onClick={handlePrev} />
+                        <Button onClick={handleToday} icon={<CalendarOutlined />}>Today</Button>
+                        <Button icon={<RightOutlined />} onClick={handleNext} />
+                        <Segmented
+                            options={viewOptions}
+                            value={mode}
+                            onChange={value => setMode(value as CalendarMode | "week" | "day")}
+                            style={{ marginLeft: 12, minWidth: 180 }}
+                        />
+                    </Space>
+                </div>
+                {getCustomPanel()}
+            </main>
+            {showId && (
+                <CalendarShow
+                    visible={!!showId}
+                    onClose={() => setShowId(null)}
+                    eventId={showId}
+                />
+            )}
+        </div>
+    );
 };
+
 export default CalendarList;

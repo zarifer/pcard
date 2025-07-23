@@ -1,8 +1,196 @@
+/*-----------------------------------------------------------
+  GLOBAL THEME VÁLTOZÓK (világos + sötét színek)
+-----------------------------------------------------------*/
+:root {
+    /* LIGHT THEME COLORS */
+    --sidebar-bg: #fff;
+    --sidebar-text: #211b40;
+    --card-bg: #fff;
+    --card-text: #211b40;
+    --calendar-bg: #f8f7fc;
+    --calendar-title: #211b40;
+    --calendar-shadow: #bc80fc44;
+    --btn-gradient: linear-gradient(90deg, #7c41f7, #bc80fc);
+    --btn-text: #fff;
+    --btn-shadow: #bc80fc44;
+}
+
+[data-theme='dark'] {
+    /* DARK THEME COLORS */
+    --sidebar-bg: #18132a;
+    --sidebar-text: #fff;
+    --card-bg: #211b40;
+    --card-text: #fff;
+    --calendar-bg: #18132a;
+    --calendar-title: #fff;
+    --calendar-shadow: #3b176c33;
+    --btn-gradient: linear-gradient(90deg, #7c41f7, #bc80fc);
+    --btn-text: #fff;
+    --btn-shadow: #1a162f44;
+}
+
+/*-----------------------------------------------------------
+  ALAP LAYOUT
+-----------------------------------------------------------*/
+.calendar-page-container {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    margin-top: 32px;
+    /* kicsit nagyobb legyen a felső margó */
+}
+
+/*-----------------------------------------------------------
+  SIDEBAR
+-----------------------------------------------------------*/
+.calendar-sidebar {
+    width: 220px;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    border-radius: 18px;
+    padding: 28px 20px 24px 20px;
+    min-height: 500px;
+    box-shadow: 0 4px 24px var(--calendar-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    transition: background 0.2s, color 0.2s;
+    margin-top: 0;
+    /* középre húzás miatt */
+}
+
+.calendar-sidebar * {
+    color: inherit;
+}
+
+/*-----------------------------------------------------------
+  CATEGORIES CARD
+-----------------------------------------------------------*/
+.calendar-categories-card {
+    background: var(--card-bg) !important;
+    color: var(--card-text) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 12px var(--calendar-shadow);
+    width: 100%;
+    border: none !important;
+    margin-top: 0;
+    margin-bottom: 16px;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.calendar-categories-card .ant-card-head-title {
+    color: var(--card-text) !important;
+}
+
+.ant-checkbox-wrapper {
+    color: var(--card-text) !important;
+}
+
+[data-theme='dark'] .calendar-categories-card,
+[data-theme='dark'] .calendar-categories-card .ant-card,
+[data-theme='dark'] .calendar-categories-card .ant-card-body,
+[data-theme='dark'] .calendar-categories-card .ant-card-head {
+    background: var(--card-bg) !important;
+    color: var(--card-text) !important;
+    border: none !important;
+    box-shadow: 0 2px 12px #15111d !important;
+}
+
+[data-theme='dark'] .calendar-categories-card .ant-card-head-title {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .calendar-categories-card .ant-checkbox-inner {
+    background: #332b59 !important;
+    border-color: #7c41f7 !important;
+}
+
+[data-theme='dark'] .calendar-categories-card .ant-checkbox-checked .ant-checkbox-inner {
+    background: #7c41f7 !important;
+    border-color: #7c41f7 !important;
+}
+
+[data-theme='dark'] .calendar-categories-card .ant-checkbox-wrapper {
+    color: #fff !important;
+}
+
+/*-----------------------------------------------------------
+  CREATE EVENT GOMB
+-----------------------------------------------------------*/
+.calendar-create-btn {
+    background: var(--btn-gradient);
+    border: none;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 1px;
+    padding: 0 28px;
+    box-shadow: 0 4px 24px var(--btn-shadow);
+    color: var(--btn-text);
+    height: 44px;
+    width: 100%;
+    margin-bottom: 0;
+    margin-top: 0;
+    display: block;
+    transition: filter 0.2s, background 0.2s;
+}
+
+.calendar-create-btn:hover {
+    filter: brightness(1.10);
+}
+
+[data-theme='dark'] .calendar-create-btn {
+    background: var(--btn-gradient) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 24px #1a162f44 !important;
+}
+
+/*-----------------------------------------------------------
+  CALENDAR (ANTD)
+-----------------------------------------------------------*/
+.ant-picker-calendar {
+    background: var(--calendar-bg) !important;
+    border-radius: 16px;
+    box-shadow: 0 4px 36px var(--calendar-shadow);
+    padding: 18px;
+    transition: background 0.2s;
+}
+
+/*-----------------------------------------------------------
+  FEJLÉC & TITLE
+-----------------------------------------------------------*/
+.calendar-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.calendar-title {
+    color: var(--calendar-title) !important;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+[data-theme='dark'] .calendar-title {
+    color: #fff !important;
+}
+
+/*-----------------------------------------------------------
+  CALENDAR EVENTS
+-----------------------------------------------------------*/
 .events {
     margin: 0;
     padding: 0;
     list-style: none;
 }
+
 .events .ant-badge-status {
     width: 100%;
     overflow: hidden;
@@ -10,10 +198,128 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
+/*-----------------------------------------------------------
+  MODALOK & FORMOK
+-----------------------------------------------------------*/
+.ant-modal-content {
+    border-radius: 12px;
+    background: var(--card-bg);
+    color: var(--card-text);
+    transition: background 0.2s, color 0.2s;
+}
+
+.ant-form-vertical .ant-form-item-label>label {
+    color: var(--calendar-title);
+    font-weight: 600;
+}
+
+[data-theme='dark'] .ant-form-vertical .ant-form-item-label>label {
+    color: #fff !important;
+}
+
+/*-----------------------------------------------------------
+  NAPTÁR CELLÁK (notes/month)
+-----------------------------------------------------------*/
 .notes-month {
     font-size: 28px;
     text-align: center;
+    color: var(--calendar-title);
 }
+
 .notes-month section {
     font-size: 28px;
+}
+
+[data-theme='dark'] .notes-month {
+    color: #fff !important;
+}
+
+/*-----------------------------------------------------------
+  SCROLLBAR DESIGN
+-----------------------------------------------------------*/
+::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d1cbe5;
+    border-radius: 6px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+    background: #332b59;
+}
+
+/*-----------------------------------------------------------
+  DARK MODE: ŰRLAPOK, PICKER, DROPDOWN
+-----------------------------------------------------------*/
+[data-theme='dark'] .ant-input,
+[data-theme='dark'] .ant-select-selector,
+[data-theme='dark'] .ant-picker,
+[data-theme='dark'] .ant-input-textarea {
+    background: #232040 !important;
+    color: #fff !important;
+    border-color: #42377c !important;
+}
+
+/*-----------------------------------------------------------
+  RESPONSIVE
+-----------------------------------------------------------*/
+@media (max-width: 900px) {
+    .calendar-page-container {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .calendar-sidebar {
+        width: 100%;
+        min-height: 0;
+        margin-top: 0;
+        margin-bottom: 16px;
+        align-items: stretch;
+        padding: 16px 8px 16px 8px;
+    }
+
+    .calendar-categories-card {
+        margin-bottom: 12px;
+    }
+}
+
+/*-----------------------------------------------------------
+  ANTD EXTRA FIXEK SÖTÉT TÉMÁHOZ
+-----------------------------------------------------------*/
+[data-theme='dark'] .ant-btn-primary {
+    background: #7c41f7 !important;
+    border-color: #7c41f7 !important;
+}
+
+[data-theme='dark'] .ant-list-item {
+    background: transparent !important;
+    color: #fff !important;
+}
+
+/*-----------------------------------------------------------
+  NAP, HÉT, HÓNAP GOMBOK KINÉZET
+-----------------------------------------------------------*/
+.week-view,
+.day-view {
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px var(--calendar-shadow);
+    padding: 20px 16px;
+    margin-top: 12px;
+    min-height: 220px;
+    transition: background 0.2s;
+}
+
+.week-view>div {
+    gap: 12px;
+}
+
+.day-view {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
 }

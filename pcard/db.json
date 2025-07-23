@@ -58,20 +58,58 @@
       "title": "Other"
     }
   ],
-  "events": [
+  "calendar": [
     {
-      "id": "1",
-      "title": "Demo Day",
-      "date": "2025-07-18",
-      "type": "success",
-      "description": "Online bemutató",
-      "location": "Budapest"
+      "id": "e666",
+      "title": "wrwer",
+      "description": "wer",
+      "date": "2025-07-07T22:00:00.000Z",
+      "type": "Pre-test",
+      "participants": [
+        "alice@example.com"
+      ]
     },
     {
-      "id": "bdd9",
-      "title": "Demo",
-      "date": "2025-07-25T03:05:05.000Z",
-      "type": "success"
+      "id": "f516",
+      "title": "fefef",
+      "description": "efe",
+      "date": "2025-07-28T22:00:00.000Z",
+      "type": "Post-test",
+      "participants": [
+        "bob@example.com"
+      ]
+    },
+    {
+      "id": "f6ab",
+      "title": "valami",
+      "description": "afa",
+      "date": "2025-07-29T22:00:00.000Z",
+      "type": "Debug",
+      "participants": [
+        "bob@example.com"
+      ]
+    },
+    {
+      "id": "5a5c",
+      "title": "DD",
+      "description": "DD",
+      "date": "2025-07-29T22:00:00.000Z",
+      "type": "Pre-test",
+      "participants": [
+        "bob@example.com"
+      ]
+    },
+    {
+      "id": "73a9",
+      "title": "qdwd",
+      "description": "sfsef",
+      "date": "2025-07-28T22:00:00.000Z",
+      "startTime": "2025-07-23T19:12:00.000Z",
+      "endTime": "2025-07-23T04:07:00.000Z",
+      "type": "Pre-test",
+      "participants": [
+        "eve@example.com"
+      ]
     }
   ]
 }
