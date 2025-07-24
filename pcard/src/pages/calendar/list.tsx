@@ -153,14 +153,90 @@ export const CalendarList = () => {
         // default: month/year nézet – az AntD Calendar
         return (
             <Calendar
-                value={value}
-                mode={mode === "month" || mode === "year" ? mode : "month"}
-                onPanelChange={(v, m) => { setValue(v); setMode(m); }}
-                onSelect={(v) => setValue(v)}
-                dateCellRender={dateCellRender}
-                monthCellRender={monthCellRender}
-                fullscreen={true}
-            />
+    value={value}
+    mode={mode === "month" || mode === "year" ? mode : "month"}
+    onPanelChange={(v, m) => { setValue(v); setMode(m); }}
+    onSelect={(v) => setValue(v)}
+    dateCellRender={dateCellRender}
+    monthCellRender={monthCellRender}
+    fullscreen={true}
+    headerRender={({ value: headerValue, onChange, onTypeChange }) => {
+        // Évek/hónapok generálása
+        const years = [];
+        const thisYear = dayjs().year();
+        for (let i = thisYear - 5; i <= thisYear + 5; i++) {
+            years.push(i);
+        }
+        const months = dayjs.monthsShort();
+
+        return (
+            <div className="calendar-header-row" style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                {/* Year select */}
+                <select
+                    value={headerValue.year()}
+                    onChange={e => {
+                        const newYear = Number(e.target.value);
+                        onChange(headerValue.clone().year(newYear));
+                    }}
+                    className="calendar-header-select"
+                >
+                    {years.map(year => (
+                        <option key={year} value={year}>{year}</option>
+                    ))}
+                </select>
+                {/* Month select (csak month módban) */}
+                {mode === "month" && (
+                    <select
+                        value={headerValue.month()}
+                        onChange={e => {
+                            const newMonth = Number(e.target.value);
+                            onChange(headerValue.clone().month(newMonth));
+                        }}
+                        className="calendar-header-select"
+                    >
+                        {months.map((name, i) => (
+                            <option key={name} value={i}>{name}</option>
+                        ))}
+                    </select>
+                )}
+                {/* Month/Year nézetváltó */}
+                <select
+                    value={mode}
+                    onChange={e => {
+                        const newMode = e.target.value as "month" | "year";
+                        setMode(newMode);
+                        onTypeChange?.(newMode);
+                    }}
+                    className="calendar-header-select"
+                >
+                    <option value="month">Month</option>
+                    <option value="year">Year</option>
+                </select>
+                {/* TODAY gomb */}
+                <button
+                    className="calendar-today-btn"
+                    onClick={() => {
+                        onChange(dayjs());
+                    }}
+                    style={{
+                        marginLeft: 1,
+                        fontWeight: 700,
+                        background: "var(--btn-gradient, #7c41f7)",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: 7,
+                        padding: "4px 18px",
+                        cursor: "pointer",
+                        boxShadow: "0 1px 6px #bc80fc33",
+                    }}
+                >
+                    Today
+                </button>
+            </div>
+        );
+    }}
+/>
+
         );
     };
 
@@ -172,7 +248,7 @@ export const CalendarList = () => {
                     className="calendar-create-btn"
                     onClick={() => create("calendar")}
                 >
-                    <PlusOutlined style={{ fontSize: 18, marginRight: 8 }} />
+                    <PlusOutlined style={{ fontSize: 12, marginRight: 2 }} />
                     Create event
                 </button>
                 <CategoriesBox

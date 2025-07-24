@@ -323,3 +323,24 @@
     margin-left: auto;
     margin-right: auto;
 }
+.calendar-header-select {
+    font-size: 1.1rem;
+    border-radius: 8px;
+    padding: 4px 16px;
+    border: 1px solid #7c41f7;
+    background: #18132a;
+    color: #fff;
+    font-weight: 700;
+    outline: none;
+    transition: border 0.15s;
+}
+
+.calendar-today-btn:hover {
+    filter: brightness(1.08);
+}
+
+[data-theme="light"] .calendar-header-select {
+    background: #fff;
+    color: #211b40;
+    border: 1px solid #bc80fc;
+}
