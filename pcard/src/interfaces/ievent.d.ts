@@ -1,6 +1,9 @@
 export interface IEvent {
   id: string;
   title: string;
+  description?: string;
   date: string;
-  type: "warning" | "success" | "error";
+  endDate?: string;
+  type: string;
+  participants?: string[];
 }
