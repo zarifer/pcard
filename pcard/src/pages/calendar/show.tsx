@@ -1,5 +1,5 @@
-import { useShow } from "@refinedev/core";
-import { Drawer, Typography, Tag, Avatar, Divider, Space } from "antd";
+import { useShow, useNavigation } from "@refinedev/core";
+import { Drawer, Typography, Tag, Avatar, Divider, Space, Button } from "antd";
 import dayjs from "dayjs";
 
 export const CATEGORY_COLORS: Record<string, string> = {
@@ -28,7 +28,6 @@ export const CalendarShow = ({
 
   // Dátumformázás
   const start = dayjs(event.date);
-  const end = event.endTime ? dayjs(event.endTime) : null;
 
   // Kategória szín
   const color = CATEGORY_COLORS[event.type] || "#808080";
@@ -45,7 +44,6 @@ export const CalendarShow = ({
     >
       <div style={{ padding: 32 }}>
         <Space direction="vertical" size={20} style={{ width: "100%" }}>
-          {/* Esemény neve színes, vastag címmel */}
           <Typography.Title
             level={3}
             style={{ color, fontWeight: 800, margin: 0 }}
@@ -62,7 +60,6 @@ export const CalendarShow = ({
 
           <Divider style={{ margin: "16px 0" }} />
 
-          {/* Dátum/Idő */}
           <div>
             <strong>Date:</strong>
             <br />
@@ -72,7 +69,6 @@ export const CalendarShow = ({
             )}
           </div>
 
-          {/* Résztvevők */}
           {event.participants && event.participants.length > 0 && (
             <div>
               <strong>Participants:</strong>
@@ -87,7 +83,6 @@ export const CalendarShow = ({
             </div>
           )}
 
-          {/* Leírás */}
           {event.description && (
             <div>
               <strong>Description:</strong>

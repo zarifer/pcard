@@ -38,8 +38,7 @@ import {
 //Calendar imports
 import CalendarList from "./pages/calendar/list";
 import CalendarCreate from "./pages/calendar/create";
-//import CalendarEdit from "./pages/calendar/edit";
-import { CalendarShow } from "./pages/calendar/show";
+import CalendarEdit from "./pages/calendar/edit";
 
 //Companies imports
 import CompanyList from "./pages/companies/list";
@@ -180,8 +179,7 @@ function App() {
                       name: "calendar",
                       list: "/calendar",
                       create: "/calendar/create",
-                      //edit: "/calendar/edit/:id",
-                      show: "/calendar/show/:id",
+                      edit: "/calendar/edit/:id",
                       meta: { canDelete: true },
                     },
                     {
@@ -238,8 +236,7 @@ function App() {
                       <Route path="/calendar">
                         <Route index element={<CalendarList />} />
                         <Route path="create" element={<CalendarCreate />} />
-
-                        <Route path="show/:id" element={<CalendarShow />} />
+                        <Route path="edit/:id" element={<CalendarEdit />} />
                       </Route>
                       <Route path="/companies">
                         <Route index element={<CompanyList />} />

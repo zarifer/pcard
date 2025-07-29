@@ -12,7 +12,6 @@ import isBetween from "dayjs/plugin/isBetween";
 import type { CalendarMode } from "antd/lib/calendar/generateCalendar";
 import { useState } from "react";
 
-// Saját importok
 import { CategoriesBox } from "./categoriesbox";
 import { CATEGORY_COLORS } from "./show";
 import { CalendarShow } from "./show";
@@ -21,6 +20,16 @@ import type { IEvent } from "../../interfaces/ievent";
 
 dayjs.extend(isBetween);
 
+const getStartDate = (e: any) =>
+  Array.isArray(e.date) ? dayjs(e.date[0]) : dayjs(e.date);
+
+const getEndDate = (e: any) =>
+  e.endDate
+    ? dayjs(e.endDate)
+    : Array.isArray(e.date)
+      ? dayjs(e.date[1])
+      : dayjs(e.date);
+
 export const CalendarList = () => {
   const { data } = useList<IEvent>({
     resource: "calendar",
@@ -28,7 +37,6 @@ export const CalendarList = () => {
   });
   const { create } = useNavigation();
 
-  // Kategória filter state
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [allCategories, setAllCategories] = useState<string[]>([
     "Pre-test",
@@ -37,11 +45,9 @@ export const CalendarList = () => {
     "Debug",
   ]);
 
-  // Nézet/nap állapot
   const [mode, setMode] = useState<CalendarMode | "week">("month");
   const [value, setValue] = useState<Dayjs>(dayjs());
 
-  // Filterelt eventek
   const filteredData =
     data?.data?.filter(
       (calendar) =>
@@ -49,41 +55,52 @@ export const CalendarList = () => {
         selectedCategories.includes(calendar.type),
     ) ?? [];
 
+  // Month nézet: napi cella
   const dateCellRender = (value: dayjs.Dayjs) => {
-  const listData = filteredData.filter((e) =>
-    dayjs(e.date).isSame(value, "day")
-  );
-  return (
-    <ul className="events">
-      {listData?.map((item) => (
-        <li key={item.id}>
-          <Badge
-            color={CATEGORY_COLORS[item.type] || "#808080"}
-            text={
-              <span
-                style={{
-                  fontWeight: 700,
-                  color: CATEGORY_COLORS[item.type] || "#808080",
-                  cursor: "pointer",
-                }}
-                onClick={() => setShowId(item.id)}
-              >
-                {item.title}
-              </span>
-            }
-          />
-        </li>
-      ))}
-    </ul>
-  );
-};
+    const listData = filteredData.filter((e) => {
+      const start = getStartDate(e);
+      const end = getEndDate(e);
+      return value.isBetween(start, end, "day", "[]");
+    });
 
+    return (
+      <ul className="events">
+        {listData.map((item) => (
+          <li key={item.id}>
+            <Badge
+  color={CATEGORY_COLORS[item.type] || "#808080"}
+  text={
+    <span
+      style={{
+        fontWeight: 700,
+        color: CATEGORY_COLORS[item.type] || "#808080",
+        cursor: "pointer",
+      }}
+      onClick={() => {
+        if (item?.id) {
+          setShowId(item.id.toString());
+        }
+      }}
+    >
+      {item.title}
+    </span>
+  }
+/>
 
-  // Month nézet event összegzés
-  const monthCellRender = (value: dayjs.Dayjs) => {
-    const listData = filteredData.filter((e) =>
-      dayjs(e.date).isSame(value, "month"),
+          </li>
+        ))}
+      </ul>
     );
+  };
+
+  // Month nézet: havi összesítő
+  const monthCellRender = (value: dayjs.Dayjs) => {
+    const listData = filteredData.filter((e) => {
+      const start = getStartDate(e);
+      const end = getEndDate(e);
+      return value.isBetween(start, end, "day", "[]");
+    });
+
     return listData.length > 0 ? (
       <div className="notes-month">
         <section>{listData.length}</section>
@@ -94,18 +111,26 @@ export const CalendarList = () => {
 
   const [showId, setShowId] = useState<string | null>(null);
 
-  // Év/hónap selectok
   const years = [];
   const thisYear = dayjs().year();
   for (let i = thisYear - 5; i <= thisYear + 5; i++) {
     years.push(i);
   }
   const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
 
-  // Navigációs gombok
   const handlePrev = () => {
     if (mode === "month") setValue(value.subtract(1, "month"));
     else if (mode === "week") setValue(value.subtract(1, "week"));
@@ -116,13 +141,12 @@ export const CalendarList = () => {
   };
   const handleToday = () => setValue(dayjs());
 
-  // Csak ezek a nézetek maradnak!
   const viewOptions = [
     { value: "month", label: "Month" },
     { value: "week", label: "Week" },
   ];
 
-  // Week nézet – naposzlopok, event-listák
+  // Week nézet
   const getCustomPanel = () => {
     if (mode === "week") {
       const weekStart = value.startOf("week");
@@ -148,8 +172,8 @@ export const CalendarList = () => {
                 <ul className="events">
                   {filteredData
                     .filter((e) => {
-                      const start = dayjs(e.date);
-                      const end = e.endDate ? dayjs(e.endDate) : start;
+                      const start = getStartDate(e);
+                      const end = getEndDate(e);
                       return day.isBetween(start, end, "day", "[]");
                     })
                     .map((e) => (
@@ -198,7 +222,6 @@ export const CalendarList = () => {
 
   return (
     <div className="calendar-page-container">
-      {/* Sidebar */}
       <aside className="calendar-sidebar">
         <button
           className="calendar-create-btn"
@@ -214,7 +237,7 @@ export const CalendarList = () => {
           onCategoriesChange={setAllCategories}
         />
       </aside>
-      {/* Main */}
+
       <main style={{ flex: 1 }}>
         <div className="calendar-header-row">
           <h2 className="calendar-title">Calendar</h2>
@@ -224,7 +247,6 @@ export const CalendarList = () => {
               Today
             </Button>
             <Button icon={<RightOutlined />} onClick={handleNext} />
-            {/* Év-választó */}
             <select
               className="calendar-select"
               value={value.year()}
@@ -238,7 +260,6 @@ export const CalendarList = () => {
                 </option>
               ))}
             </select>
-            {/* Hónap-választó */}
             <select
               className="calendar-select"
               value={value.month()}
@@ -255,9 +276,7 @@ export const CalendarList = () => {
             <Segmented
               options={viewOptions}
               value={mode}
-              onChange={(value) =>
-                setMode(value as CalendarMode | "week")
-              }
+              onChange={(value) => setMode(value as CalendarMode | "week")}
               style={{ marginLeft: 12, minWidth: 120 }}
             />
           </Space>

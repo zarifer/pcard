@@ -402,3 +402,30 @@
 .events li {
   margin-bottom: 6px;
 }
+
+/*-----------------------------------------------------------
+  CALENDAR EDIT SECTION
+-----------------------------------------------------------*/
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drawer-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--calendar-title);
+}
+
+.edit-btn {
+  background: var(--btn-gradient);
+  border: none;
+  font-weight: 600;
+  color: #fff !important;
+}
+
+.edit-btn:hover {
+  filter: brightness(1.1);
+}
