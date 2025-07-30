@@ -60,35 +60,18 @@
   ],
   "calendar": [
     {
-      "id": "469e",
-      "title": "Single day proba",
-      "description": "SDP",
-      "date": "2025-07-14T22:00:00.000Z",
-      "type": "Pre-test",
-      "participants": [
-        "alice@example.com"
-      ]
-    },
-    {
-      "id": "e91b",
-      "title": "Multi day proba",
-      "description": "MDP",
+      "id": "71ec",
+      "title": "Multi day",
       "multi": true,
-      "date": [
-        "2025-07-28T22:00:00.000Z",
-        "2025-08-05T22:00:00.000Z"
-      ],
-      "type": "Post-test",
-      "participants": [
-        "bob@example.com"
-      ]
+      "date": ["2025-07-16T22:00:00.000Z", "2025-07-25T22:00:00.000Z"],
+      "type": "Post-test"
     },
     {
-      "id": "19fe",
-      "title": "Proba új event",
-      "description": "PUE",
-      "date": "2025-07-30T22:00:00.000Z",
-      "type": "Main test"
+      "id": "fb37",
+      "title": "Single day",
+      "date": "2025-07-05T22:00:00.000Z",
+      "type": "Pre-test",
+      "multi": false
     }
   ]
 }

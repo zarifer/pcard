@@ -68,25 +68,24 @@ export const CalendarList = () => {
         {listData.map((item) => (
           <li key={item.id}>
             <Badge
-  color={CATEGORY_COLORS[item.type] || "#808080"}
-  text={
-    <span
-      style={{
-        fontWeight: 700,
-        color: CATEGORY_COLORS[item.type] || "#808080",
-        cursor: "pointer",
-      }}
-      onClick={() => {
-        if (item?.id) {
-          setShowId(item.id.toString());
-        }
-      }}
-    >
-      {item.title}
-    </span>
-  }
-/>
-
+              color={CATEGORY_COLORS[item.type] || "#808080"}
+              text={
+                <span
+                  style={{
+                    fontWeight: 700,
+                    color: CATEGORY_COLORS[item.type] || "#808080",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    if (item?.id) {
+                      setShowId(item.id.toString());
+                    }
+                  }}
+                >
+                  {item.title}
+                </span>
+              }
+            />
           </li>
         ))}
       </ul>

@@ -9,6 +9,17 @@ export const CATEGORY_COLORS: Record<string, string> = {
   Debug: "#e53e3e",
 };
 
+// Segédfüggvény a dátumkezeléshez
+const getStartDate = (e: any) =>
+  Array.isArray(e.date) ? dayjs(e.date[0]) : dayjs(e.date);
+
+const getEndDate = (e: any) =>
+  e.endDate
+    ? dayjs(e.endDate)
+    : Array.isArray(e.date)
+      ? dayjs(e.date[1])
+      : undefined;
+
 export const CalendarShow = ({
   visible,
   onClose,
@@ -22,21 +33,40 @@ export const CalendarShow = ({
     resource: "calendar",
     id: eventId,
   });
+
+  const { edit } = useNavigation();
   const event = queryResult?.data?.data;
 
   if (!event) return null;
 
-  // Dátumformázás
-  const start = dayjs(event.date);
-
-  // Kategória szín
+  const start = getStartDate(event);
+  const end = getEndDate(event);
   const color = CATEGORY_COLORS[event.type] || "#808080";
 
   return (
     <Drawer
       open={visible}
       onClose={onClose}
-      title={null}
+      title={
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span>{event.title}</span>
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => {
+              if (event.id) edit("calendar", event.id);
+            }}
+          >
+            Edit
+          </Button>
+        </div>
+      }
       placement="right"
       width={400}
       bodyStyle={{ padding: 0, background: "var(--card-bg)" }}
@@ -63,10 +93,8 @@ export const CalendarShow = ({
           <div>
             <strong>Date:</strong>
             <br />
-            {start.format("YYYY. MMM D. (ddd)")}
-            {event.endDate && (
-              <> – {dayjs(event.endDate).format("YYYY. MMM D. (ddd)")}</>
-            )}
+            {start.isValid() && start.format("YYYY. MMM D. (ddd)")}
+            {end && end.isValid() && <> – {end.format("YYYY. MMM D. (ddd)")}</>}
           </div>
 
           {event.participants && event.participants.length > 0 && (
