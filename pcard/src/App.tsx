@@ -10,7 +10,7 @@ import {
 import "@refinedev/antd/dist/reset.css";
 import dataProvider from "@refinedev/simple-rest";
 import { App as AntdApp } from "antd";
-import { BrowserRouter, Route, Routes, Outlet } from "react-router";
+import { BrowserRouter, Route, Routes, Outlet } from "react-router-dom";
 import routerBindings, {
   NavigateToResource,
   CatchAllNavigate,
@@ -27,6 +27,11 @@ import { parseJwt } from "./utils/parse-jwt";
 //Login imports
 import { Login } from "./pages/login";
 
+//Calendar imports
+import CalendarList from "./pages/calendar/list";
+import CalendarCreate from "./pages/calendar/create";
+import CalendarEdit from "./pages/calendar/edit";
+
 //Categories imports
 import {
   CategoryList,
@@ -34,11 +39,6 @@ import {
   CategoryEdit,
   CategoryShow,
 } from "./pages/categories";
-
-//Calendar imports
-import CalendarList from "./pages/calendar/list";
-import CalendarCreate from "./pages/calendar/create";
-import CalendarEdit from "./pages/calendar/edit";
 
 //Companies imports
 import CompanyList from "./pages/companies/list";
@@ -53,6 +53,9 @@ import {
   IncidentLogEdit,
   IncidentLogShow,
 } from "./pages/incident-logs";
+
+//Kanban imports
+import KanbanList from "./pages/kanban/list";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
@@ -190,6 +193,11 @@ function App() {
                       show: "/companies/show/:id",
                       meta: { canDelete: true },
                     },
+                    {
+                      name: "kanban",
+                      list: "/kanban",
+                      meta: { canDelete: true },
+                    },
                   ]}
                   options={{
                     syncWithLocation: true,
@@ -219,13 +227,14 @@ function App() {
                     >
                       <Route
                         index
-                        element={<NavigateToResource resource="blog_posts" />}
+                        element={
+                          <NavigateToResource resource="incident_logs" />
+                        }
                       />
-                      <Route path="/incident-logs">
-                        <Route index element={<IncidentLogList />} />
-                        <Route path="create" element={<IncidentLogCreate />} />
-                        <Route path="edit/:id" element={<IncidentLogEdit />} />
-                        <Route path="show/:id" element={<IncidentLogShow />} />
+                      <Route path="/calendar">
+                        <Route index element={<CalendarList />} />
+                        <Route path="create" element={<CalendarCreate />} />
+                        <Route path="edit/:id" element={<CalendarEdit />} />
                       </Route>
                       <Route path="/categories">
                         <Route index element={<CategoryList />} />
@@ -233,16 +242,20 @@ function App() {
                         <Route path="edit/:id" element={<CategoryEdit />} />
                         <Route path="show/:id" element={<CategoryShow />} />
                       </Route>
-                      <Route path="/calendar">
-                        <Route index element={<CalendarList />} />
-                        <Route path="create" element={<CalendarCreate />} />
-                        <Route path="edit/:id" element={<CalendarEdit />} />
-                      </Route>
                       <Route path="/companies">
                         <Route index element={<CompanyList />} />
                         <Route path="create" element={<CompanyCreate />} />
                         <Route path="edit/:id" element={<CompanyEdit />} />
                         <Route path="show/:id" element={<CompanyShow />} />
+                      </Route>
+                      <Route path="/incident-logs">
+                        <Route index element={<IncidentLogList />} />
+                        <Route path="create" element={<IncidentLogCreate />} />
+                        <Route path="edit/:id" element={<IncidentLogEdit />} />
+                        <Route path="show/:id" element={<IncidentLogShow />} />
+                      </Route>
+                      <Route path="/kanban">
+                        <Route index element={<KanbanList />} />
                       </Route>
                       <Route path="*" element={<ErrorComponent />} />
                     </Route>

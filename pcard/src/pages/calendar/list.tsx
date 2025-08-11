@@ -43,6 +43,7 @@ export const CalendarList = () => {
     "Main test",
     "Post-test",
     "Debug",
+    "KanBan",
   ]);
 
   const [mode, setMode] = useState<CalendarMode | "week">("month");
@@ -147,28 +148,21 @@ export const CalendarList = () => {
 
   // Week nézet
   const getCustomPanel = () => {
+    // Google Calendar-szerű grid
     if (mode === "week") {
       const weekStart = value.startOf("week");
       const days = Array.from({ length: 7 }, (_, i) => weekStart.add(i, "day"));
 
+      // Minden nap külön oszlop, fejléccel
       return (
-        <div className="week-view">
-          <div style={{ display: "flex", gap: 8 }}>
+        <div className="gc-week-wrapper">
+          <div className="gc-week-grid">
             {days.map((day) => (
-              <div
-                key={day.format("YYYY-MM-DD")}
-                style={{ flex: 1, minWidth: 120 }}
-              >
-                <div
-                  style={{
-                    fontWeight: 600,
-                    textAlign: "center",
-                    marginBottom: 6,
-                  }}
-                >
+              <div className="gc-week-day-col" key={day.format("YYYY-MM-DD")}>
+                <div className="gc-week-day-label">
                   {day.format("ddd, MMM D")}
                 </div>
-                <ul className="events">
+                <div className="gc-week-events-col">
                   {filteredData
                     .filter((e) => {
                       const start = getStartDate(e);
@@ -176,25 +170,19 @@ export const CalendarList = () => {
                       return day.isBetween(start, end, "day", "[]");
                     })
                     .map((e) => (
-                      <li key={e.id}>
-                        <Badge
-                          color={CATEGORY_COLORS[e.type] || "#808080"}
-                          text={
-                            <span
-                              style={{
-                                fontWeight: 700,
-                                color: CATEGORY_COLORS[e.type] || "#808080",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => setShowId(e.id)}
-                            >
-                              {e.title}
-                            </span>
-                          }
-                        />
-                      </li>
+                      <div
+                        className="gc-week-event"
+                        key={e.id}
+                        style={{
+                          borderLeft: `4px solid ${CATEGORY_COLORS[e.type] || "#7c41f7"}`,
+                        }}
+                        title={e.description || ""}
+                        onClick={() => setShowId(e.id)}
+                      >
+                        <div className="gc-week-event-title">{e.title}</div>
+                      </div>
                     ))}
-                </ul>
+                </div>
               </div>
             ))}
           </div>

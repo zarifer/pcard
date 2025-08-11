@@ -1,0 +1,294 @@
+/* =======================================================================
+   KANBAN BOARD – LAYOUT WRAPPER
+   ======================================================================= */
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  background: var(--background, #f5f5f5);
+  min-height: 80vh;
+}
+
+[data-theme="dark"] .kanban-board {
+  background: #0d0b1a;
+  /* MATCHES CALENDAR DARK BACKGROUND */
+}
+
+/* =======================================================================
+   KANBAN COLUMN – CONTAINER
+   ======================================================================= */
+.kanban-column {
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .kanban-column {
+  background: #1e1a2b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* =======================================================================
+   KANBAN COLUMN – HEADER (TITLE + ACTIONS)
+   ======================================================================= */
+.kanban-column-header {
+  padding: 12px 16px;
+  font-weight: bold;
+  font-size: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fafafa;
+  color: #222;
+
+  /* NEW: MAKE SPACE FOR THE SMALL PLUS BUTTON ON THE RIGHT */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+[data-theme="dark"] .kanban-column-header {
+  background: #282042;
+  border-bottom: 1px solid #3b3259;
+  color: #fff;
+}
+
+/* =======================================================================
+   KANBAN COLUMN – HEADER ACTIONS (+ BUTTON AREA)
+   ======================================================================= */
+.kanban-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* SMALL ROUNDED PLUS BUTTON */
+.kanban-add-btn {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
+  color: #333;
+  border-radius: 6px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.kanban-add-btn:hover {
+  background: #f4f4f4;
+}
+
+.kanban-add-btn:focus-visible {
+  outline: 2px solid #4f46e5;
+  /* ACCESSIBLE FOCUS */
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .kanban-add-btn {
+  background: #352a53;
+  border-color: #4a3a6e;
+  color: #fff;
+}
+
+[data-theme="dark"] .kanban-add-btn:hover {
+  background: #3e315f;
+}
+
+/* =======================================================================
+   KANBAN COLUMN – CONTENT AREA
+   ======================================================================= */
+.kanban-column-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* =======================================================================
+   KANBAN CARD – BASE VISUALS
+   ======================================================================= */
+.kanban-card {
+  background: #fff;
+  border-radius: 6px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s ease;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .kanban-card {
+  background: #2a2440;
+  color: #eaeaea;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+}
+
+/* =======================================================================
+   KANBAN CARD – TITLE & DESCRIPTION
+   ======================================================================= */
+.kanban-card-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+[data-theme="dark"] .kanban-card-title {
+  color: #fff;
+}
+
+.kanban-card-desc {
+  font-size: 13px;
+  color: #666;
+}
+
+[data-theme="dark"] .kanban-card-desc {
+  color: #b8b8b8;
+}
+
+/* =======================================================================
+   CREATE MODAL – BACKDROP & SHELL
+   ======================================================================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+
+.modal {
+  width: min(560px, 92vw);
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+}
+
+[data-theme="dark"] .modal {
+  background: #1e1a2b;
+  color: #f2f2f2;
+}
+
+/* =======================================================================
+   CREATE MODAL – HEADER (TITLE + CLOSE ICON)
+   ======================================================================= */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.icon-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* =======================================================================
+   CREATE MODAL – FORM / INPUTS / ERRORS
+   ======================================================================= */
+.modal-label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  margin: 8px 0 12px;
+}
+
+.modal-label input {
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+}
+
+.modal-label input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+[data-theme="dark"] .modal-label input {
+  background: #2a2440;
+  border-color: #4a3a6e;
+  color: #fff;
+}
+
+.modal-error {
+  color: #c0392b;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+/* =======================================================================
+   CREATE MODAL – ACTION BUTTONS
+   ======================================================================= */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-primary,
+.btn-secondary {
+  border-radius: 8px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: #f3f3f3;
+  border-color: #e0e0e0;
+  color: #111;
+}
+
+.btn-primary {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: #352a53;
+  border-color: #4a3a6e;
+  color: #fff;
+}
+
+/* =======================================================================
+   SHOW MODAL
+   ======================================================================= */
+
+.markdown-body p {
+  margin: 0 0 8px;
+}
+
+.markdown-body ul {
+  margin: 0 0 8px 18px;
+}
+
+.markdown-body code {
+  background: #0000000d;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+[data-theme="dark"] .markdown-body code {
+  background: #ffffff1a;
+}

@@ -88,6 +88,7 @@ export const CategoriesBox: React.FC<CategoriesBoxProps> = ({
         title="Manage Categories"
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
+        footer={null}
       >
         <List
           dataSource={categoryList}

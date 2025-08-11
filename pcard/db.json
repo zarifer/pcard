@@ -63,15 +63,59 @@
       "id": "71ec",
       "title": "Multi day",
       "multi": true,
-      "date": ["2025-07-16T22:00:00.000Z", "2025-07-25T22:00:00.000Z"],
+      "date": [
+        "2025-07-16T22:00:00.000Z",
+        "2025-07-25T22:00:00.000Z"
+      ],
       "type": "Post-test"
     },
     {
       "id": "fb37",
       "title": "Single day",
-      "date": "2025-07-05T22:00:00.000Z",
+      "date": [
+        "2025-07-15T22:00:00.000Z",
+        "2025-07-25T22:00:00.000Z"
+      ],
       "type": "Pre-test",
-      "multi": false
+      "multi": true
+    },
+    {
+      "id": "c373",
+      "title": "Kanban proba 1",
+      "date": [
+        "2025-08-28T22:00:00.000Z",
+        "2025-08-28T22:00:00.000Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "22e3"
+    }
+  ],
+  "kanban": [
+    {
+      "id": "22e3",
+      "title": "Kanban proba 1",
+      "stage": "in-progress",
+      "description": "Kanban próba",
+      "dueDate": "2025-08-28T22:00:00.000Z",
+      "calendarId": "c373",
+      "comments": [
+        {
+          "id": "1754916552939-po0hg7",
+          "text": "Hello",
+          "at": "2025-08-11T12:49:12.939Z",
+          "authorName": "Kitti Csia",
+          "authorEmail": "kitti.csia@virusbulletin.com",
+          "authorAvatar": "https://lh3.googleusercontent.com/a/ACg8ocI_VO5sNKg_z6JfW4VyfJfdh4cW2Pr4q3OjwwZIrK92v1H5NQ0=s96-c"
+        },
+        {
+          "id": "1754922782211-0vxw05",
+          "text": "Hello",
+          "at": "2025-08-11T14:33:02.211Z",
+          "authorName": "Kitti Csia",
+          "authorEmail": "kitti.csia@virusbulletin.com",
+          "authorAvatar": "https://lh3.googleusercontent.com/a/ACg8ocI_VO5sNKg_z6JfW4VyfJfdh4cW2Pr4q3OjwwZIrK92v1H5NQ0=s96-c"
+        }
+      ]
     }
   ]
 }

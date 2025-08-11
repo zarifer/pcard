@@ -289,7 +289,7 @@
 }
 
 /*-----------------------------------------------------------
-  CALENDAR HEADER: TITLE, WEEK, MONTH
+  CALENDAR HEADER: TITLE, MONTH
 -----------------------------------------------------------*/
 .calendar-header-row {
   display: flex;
@@ -308,20 +308,6 @@
 
 [data-theme="dark"] .calendar-title {
   color: #fff !important;
-}
-
-.week-view {
-  background: var(--card-bg);
-  border-radius: 14px;
-  box-shadow: 0 2px 12px var(--calendar-shadow);
-  padding: 20px 16px;
-  margin-top: 12px;
-  min-height: 220px;
-  transition: background 0.2s;
-}
-
-.week-view > div {
-  gap: 12px;
 }
 
 .calendar-header-row select,
@@ -379,28 +365,81 @@
   CALENDAR WEEK VIEW
 -----------------------------------------------------------*/
 
-.week-view {
+.gc-week-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 12px;
+}
+
+.gc-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 16px;
+  min-height: 400px;
   background: var(--card-bg);
   border-radius: 14px;
   box-shadow: 0 2px 12px var(--calendar-shadow);
-  padding: 20px 16px;
-  margin-top: 12px;
-  min-height: 220px;
-  transition: background 0.2s;
+  padding: 10px 8px 16px 8px;
 }
 
-.week-view > div {
-  gap: 12px;
+.gc-week-day-col {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 120px;
 }
 
-.events {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.gc-week-day-label {
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+  margin-bottom: 10px;
+  color: var(--calendar-title);
+  letter-spacing: 1px;
+  border-bottom: 1px solid #ede5fd;
+  padding-bottom: 6px;
 }
 
-.events li {
-  margin-bottom: 6px;
+[data-theme="dark"] .gc-week-day-label {
+  color: #fff;
+  border-bottom: 1px solid #28204a;
+}
+
+.gc-week-events-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gc-week-event {
+  background: #f7f5fe;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #c5b2ff33;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  transition:
+    box-shadow 0.2s,
+    background 0.2s;
+  border-left: 4px solid #7c41f7;
+  cursor: pointer;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.gc-week-event-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme="dark"] .gc-week-event {
+  background: #28204a;
+  border-left-color: #bc80fc;
+  color: #fff;
+  box-shadow: 0 2px 8px #20153366;
 }
 
 /*-----------------------------------------------------------

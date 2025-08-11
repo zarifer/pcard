@@ -75,6 +75,7 @@ export const CalendarCreate = () => {
                 { value: "Main test", label: "Main test" },
                 { value: "Post-test", label: "Post-test" },
                 { value: "Debug", label: "Debug" },
+                { value: "Kanban", label: "Kanban" },
               ]}
               placeholder="Category"
             />

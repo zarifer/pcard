@@ -7,6 +7,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
   "Main test": "#2fa7b9",
   "Post-test": "#f88020",
   Debug: "#e53e3e",
+  KanBan: "#4f46e5",
 };
 
 // Segédfüggvény a dátumkezeléshez
