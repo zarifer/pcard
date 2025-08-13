@@ -1,12 +1,11 @@
 import { Create, useForm } from "@refinedev/antd";
 import { Form, Input, Select, Button, DatePicker } from "antd";
 import type { Dayjs } from "dayjs";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
+import { useList } from "@refinedev/core";
 
-/* ALL COMMENTS IN ENGLISH AND CAPS AS REQUESTED */
-
-type ColumnId = "todo" | "in-progress" | "review" | "waiting-vendor" | "done";
+type ColumnId = string;
 
 export interface IPCard {
   id?: string;
@@ -29,7 +28,7 @@ const sanitizeTitle = (raw: string) =>
     .trim()
     .slice(0, 120);
 
-const stageOptions = [
+const DEFAULT_STAGE_OPTIONS = [
   { value: "todo", label: "To Do" },
   { value: "in-progress", label: "In Progress" },
   { value: "review", label: "Review" },
@@ -42,6 +41,22 @@ export default function KanbanCreate() {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const stageFromQuery = (params.get("stage") as ColumnId) || "todo";
+
+  const { data: stagesRes } = useList<{
+    id: string;
+    key: string;
+    title: string;
+  }>({ resource: "stages", queryOptions: { retry: false } });
+
+  const stageOptions = useMemo(
+    () =>
+      stagesRes?.data?.length
+        ? stagesRes.data
+            .sort((a, b) => (a as any).order - (b as any).order)
+            .map((s) => ({ value: s.key, label: s.title }))
+        : DEFAULT_STAGE_OPTIONS,
+    [stagesRes?.data],
+  );
 
   /* REFINE FORM BOUND TO `kanban` */
   const { formProps, saveButtonProps } = useForm<IPCard>({

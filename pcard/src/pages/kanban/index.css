@@ -313,3 +313,199 @@
 .kanban-card.dragging {
   opacity: 0.6;
 }
+
+/* =======================================================================
+   STAGE HEADER – MENU BUTTON (THREE DOTS)
+   ======================================================================= */
+.stage-menu-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
+  color: #333;
+  border-radius: 6px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.stage-menu-btn:hover {
+  background: #f4f4f4;
+}
+
+[data-theme="dark"] .stage-menu-btn {
+  background: #352a53;
+  border-color: #4a3a6e;
+  color: #fff;
+}
+
+[data-theme="dark"] .stage-menu-btn:hover {
+  background: #3e315f;
+}
+
+.danger-text {
+  color: #d32029;
+  font-weight: 600;
+}
+
+/* =======================================================================
+   ADD STAGE COLUMN (RIGHT EDGE)
+   ======================================================================= */
+.add-stage-column {
+  background: transparent;
+  box-shadow: none;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.add-stage-btn {
+  border-radius: 10px !important;
+  height: 44px;
+}
+
+.stage-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =======================================================================
+   OVERDUE / SECTION TITLES (INLINE TAG NEXT TO H5)
+   ======================================================================= */
+.section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overdue-tag {
+  font-weight: 600;
+}
+
+/* =======================================================================
+  CHECKLIST – CORE
+   =======================================================================*/
+.checklist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.checklist-list {
+  display: grid;
+  gap: 8px;
+}
+
+.checklist-item {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  background: var(--card-bg, #fff0);
+  border: 1px solid #eae6ff22;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+[data-theme="dark"] .checklist-item {
+  border-color: #3b3259;
+}
+
+.checklist-item.done {
+  opacity: 0.6;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.checklist-item.done input {
+  text-decoration: line-through;
+}
+
+.checklist-add-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+
+.checklist-add-btn {
+  height: 40px;
+  border: 1px dashed #dcdcdc;
+  border-radius: 8px;
+  text-align: left;
+  padding-left: 12px;
+  background: transparent;
+}
+
+.checklist-add-btn:hover {
+  background: #f7f7f7;
+}
+
+[data-theme="dark"] .checklist-add-btn {
+  border-color: #4a3a6e;
+  background: #2a2440;
+  color: #fff;
+}
+
+[data-theme="dark"] .checklist-add-btn:hover {
+  background: #352a53;
+}
+
+/* =======================================================================
+   COMMENTS – PINNED & ACTIONS
+   ======================================================================= */
+.comment-item.pinned {
+  background: rgba(255, 213, 79, 0.08);
+  border-left: 3px solid #fadb14;
+  border-radius: 6px;
+}
+
+[data-theme="dark"] .comment-item.pinned {
+  background: rgba(250, 219, 20, 0.08);
+  border-left-color: #ffd666;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* =======================================================================
+   MARKDOWN EDITOR (SIMPLEMDE) – THEME TWEAKS
+   ======================================================================= */
+.EasyMDEContainer {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #eae6ff22;
+}
+
+.editor-toolbar {
+  border: none !important;
+  background: #f7f7f7;
+}
+
+.editor-toolbar button:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.CodeMirror {
+  border: none !important;
+  min-height: 180px;
+  font-size: 14px;
+}
+
+[data-theme="dark"] .editor-toolbar {
+  background: #2a2440;
+  border-bottom: 1px solid #3b3259 !important;
+}
+
+[data-theme="dark"] .CodeMirror {
+  background: #1e1a2b;
+  color: #eaeaea;
+}
+
+[data-theme="dark"] .cm-s-easymde .CodeMirror-cursor {
+  border-left: 1px solid #eaeaea;
+}

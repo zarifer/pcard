@@ -60,56 +60,116 @@
   ],
   "calendar": [
     {
-      "id": "71ec",
-      "title": "Multi day",
-      "multi": true,
-      "date": ["2025-07-16T22:00:00.000Z", "2025-07-25T22:00:00.000Z"],
-      "type": "Post-test"
-    },
-    {
-      "id": "fb37",
-      "title": "Single day",
-      "date": ["2025-07-15T22:00:00.000Z", "2025-07-25T22:00:00.000Z"],
-      "type": "Pre-test",
-      "multi": true
-    },
-    {
-      "id": "c373",
-      "title": "Kanban proba 1",
-      "date": ["2025-08-23T22:00:00.000Z", "2025-08-23T22:00:00.000Z"],
+      "id": "0460",
+      "title": "Amala",
+      "date": [
+        "2025-08-03T22:00:00.000Z",
+        "2025-08-03T22:00:00.000Z"
+      ],
       "type": "Kanban",
-      "refKanbanId": "22e3"
+      "refKanbanId": "b42d"
     },
     {
-      "id": "0bc5",
-      "title": "Bellooo",
-      "date": ["2025-08-26T22:00:00.000Z", "2025-08-26T22:00:00.000Z"],
+      "id": "b5cf",
+      "title": "gegr",
+      "date": [
+        "2025-08-22T22:00:00.000Z",
+        "2025-08-22T22:00:00.000Z"
+      ],
       "type": "Kanban",
-      "refKanbanId": "e71f"
+      "refKanbanId": "5e69"
+    }
+  ],
+  "stages": [
+    {
+      "id": "s1",
+      "key": "todo",
+      "title": "To Do",
+      "order": 0
     },
     {
-      "id": "6351",
-      "title": "vvf",
-      "date": ["2025-08-25T22:00:00.000Z", "2025-08-25T22:00:00.000Z"],
-      "type": "Kanban",
-      "refKanbanId": "d121"
+      "id": "s2",
+      "key": "in-progress",
+      "title": "In Progress",
+      "order": 1
     },
     {
-      "id": "41ac",
-      "title": "Hello",
-      "date": ["2025-08-19T22:00:00.000Z", "2025-08-19T22:00:00.000Z"],
-      "type": "Kanban",
-      "refKanbanId": "b501"
+      "id": "s4",
+      "key": "done",
+      "title": "Done",
+      "order": 3
+    },
+    {
+      "id": "c5a0",
+      "title": "In Review",
+      "key": "in-review",
+      "order": 4
     }
   ],
   "kanban": [
     {
-      "id": "b501",
-      "title": "Hello",
-      "stage": "todo",
-      "description": "HEloo",
-      "dueDate": "2025-08-19T22:00:00.000Z",
-      "calendarId": "41ac"
+      "id": "b42d",
+      "title": "Amala",
+      "stage": "in-progress",
+      "description": "## **ojefowjfjwfjewoflmlm**[](https://)~~~~",
+      "dueDate": "2025-08-03T22:00:00.000Z",
+      "calendarId": "0460",
+      "checklist": [],
+      "comments": [
+        {
+          "id": "1755120395295-kvsrpc",
+          "text": "pwkfkw",
+          "at": "2025-08-13T21:26:35.295Z",
+          "authorName": "Kitti Csia",
+          "authorEmail": "kitti.csia@virusbulletin.com",
+          "authorAvatar": "https://lh3.googleusercontent.com/a/ACg8ocI_VO5sNKg_z6JfW4VyfJfdh4cW2Pr4q3OjwwZIrK92v1H5NQ0=s96-c",
+          "pinned": false
+        },
+        {
+          "id": "1755120401008-hoga6y",
+          "text": "Hello Gabika",
+          "at": "2025-08-13T21:26:41.008Z",
+          "authorName": "Kitti Csia",
+          "authorEmail": "kitti.csia@virusbulletin.com",
+          "authorAvatar": "https://lh3.googleusercontent.com/a/ACg8ocI_VO5sNKg_z6JfW4VyfJfdh4cW2Pr4q3OjwwZIrK92v1H5NQ0=s96-c",
+          "pinned": true
+        },
+        {
+          "id": "1755120404805-tos6ik",
+          "text": "Helloo",
+          "at": "2025-08-13T21:26:44.805Z",
+          "authorName": "Kitti Csia",
+          "authorEmail": "kitti.csia@virusbulletin.com",
+          "authorAvatar": "https://lh3.googleusercontent.com/a/ACg8ocI_VO5sNKg_z6JfW4VyfJfdh4cW2Pr4q3OjwwZIrK92v1H5NQ0=s96-c",
+          "pinned": false
+        }
+      ]
+    },
+    {
+      "id": "5e69",
+      "title": "gegr",
+      "stage": "done",
+      "description": "",
+      "dueDate": "2025-08-22T22:00:00.000Z",
+      "calendarId": "b5cf",
+      "comments": [
+        {
+          "id": "1755116377820-x5zcon",
+          "text": "ergeg",
+          "at": "2025-08-13T20:19:37.820Z",
+          "authorName": "Kitti Csia",
+          "authorEmail": "kitti.csia@virusbulletin.com",
+          "authorAvatar": "https://lh3.googleusercontent.com/a/ACg8ocI_VO5sNKg_z6JfW4VyfJfdh4cW2Pr4q3OjwwZIrK92v1H5NQ0=s96-c"
+        },
+        {
+          "id": "1755116409913-1oh41z",
+          "text": "wfwefwf",
+          "at": "2025-08-13T20:20:09.913Z",
+          "authorName": "Kitti Csia",
+          "authorEmail": "kitti.csia@virusbulletin.com",
+          "authorAvatar": "https://lh3.googleusercontent.com/a/ACg8ocI_VO5sNKg_z6JfW4VyfJfdh4cW2Pr4q3OjwwZIrK92v1H5NQ0=s96-c"
+        }
+      ]
     }
   ]
 }
