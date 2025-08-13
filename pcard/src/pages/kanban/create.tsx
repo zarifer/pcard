@@ -16,7 +16,7 @@ export interface IPCard {
   checklist?: { id: string; text: string; done: boolean }[];
   comments?: { id: string; text: string; at: string }[];
   assignees?: string[];
-  dueDate?: string | null; /* ISO OR NULL */
+  dueDate?: string | null /* ISO OR NULL */;
 }
 
 /* FORM-VERSION OF THE VALUES (DUE DATE AS DAYJS) */
@@ -24,7 +24,10 @@ type IPCardForm = Omit<IPCard, "dueDate"> & { dueDate?: Dayjs | null };
 
 /* BASIC SANITIZER TO AVOID XSS */
 const sanitizeTitle = (raw: string) =>
-  raw.replace(/<[^>]*>/g, "").trim().slice(0, 120);
+  raw
+    .replace(/<[^>]*>/g, "")
+    .trim()
+    .slice(0, 120);
 
 const stageOptions = [
   { value: "todo", label: "To Do" },
@@ -75,7 +78,9 @@ export default function KanbanCreate() {
             checklist: values.checklist ?? [],
             comments: values.comments ?? [],
             assignees: values.assignees ?? [],
-            dueDate: values.dueDate ? values.dueDate.toDate().toISOString() : null,
+            dueDate: values.dueDate
+              ? values.dueDate.toDate().toISOString()
+              : null,
           };
           return formProps.onFinish?.(clean);
         }}
@@ -93,11 +98,17 @@ export default function KanbanCreate() {
         </Form.Item>
 
         <Form.Item label="Description" name="description">
-          <Input.TextArea placeholder="(Optional) Description…" autoSize={{ minRows: 2, maxRows: 6 }} />
+          <Input.TextArea
+            placeholder="(Optional) Description…"
+            autoSize={{ minRows: 2, maxRows: 6 }}
+          />
         </Form.Item>
 
         <Form.Item style={{ textAlign: "right", marginBottom: 0 }}>
-          <Button onClick={() => window.history.back()} style={{ marginRight: 12 }}>
+          <Button
+            onClick={() => window.history.back()}
+            style={{ marginRight: 12 }}
+          >
             Cancel
           </Button>
         </Form.Item>

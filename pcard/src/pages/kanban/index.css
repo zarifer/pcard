@@ -292,3 +292,24 @@
 [data-theme="dark"] .markdown-body code {
   background: #ffffff1a;
 }
+
+/* =======================================================================
+   DRAG & DROP
+   ======================================================================= */
+
+.kanban-column.drag-target {
+  outline: 2px dashed #7c41f7;
+  outline-offset: 4px;
+}
+
+.kanban-drop-placeholder {
+  border: 2px dashed #b599ff;
+  border-radius: 10px;
+  height: 56px;
+  margin-bottom: 12px;
+  background: transparent;
+}
+
+.kanban-card.dragging {
+  opacity: 0.6;
+}

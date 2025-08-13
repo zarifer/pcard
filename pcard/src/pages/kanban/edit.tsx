@@ -28,12 +28,12 @@ type KanbanItem = {
   title: string;
   description?: string;
   stage: ColumnId;
-  dueDate?: string | null;           /* ISO */
-  calendarId?: string | null;        /* LINKED CALENDAR ENTRY */
+  dueDate?: string | null /* ISO */;
+  calendarId?: string | null /* LINKED CALENDAR ENTRY */;
   comments?: Array<{
     id: string;
-    text: string;                    /* MARKDOWN OR PLAIN */
-    at: string;                      /* ISO DATE */
+    text: string /* MARKDOWN OR PLAIN */;
+    at: string /* ISO DATE */;
     authorName?: string;
     authorEmail?: string;
     authorAvatar?: string;
@@ -57,7 +57,10 @@ export default function KanbanEdit({
   const API_URL = useApiUrl();
 
   /* LOAD CARD */
-  const { queryResult } = useShow<KanbanItem>({ resource: "kanban", id: cardId });
+  const { queryResult } = useShow<KanbanItem>({
+    resource: "kanban",
+    id: cardId,
+  });
   const item = queryResult?.data?.data;
 
   /* MUTATION FOR KANBAN (THIS ONE SHOWS A SINGLE TOAST) */
@@ -116,7 +119,8 @@ export default function KanbanEdit({
       id: rid(),
       text,
       at: new Date().toISOString(),
-      authorName: identity?.name || identity?.given_name || identity?.email || "You",
+      authorName:
+        identity?.name || identity?.given_name || identity?.email || "You",
       authorEmail: identity?.email,
       authorAvatar: identity?.avatar || identity?.picture,
     };
@@ -210,7 +214,9 @@ export default function KanbanEdit({
               <Typography.Text strong style={{ fontSize: 16 }}>
                 {item.title}
               </Typography.Text>
-              <Button type="link" onClick={() => setTitleEditing(true)}>✎</Button>
+              <Button type="link" onClick={() => setTitleEditing(true)}>
+                ✎
+              </Button>
             </>
           )}
 
@@ -262,8 +268,20 @@ export default function KanbanEdit({
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
               />
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
-                <Button onClick={() => { setDesc(item.description || ""); setDescEdit(false); }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 8,
+                  marginTop: 8,
+                }}
+              >
+                <Button
+                  onClick={() => {
+                    setDesc(item.description || "");
+                    setDescEdit(false);
+                  }}
+                >
                   Cancel
                 </Button>
                 <Button type="primary" onClick={saveDescription}>
@@ -300,10 +318,16 @@ export default function KanbanEdit({
             renderItem={(c) => (
               <List.Item>
                 <List.Item.Meta
-                  avatar={<Avatar src={c.authorAvatar}>{(c.authorName?.[0] || "?").toUpperCase()}</Avatar>}
+                  avatar={
+                    <Avatar src={c.authorAvatar}>
+                      {(c.authorName?.[0] || "?").toUpperCase()}
+                    </Avatar>
+                  }
                   title={
                     <Space size={8}>
-                      <span style={{ fontWeight: 600 }}>{c.authorName || "User"}</span>
+                      <span style={{ fontWeight: 600 }}>
+                        {c.authorName || "User"}
+                      </span>
                       <Tag color="default" style={{ marginLeft: 8 }}>
                         {new Date(c.at).toLocaleString()}
                       </Tag>
@@ -311,7 +335,9 @@ export default function KanbanEdit({
                   }
                   description={
                     <div className="markdown-body">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{c.text}</ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {c.text}
+                      </ReactMarkdown>
                     </div>
                   }
                 />

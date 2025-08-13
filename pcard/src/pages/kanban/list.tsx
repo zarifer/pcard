@@ -1,7 +1,6 @@
 import { useList, useInvalidate, useCreate, useUpdate } from "@refinedev/core";
 import { Modal, Form, Input, Select, Button, DatePicker } from "antd";
 import { useMemo, useState, useCallback } from "react";
-import dayjs from "dayjs";
 import axios from "axios";
 import { useApiUrl } from "@refinedev/core";
 import "./index.css";
@@ -24,23 +23,36 @@ type KanbanItem = {
 
 /* CONSTANTS */
 const COLUMNS: { id: ColumnId; title: string }[] = [
-  { id: "todo",            title: "To Do" },
-  { id: "in-progress",     title: "In Progress" },
-  { id: "review",          title: "Review" },
-  { id: "waiting-vendor",  title: "Waiting for vendor" },
-  { id: "done",            title: "Done" },
+  { id: "todo", title: "To Do" },
+  { id: "in-progress", title: "In Progress" },
+  { id: "review", title: "Review" },
+  { id: "waiting-vendor", title: "Waiting for vendor" },
+  { id: "done", title: "Done" },
 ];
 
-const sanitizeTitle = (raw: string) => raw.replace(/<[^>]*>/g, "").trim().slice(0, 120);
+const sanitizeTitle = (raw: string) =>
+  raw
+    .replace(/<[^>]*>/g, "")
+    .trim()
+    .slice(0, 120);
 
 export default function KanbanList() {
   const API_URL = useApiUrl();
 
   /* DATA */
-  const { data, isLoading } = useList<KanbanItem>({ resource: "kanban", config: { pagination: { pageSize: 200 } } });
+  const { data, isLoading } = useList<KanbanItem>({
+    resource: "kanban",
+    config: { pagination: { pageSize: 200 } },
+  });
   const items = data?.data ?? [];
   const grouped = useMemo(() => {
-    const map: Record<ColumnId, KanbanItem[]> = { "todo": [], "in-progress": [], "review": [], "waiting-vendor": [], "done": [] };
+    const map: Record<ColumnId, KanbanItem[]> = {
+      todo: [],
+      "in-progress": [],
+      review: [],
+      "waiting-vendor": [],
+      done: [],
+    };
     items.forEach((it) => map[it.stage]?.push(it));
     return map;
   }, [items]);
@@ -106,7 +118,9 @@ export default function KanbanList() {
                 });
                 const calId = cres.data?.id;
                 if (calId) {
-                  await axios.patch(`${API_URL}/kanban/${newId}`, { calendarId: calId });
+                  await axios.patch(`${API_URL}/kanban/${newId}`, {
+                    calendarId: calId,
+                  });
                 }
               } catch {
                 /* ignore */
@@ -128,36 +142,42 @@ export default function KanbanList() {
     setDragOverCol(null);
   }, []);
 
-  const handleDragOverCol = useCallback((colId: ColumnId, e: React.DragEvent) => {
-    e.preventDefault(); // allow drop
-    if (dragOverCol !== colId) setDragOverCol(colId);
-  }, [dragOverCol]);
+  const handleDragOverCol = useCallback(
+    (colId: ColumnId, e: React.DragEvent) => {
+      e.preventDefault(); // allow drop
+      if (dragOverCol !== colId) setDragOverCol(colId);
+    },
+    [dragOverCol],
+  );
 
-  const handleDropOnCol = useCallback((colId: ColumnId) => {
-    if (!draggingId) return;
-    // find the card
-    const card = items.find((i) => i.id?.toString() === draggingId);
-    if (!card || card.stage === colId) {
-      setDraggingId(null);
-      setDragOverCol(null);
-      return;
-    }
-    // update stage
-    updateKanban(
-      { resource: "kanban", id: draggingId, values: { stage: colId } },
-      {
-        onSuccess: () => {
-          setDraggingId(null);
-          setDragOverCol(null);
-          invalidate({ resource: "kanban", invalidates: ["list"] });
+  const handleDropOnCol = useCallback(
+    (colId: ColumnId) => {
+      if (!draggingId) return;
+      // find the card
+      const card = items.find((i) => i.id?.toString() === draggingId);
+      if (!card || card.stage === colId) {
+        setDraggingId(null);
+        setDragOverCol(null);
+        return;
+      }
+      // update stage
+      updateKanban(
+        { resource: "kanban", id: draggingId, values: { stage: colId } },
+        {
+          onSuccess: () => {
+            setDraggingId(null);
+            setDragOverCol(null);
+            invalidate({ resource: "kanban", invalidates: ["list"] });
+          },
+          onError: () => {
+            setDraggingId(null);
+            setDragOverCol(null);
+          },
         },
-        onError: () => {
-          setDraggingId(null);
-          setDragOverCol(null);
-        },
-      },
-    );
-  }, [draggingId, items, updateKanban, invalidate]);
+      );
+    },
+    [draggingId, items, updateKanban, invalidate],
+  );
 
   if (isLoading) return <div>Loading…</div>;
 
@@ -202,7 +222,9 @@ export default function KanbanList() {
                   onClick={() => setEditId(card.id!.toString())}
                 >
                   <div className="kanban-card-title">{card.title}</div>
-                  <div className="kanban-card-desc">{card.description || "Click to edit…"}</div>
+                  <div className="kanban-card-desc">
+                    {card.description || "Click to edit…"}
+                  </div>
                 </div>
               ))}
             </div>
@@ -225,8 +247,16 @@ export default function KanbanList() {
         }
         destroyOnClose
       >
-        <Form form={form} layout="vertical" initialValues={{ stage: targetStage }}>
-          <Form.Item label="Title" name="title" rules={[{ required: true, message: "Title is required" }]}>
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{ stage: targetStage }}
+        >
+          <Form.Item
+            label="Title"
+            name="title"
+            rules={[{ required: true, message: "Title is required" }]}
+          >
             <Input placeholder="Short card title…" maxLength={120} />
           </Form.Item>
 
@@ -243,7 +273,10 @@ export default function KanbanList() {
           </Form.Item>
 
           <Form.Item label="Description" name="description">
-            <Input.TextArea placeholder="(Optional) Description…" autoSize={{ minRows: 2, maxRows: 6 }} />
+            <Input.TextArea
+              placeholder="(Optional) Description…"
+              autoSize={{ minRows: 2, maxRows: 6 }}
+            />
           </Form.Item>
 
           <Form.Item label="Due date" name="dueDate">
