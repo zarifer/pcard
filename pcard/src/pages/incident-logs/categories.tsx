@@ -1,7 +1,16 @@
 // src/pages/incident-logs/Categories.tsx
 import { HttpError, CrudFilters, BaseRecord } from "@refinedev/core";
 import { useTable, DeleteButton, useModalForm } from "@refinedev/antd";
-import { Button, Modal, Form, Input, Space, Table, Card, Typography } from "antd";
+import {
+  Button,
+  Modal,
+  Form,
+  Input,
+  Space,
+  Table,
+  Card,
+  Typography,
+} from "antd";
 
 const { Title } = Typography;
 
@@ -51,9 +60,15 @@ export default function CategoriesBox() {
     <Card className="panel-card">
       {/* HEADER ROW: TITLE LEFT, ACTIONS RIGHT */}
       <div className="panel-header">
-        <Title level={5} className="panel-title">Categories</Title>
+        <Title level={5} className="panel-title">
+          Categories
+        </Title>
         <div className="panel-actions">
-          <Button type="primary" className="btn-primary" onClick={() => showCreate()}>
+          <Button
+            type="primary"
+            className="btn-primary"
+            onClick={() => showCreate()}
+          >
             New Category
           </Button>
         </div>
@@ -68,7 +83,9 @@ export default function CategoriesBox() {
           width={180}
           render={(_, record: BaseRecord) => (
             <Space>
-              <Button size="small" onClick={() => showEdit(record.id)}>Edit</Button>
+              <Button size="small" onClick={() => showEdit(record.id)}>
+                Edit
+              </Button>
               <DeleteButton
                 size="small"
                 resource="categories"
@@ -83,7 +100,12 @@ export default function CategoriesBox() {
       </Table>
 
       {/* CREATE MODAL */}
-      <Modal {...createModalProps} title="Create Category" okText="Save" destroyOnClose>
+      <Modal
+        {...createModalProps}
+        title="Create Category"
+        okText="Save"
+        destroyOnClose
+      >
         <Form
           {...createFormProps}
           layout="vertical"
@@ -100,7 +122,12 @@ export default function CategoriesBox() {
       </Modal>
 
       {/* EDIT MODAL */}
-      <Modal {...editModalProps} title="Edit Category" okText="Save" destroyOnClose>
+      <Modal
+        {...editModalProps}
+        title="Edit Category"
+        okText="Save"
+        destroyOnClose
+      >
         <Form
           {...editFormProps}
           layout="vertical"
@@ -118,4 +145,3 @@ export default function CategoriesBox() {
     </Card>
   );
 }
-

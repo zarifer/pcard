@@ -8,7 +8,9 @@
       "email": "contact@acme.com",
       "gui": "Terminal",
       "log": "No log",
-      "features": ".dat files + fileddetected_*.txt should go to Scotty together. No RT, don't be scared, on a 102000 set it will go up to 119964 with OD scanning. It will stop don't worry."
+      "features": ".dat files + fileddetected_*.txt should go to Scotty together. No RT, don't be scared, on a 102000 set it will go up to 119964 with OD scanning. It will stop don't worry.",
+      "vendor": "Alibaba",
+      "emails": ["nixon@alibaba.com", "banan@alibaba.com"]
     },
     {
       "id": "ea14",
@@ -17,7 +19,8 @@
       "email": "sanyika@gmail.com",
       "gui": "Yes, it has",
       "log": "https://kb.acronis.com/content/54608",
-      "features": "open web GUI. Go to devices/VB100. Choose the machine. On the right go to Protection -> the deployed plan -> choose the antiviru s service -> scrool down to \"run\" and choose customer scan."
+      "features": "open web GUI. Go to devices/VB100. Choose the machine. On the right go to Protection -> the deployed plan -> choose the antiviru s service -> scrool down to \"run\" and choose customer scan.",
+      "vendor": "Acronis"
     }
   ],
   "incident_logs": [
@@ -28,7 +31,7 @@
       "category": {
         "id": "c0cb"
       },
-      "status": "Open"
+      "status": "open"
     },
     {
       "id": "2",
@@ -37,7 +40,7 @@
       "category": {
         "id": "32ee"
       },
-      "status": "Draft"
+      "status": "draft"
     },
     {
       "id": "e03e",
@@ -63,20 +66,14 @@
     {
       "id": "0460",
       "title": "Amala",
-      "date": [
-        "2025-08-02T22:00:00.000Z",
-        "2025-08-02T22:00:00.000Z"
-      ],
+      "date": ["2025-08-02T22:00:00.000Z", "2025-08-02T22:00:00.000Z"],
       "type": "Kanban",
       "refKanbanId": "b42d"
     },
     {
       "id": "b5cf",
       "title": "gegr",
-      "date": [
-        "2025-08-22T22:00:00.000Z",
-        "2025-08-22T22:00:00.000Z"
-      ],
+      "date": ["2025-08-22T22:00:00.000Z", "2025-08-22T22:00:00.000Z"],
       "type": "Kanban",
       "refKanbanId": "5e69"
     }

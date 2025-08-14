@@ -11,29 +11,31 @@ import {
 import { type BaseRecord, useMany } from "@refinedev/core";
 import { Space, Table, Tabs, Typography, Card } from "antd";
 import CategoriesBox from "./categories";
+import { STATUS_OPTS } from "./fields";
+
+/* ALL COMMENTS IN ENGLISH AND CAPS */
 
 const { Title } = Typography;
 
 export const IncidentLogList = () => {
-  /* USE REFINED TABLE HOOK */
   const { tableProps } = useTable({
     syncWithLocation: true,
   });
 
-  /* RESOLVE CATEGORY TITLES FOR LIST VIEW */
+  /* RESOLVE CATEGORY + COMPANY TITLES */
   const { data: categoryData, isLoading: categoryIsLoading } = useMany({
     resource: "categories",
-    ids:
-      tableProps?.dataSource
-        ?.map((item: any) => item?.category?.id)
-        .filter(Boolean) ?? [],
-    queryOptions: {
-      enabled: !!tableProps?.dataSource,
-    },
+    ids: tableProps?.dataSource?.map((r: any) => r?.category?.id).filter(Boolean) ?? [],
+    queryOptions: { enabled: !!tableProps?.dataSource },
+  });
+
+  const { data: companyData, isLoading: companyIsLoading } = useMany({
+    resource: "companies",
+    ids: tableProps?.dataSource?.map((r: any) => r?.company?.id).filter(Boolean) ?? [],
+    queryOptions: { enabled: !!tableProps?.dataSource },
   });
 
   return (
-    /* IMPORTANT: HIDE DEFAULT LIST HEADER CREATE BUTTON */
     <List title="Incident logs" canCreate={false} headerButtons={null}>
       <Tabs
         className="tabs-default"
@@ -43,40 +45,42 @@ export const IncidentLogList = () => {
             label: "Incidents",
             children: (
               <Card className="panel-card">
-                {/* HEADER ROW: TITLE LEFT, ACTIONS RIGHT */}
                 <div className="panel-header">
                   <Title level={5} className="panel-title">Incidents</Title>
                   <div className="panel-actions">
-                    {/* KEEP ANTD PRIMARY (PURPLE) */}
                     <CreateButton className="btn-primary" />
                   </div>
                 </div>
 
                 <Table {...tableProps} rowKey="id">
                   <Table.Column dataIndex="id" title={"ID"} width={80} />
+                  <Table.Column
+                    dataIndex={"company"}
+                    title={"Company"}
+                    render={(value: any) =>
+                      companyIsLoading ? "…" : companyData?.data?.find((c: any) => c.id === value?.id)?.name
+                    }
+                    width={180}
+                  />
                   <Table.Column dataIndex="title" title={"Title"} />
                   <Table.Column
                     dataIndex="content"
                     title={"Content"}
-                    render={(value: any) => {
-                      if (!value) return "-";
-                      /* SECURITY: SHOW A SHORT MARKDOWN PREVIEW ONLY */
-                      return <MarkdownField value={String(value).slice(0, 120) + "..."} />;
-                    }}
+                    render={(value: any) =>
+                      value ? <MarkdownField value={String(value).slice(0, 120) + "..."} /> : "-"
+                    }
                   />
                   <Table.Column
                     dataIndex={"category"}
                     title={"Category"}
                     render={(value: any) =>
-                      categoryIsLoading ? (
-                        <>Loading...</>
-                      ) : (
-                        categoryData?.data?.find((item: any) => item.id === value?.id)
-                          ?.title
-                      )
+                      categoryIsLoading ? "…" : categoryData?.data?.find((i: any) => i.id === value?.id)?.title
                     }
+                    width={160}
                   />
                   <Table.Column dataIndex="status" title={"Status"} width={110} />
+                  <Table.Column dataIndex="severity" title={"Severity"} width={110} />
+                  <Table.Column dataIndex="priority" title={"Priority"} width={90} />
                   <Table.Column
                     dataIndex={["createdAt"]}
                     title={"Created at"}
@@ -99,15 +103,9 @@ export const IncidentLogList = () => {
               </Card>
             ),
           },
-          {
-            key: "categories",
-            label: "Categories",
-            children: <CategoriesBox />,
-          },
+          { key: "categories", label: "Categories", children: <CategoriesBox /> },
         ]}
       />
     </List>
   );
 };
-
-/* ALL COMMENTS IN ENGLISH AND UPPERCASE PER PROJECT STANDARD */

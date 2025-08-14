@@ -1,0 +1,88 @@
+/* ===========================
+   GLOBAL UI UTILITIES
+   =========================== */
+
+.toolbar {
+  /* KEEP LAYOUT CLEAN AND CONSISTENT */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.toolbar__search {
+  /* LET SEARCH GROW BUT CAP ITS WIDTH */
+  flex: 1 1 auto;
+  max-width: 420px;
+}
+
+/* COMPANY CARD TWEAKS */
+.company-card__vendor {
+  /* SUBTLE SECONDARY TEXT */
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.company-card__emails a {
+  /* ACTION BAR LINKS: COMPACT + WRAP LONG EMAILS */
+  font-size: 12px;
+  word-break: break-all;
+  text-decoration: none;
+}
+
+.company-card__emails a:hover {
+  text-decoration: underline;
+}
+
+.company-card--clickable {
+  cursor: pointer;
+}
+
+/* RESPONSIVE NICE-TO-HAVE */
+@media (max-width: 576px) {
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .toolbar__search {
+    max-width: 100%;
+  }
+}
+/* ===========================
+   COMPANY SHOW – INCIDENT TABS
+   =========================== */
+
+.company-incidents {
+  margin-top: 16px;
+}
+
+.company-incidents .ant-tabs-nav {
+  margin: 0 0 8px 0;
+}
+
+.company-incidents .ant-table {
+  /* KEEP IT COMPACT */
+  font-size: 12px;
+}
+
+.company-incidents .ant-table-thead > tr > th,
+.company-incidents .ant-table-tbody > tr > td {
+  padding: 8px 12px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.panel-header .panel-title {
+  margin: 0;
+}
+
+.panel-header .panel-actions {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}

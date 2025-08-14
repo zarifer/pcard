@@ -3,11 +3,11 @@
    ========================================================= */
 
 :root {
-    /* /* THEME TOKENS – KEEP IT SIMPLE AND CONSISTENT */
-    --gap-sm: 8px;
-    --gap-md: 16px;
-    --gap-lg: 24px;
-    --radius-xl: 12px;
+  /* /* THEME TOKENS – KEEP IT SIMPLE AND CONSISTENT */
+  --gap-sm: 8px;
+  --gap-md: 16px;
+  --gap-lg: 24px;
+  --radius-xl: 12px;
 }
 
 /* =========================================================
@@ -15,7 +15,7 @@
    ========================================================= */
 
 .panel-card {
-    border-radius: var(--radius-xl) !important;
+  border-radius: var(--radius-xl) !important;
 }
 
 /* =========================================================
@@ -23,20 +23,20 @@
    ========================================================= */
 
 .panel-header {
-display: flex;
-    align-items: center;
-    gap: var(--gap-md);
-    margin-bottom: var(--gap-md);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+  margin-bottom: var(--gap-md);
 }
 
 .panel-title {
-    margin: 0 !important;
+  margin: 0 !important;
 }
 
 .panel-actions {
-    margin-left: auto;
-    display: flex;
-    gap: var(--gap-sm);
+  margin-left: auto;
+  display: flex;
+  gap: var(--gap-sm);
 }
 
 /* =========================================================
@@ -44,10 +44,9 @@ display: flex;
    ========================================================= */
 
 .tabs-default .ant-tabs-nav {
-    margin-bottom: var(--gap-lg);
+  margin-bottom: var(--gap-lg);
 }
 
 .ant-table-cell {
-    vertical-align: middle;
+  vertical-align: middle;
 }
-
