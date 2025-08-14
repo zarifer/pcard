@@ -32,14 +32,6 @@ import CalendarList from "./pages/calendar/list";
 import CalendarCreate from "./pages/calendar/create";
 import CalendarEdit from "./pages/calendar/edit";
 
-//Categories imports
-import {
-  CategoryList,
-  CategoryCreate,
-  CategoryEdit,
-  CategoryShow,
-} from "./pages/categories";
-
 //Companies imports
 import CompanyList from "./pages/companies/list";
 import CompanyCreate from "./pages/companies/create";
@@ -163,29 +155,6 @@ function App() {
                   authProvider={authProvider}
                   resources={[
                     {
-                      name: "incident_logs",
-                      list: "/incident-logs",
-                      create: "/incident-logs/create",
-                      edit: "/incident-logs/edit/:id",
-                      show: "/incident-logs/show/:id",
-                      meta: { canDelete: true },
-                    },
-                    {
-                      name: "categories",
-                      list: "/categories",
-                      create: "/categories/create",
-                      edit: "/categories/edit/:id",
-                      show: "/categories/show/:id",
-                      meta: { canDelete: true },
-                    },
-                    {
-                      name: "calendar",
-                      list: "/calendar",
-                      create: "/calendar/create",
-                      edit: "/calendar/edit/:id",
-                      meta: { canDelete: true },
-                    },
-                    {
                       name: "companies",
                       list: "/companies",
                       create: "/companies/create",
@@ -194,8 +163,23 @@ function App() {
                       meta: { canDelete: true },
                     },
                     {
+                      name: "incident_logs",
+                      list: "/incident-logs",
+                      create: "/incident-logs/create",
+                      edit: "/incident-logs/edit/:id",
+                      show: "/incident-logs/show/:id",
+                      meta: { canDelete: true },
+                    },
+                    {
                       name: "kanban",
                       list: "/kanban",
+                      meta: { canDelete: true },
+                    },
+                    {
+                      name: "calendar",
+                      list: "/calendar",
+                      create: "/calendar/create",
+                      edit: "/calendar/edit/:id",
                       meta: { canDelete: true },
                     },
                   ]}
@@ -235,12 +219,6 @@ function App() {
                         <Route index element={<CalendarList />} />
                         <Route path="create" element={<CalendarCreate />} />
                         <Route path="edit/:id" element={<CalendarEdit />} />
-                      </Route>
-                      <Route path="/categories">
-                        <Route index element={<CategoryList />} />
-                        <Route path="create" element={<CategoryCreate />} />
-                        <Route path="edit/:id" element={<CategoryEdit />} />
-                        <Route path="show/:id" element={<CategoryShow />} />
                       </Route>
                       <Route path="/companies">
                         <Route index element={<CompanyList />} />

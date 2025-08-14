@@ -25,37 +25,38 @@
       "id": "1",
       "title": "RT no detection",
       "content": "No RT, don't be scared, on a 102000 set it will go up to 119964 with OD scanning. It will stop don't worry.",
-      "category": "Other",
+      "category": {
+        "id": "c0cb"
+      },
       "status": "Open"
     },
     {
       "id": "2",
       "title": "Hajaj",
       "content": "![image](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.-yunHKHDnlbDLZXFYuvUqwHaE8%3Fpid%3DApi&f=1&ipt=909997dd5d8fad17c921ff8548045083616fac015b4793e1a4905cc366ca00b0&ipo=images)",
-      "category": "Other",
+      "category": {
+        "id": "32ee"
+      },
       "status": "Draft"
+    },
+    {
+      "id": "e03e",
+      "title": "erfef",
+      "content": "erfef",
+      "category": {
+        "id": "c0cb"
+      },
+      "status": "draft"
     }
   ],
   "categories": [
     {
-      "id": "1",
-      "title": "Too many FNs"
+      "id": "c0cb",
+      "title": "Hello"
     },
     {
-      "id": "2",
-      "title": "Too many FPs"
-    },
-    {
-      "id": "3",
-      "title": "Real Time stopped"
-    },
-    {
-      "id": "4",
-      "title": "OD scan stopped"
-    },
-    {
-      "id": "5",
-      "title": "Other"
+      "id": "32ee",
+      "title": "There"
     }
   ],
   "calendar": [
@@ -63,8 +64,8 @@
       "id": "0460",
       "title": "Amala",
       "date": [
-        "2025-08-03T22:00:00.000Z",
-        "2025-08-03T22:00:00.000Z"
+        "2025-08-02T22:00:00.000Z",
+        "2025-08-02T22:00:00.000Z"
       ],
       "type": "Kanban",
       "refKanbanId": "b42d"
@@ -108,47 +109,9 @@
   ],
   "kanban": [
     {
-      "id": "b42d",
-      "title": "Amala",
-      "stage": "in-progress",
-      "description": "## **ojefowjfjwfjewoflmlm**[](https://)~~~~",
-      "dueDate": "2025-08-03T22:00:00.000Z",
-      "calendarId": "0460",
-      "checklist": [],
-      "comments": [
-        {
-          "id": "1755120395295-kvsrpc",
-          "text": "pwkfkw",
-          "at": "2025-08-13T21:26:35.295Z",
-          "authorName": "Kitti Csia",
-          "authorEmail": "kitti.csia@virusbulletin.com",
-          "authorAvatar": "https://lh3.googleusercontent.com/a/ACg8ocI_VO5sNKg_z6JfW4VyfJfdh4cW2Pr4q3OjwwZIrK92v1H5NQ0=s96-c",
-          "pinned": false
-        },
-        {
-          "id": "1755120401008-hoga6y",
-          "text": "Hello Gabika",
-          "at": "2025-08-13T21:26:41.008Z",
-          "authorName": "Kitti Csia",
-          "authorEmail": "kitti.csia@virusbulletin.com",
-          "authorAvatar": "https://lh3.googleusercontent.com/a/ACg8ocI_VO5sNKg_z6JfW4VyfJfdh4cW2Pr4q3OjwwZIrK92v1H5NQ0=s96-c",
-          "pinned": true
-        },
-        {
-          "id": "1755120404805-tos6ik",
-          "text": "Helloo",
-          "at": "2025-08-13T21:26:44.805Z",
-          "authorName": "Kitti Csia",
-          "authorEmail": "kitti.csia@virusbulletin.com",
-          "authorAvatar": "https://lh3.googleusercontent.com/a/ACg8ocI_VO5sNKg_z6JfW4VyfJfdh4cW2Pr4q3OjwwZIrK92v1H5NQ0=s96-c",
-          "pinned": false
-        }
-      ]
-    },
-    {
       "id": "5e69",
       "title": "gegr",
-      "stage": "done",
+      "stage": "in-progress",
       "description": "",
       "dueDate": "2025-08-22T22:00:00.000Z",
       "calendarId": "b5cf",

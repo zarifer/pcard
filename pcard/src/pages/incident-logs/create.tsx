@@ -15,45 +15,33 @@ export const IncidentLogCreate = () => {
         <Form.Item
           label={"Title"}
           name={["title"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          rules={[{ required: true }]}
         >
           <Input />
         </Form.Item>
+
         <Form.Item
           label={"Content"}
           name="content"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          rules={[{ required: true }]}
         >
+          {/* SECURITY: @UIW EDITOR ESCAPES HTML BY DEFAULT; AVOID RAW HTML */}
           <MDEditor data-color-mode="light" />
         </Form.Item>
+
         <Form.Item
           label={"Category"}
           name={["category", "id"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          rules={[{ required: true }]}
         >
           <Select {...categorySelectProps} />
         </Form.Item>
+
         <Form.Item
           label={"Status"}
           name={["status"]}
           initialValue={"draft"}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          rules={[{ required: true }]}
         >
           <Select
             defaultValue={"draft"}
@@ -62,10 +50,11 @@ export const IncidentLogCreate = () => {
               { value: "open", label: "Open" },
               { value: "closed", label: "Closed" },
             ]}
-            style={{ width: 120 }}
           />
         </Form.Item>
       </Form>
     </Create>
   );
 };
+
+/* ALL COMMENTS ARE IN ENGLISH AND CAPS */

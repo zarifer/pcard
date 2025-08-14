@@ -10,9 +10,7 @@ export const IncidentLogEdit = () => {
   const { selectProps: categorySelectProps } = useSelect({
     resource: "categories",
     defaultValue: incidentLogsData?.category,
-    queryOptions: {
-      enabled: !!incidentLogsData?.category,
-    },
+    queryOptions: { enabled: !!incidentLogsData?.category },
   });
 
   return (
@@ -21,46 +19,33 @@ export const IncidentLogEdit = () => {
         <Form.Item
           label={"Title"}
           name={["title"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          rules={[{ required: true }]}
         >
           <Input />
         </Form.Item>
+
         <Form.Item
           label={"Content"}
           name="content"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          rules={[{ required: true }]}
         >
           <MDEditor data-color-mode="light" />
         </Form.Item>
+
         <Form.Item
           label={"Category"}
           name={["category", "id"]}
           initialValue={formProps?.initialValues?.category?.id}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          rules={[{ required: true }]}
         >
           <Select {...categorySelectProps} />
         </Form.Item>
+
         <Form.Item
           label={"Status"}
           name={["status"]}
           initialValue={"draft"}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          rules={[{ required: true }]}
         >
           <Select
             defaultValue={"draft"}
@@ -69,10 +54,11 @@ export const IncidentLogEdit = () => {
               { value: "open", label: "Open" },
               { value: "closed", label: "Closed" },
             ]}
-            style={{ width: 120 }}
           />
         </Form.Item>
       </Form>
     </Edit>
   );
 };
+
+/* ALL COMMENTS ARE IN ENGLISH AND CAPS */

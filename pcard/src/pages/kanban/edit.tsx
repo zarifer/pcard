@@ -2,8 +2,8 @@ import {
   useShow,
   useUpdate,
   useGetIdentity,
-  useDelete,                /* ENABLE DELETE CARD */
-  useInvalidate,           /* TO REFRESH LIST AFTER DELETE */
+  useDelete /* ENABLE DELETE CARD */,
+  useInvalidate /* TO REFRESH LIST AFTER DELETE */,
 } from "@refinedev/core";
 import {
   Drawer,
@@ -18,7 +18,7 @@ import {
   Tag,
   message,
   Checkbox,
-  Popconfirm,              /* CONFIRM UI FOR DELETE CARD */
+  Popconfirm /* CONFIRM UI FOR DELETE CARD */,
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState, useMemo } from "react";
@@ -158,7 +158,8 @@ export default function KanbanEdit({
       id: rid(),
       text,
       at: new Date().toISOString(),
-      authorName: identity?.name || identity?.given_name || identity?.email || "You",
+      authorName:
+        identity?.name || identity?.given_name || identity?.email || "You",
       authorEmail: identity?.email,
       authorAvatar: identity?.avatar || identity?.picture,
       pinned: false,
@@ -246,7 +247,11 @@ export default function KanbanEdit({
   /* CHECKLIST HELPERS */
   const persistChecklist = (next: KanbanItem["checklist"]) => {
     setChecklist(next || []);
-    updateCard({ resource: "kanban", id: item.id, values: { checklist: next } });
+    updateCard({
+      resource: "kanban",
+      id: item.id,
+      values: { checklist: next },
+    });
   };
 
   const addChecklistItem = () => {
@@ -375,7 +380,12 @@ export default function KanbanEdit({
                 }}
               />
               <div
-                style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 8,
+                  marginTop: 8,
+                }}
               >
                 <Button
                   onClick={() => {
@@ -429,7 +439,10 @@ export default function KanbanEdit({
 
           <div className="checklist-list">
             {checklist.map((c) => (
-              <div key={c.id} className={`checklist-item ${c.done ? "done" : ""}`}>
+              <div
+                key={c.id}
+                className={`checklist-item ${c.done ? "done" : ""}`}
+              >
                 <Checkbox
                   checked={c.done}
                   onChange={(e) => toggleChecklistItem(c.id, e.target.checked)}
@@ -444,7 +457,11 @@ export default function KanbanEdit({
                       : undefined
                   }
                 />
-                <Button danger type="text" onClick={() => deleteChecklistItem(c.id)}>
+                <Button
+                  danger
+                  type="text"
+                  onClick={() => deleteChecklistItem(c.id)}
+                >
                   Delete
                 </Button>
               </div>
@@ -490,7 +507,9 @@ export default function KanbanEdit({
               const mine =
                 !!identity?.email && c.authorEmail === identity.email;
               return (
-                <List.Item className={`comment-item ${c.pinned ? "pinned" : ""}`}>
+                <List.Item
+                  className={`comment-item ${c.pinned ? "pinned" : ""}`}
+                >
                   <List.Item.Meta
                     avatar={
                       <Avatar src={c.authorAvatar}>
@@ -500,14 +519,21 @@ export default function KanbanEdit({
                     title={
                       <Space
                         size={8}
-                        style={{ width: "100%", justifyContent: "space-between" }}
+                        style={{
+                          width: "100%",
+                          justifyContent: "space-between",
+                        }}
                       >
                         <span style={{ fontWeight: 600 }}>
                           {c.authorName || "User"}{" "}
                           {c.pinned && <Tag color="gold">Pinned</Tag>}
                         </span>
                         <div className="comment-actions">
-                          <Button size="small" type="link" onClick={() => togglePin(c.id)}>
+                          <Button
+                            size="small"
+                            type="link"
+                            onClick={() => togglePin(c.id)}
+                          >
                             {c.pinned ? "Unpin" : "Pin"}
                           </Button>
                           {mine && (
