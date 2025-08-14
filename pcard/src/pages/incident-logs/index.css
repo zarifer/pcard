@@ -50,3 +50,49 @@
 .ant-table-cell {
   vertical-align: middle;
 }
+
+/* ===========================
+   MARKDOWN EDITOR – DARK MODE FIX
+   =========================== */
+
+/* ANT DESIGN DARK THEME SELECTOR VARIANTS */
+html[data-theme="dark"] .w-md-editor,
+:root[data-theme="dark"] .w-md-editor,
+body.dark .w-md-editor {
+  background-color: #141414 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  border-color: #303030 !important;
+}
+
+html[data-theme="dark"] .w-md-editor-text-input,
+:root[data-theme="dark"] .w-md-editor-text-input,
+body.dark .w-md-editor-text-input {
+  background-color: transparent !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+html[data-theme="dark"] .w-md-editor-toolbar,
+:root[data-theme="dark"] .w-md-editor-toolbar,
+body.dark .w-md-editor-toolbar {
+  background-color: #141414 !important;
+  border-bottom-color: #303030 !important;
+}
+
+/* MAKE TABLE ROWS LOOK CLICKABLE, EXCEPT ACTIONS */
+/* COMPANY EMBEDDED TABLES */
+.company-incidents .ant-table-tbody > tr {
+  cursor: pointer;
+}
+
+.company-incidents .ant-table-tbody > tr .ant-space {
+  cursor: default;
+}
+
+/* INCIDENT LIST TABLES */
+.panel-card .ant-table-tbody > tr {
+  cursor: pointer;
+}
+
+.panel-card .ant-table-tbody > tr .ant-space {
+  cursor: default;
+}

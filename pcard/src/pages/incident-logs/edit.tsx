@@ -1,21 +1,56 @@
 import { Edit, useForm, useSelect } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
 import { Form, Input, Select } from "antd";
+import { useContext } from "react";
+import { ColorModeContext } from "../../contexts/color-mode";
+
+/* ALL COMMENTS IN ENGLISH AND CAPS */
 
 export const IncidentLogEdit = () => {
   const { formProps, saveButtonProps, queryResult, formLoading } = useForm({});
+  const record = queryResult?.data?.data;
+  const { mode } = useContext(ColorModeContext);
 
-  const incidentLogsData = queryResult?.data?.data;
+  const { selectProps: companySelectProps } = useSelect({
+    resource: "companies",
+    optionLabel: "product",
+    optionValue: "id",
+    sorters: [{ field: "product", order: "asc" }],
+    defaultValue: record?.company?.id,
+    queryOptions: { enabled: true },
+  });
 
   const { selectProps: categorySelectProps } = useSelect({
     resource: "categories",
-    defaultValue: incidentLogsData?.category,
-    queryOptions: { enabled: !!incidentLogsData?.category },
+    optionLabel: "title",
+    optionValue: "id",
+    defaultValue: record?.category?.id,
+    queryOptions: { enabled: true },
   });
 
   return (
-    <Edit saveButtonProps={saveButtonProps} isLoading={formLoading}>
-      <Form {...formProps} layout="vertical">
+    <Edit
+      headerButtons={() => null}
+      saveButtonProps={saveButtonProps}
+      isLoading={formLoading}
+    >
+      <Form
+        {...formProps}
+        layout="vertical"
+        onFinish={async (values) => {
+          const v: any = { ...values, updatedAt: new Date().toISOString() };
+          if (v.dueAt?.toISOString) v.dueAt = v.dueAt.toISOString();
+          return formProps.onFinish?.(v);
+        }}
+      >
+        <Form.Item
+          label={"Company"}
+          name={["company", "id"]}
+          rules={[{ required: true }]}
+        >
+          <Select {...companySelectProps} />
+        </Form.Item>
+
         <Form.Item
           label={"Title"}
           name={["title"]}
@@ -24,18 +59,17 @@ export const IncidentLogEdit = () => {
           <Input />
         </Form.Item>
 
-        <Form.Item
-          label={"Content"}
-          name="content"
-          rules={[{ required: true }]}
-        >
-          <MDEditor data-color-mode="light" />
+        <Form.Item label={"Detail"} name="detail" rules={[{ required: true }]}>
+          <MDEditor data-color-mode={mode as "light" | "dark"} />
+        </Form.Item>
+
+        <Form.Item label={"Solution"} name="solution">
+          <MDEditor data-color-mode={mode as "light" | "dark"} />
         </Form.Item>
 
         <Form.Item
-          label={"Category"}
+          label={"Incident type"}
           name={["category", "id"]}
-          initialValue={formProps?.initialValues?.category?.id}
           rules={[{ required: true }]}
         >
           <Select {...categorySelectProps} />
@@ -44,15 +78,13 @@ export const IncidentLogEdit = () => {
         <Form.Item
           label={"Status"}
           name={["status"]}
-          initialValue={"draft"}
           rules={[{ required: true }]}
         >
           <Select
-            defaultValue={"draft"}
             options={[
-              { value: "draft", label: "Draft" },
               { value: "open", label: "Open" },
               { value: "closed", label: "Closed" },
+              { value: "draft", label: "Draft" },
             ]}
           />
         </Form.Item>
@@ -60,5 +92,3 @@ export const IncidentLogEdit = () => {
     </Edit>
   );
 };
-
-/* ALL COMMENTS ARE IN ENGLISH AND CAPS */

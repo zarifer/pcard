@@ -1,55 +1,71 @@
-import { useShow, useNavigation } from "@refinedev/core";
-import { Show, EditButton, DeleteButton, useTable } from "@refinedev/antd";
+import {
+  useShow,
+  useNavigation,
+  useMany,
+  type CrudFilters,
+} from "@refinedev/core";
+import {
+  Show,
+  EditButton,
+  DeleteButton,
+  useTable,
+  DateField,
+  MarkdownField,
+} from "@refinedev/antd";
 import {
   Card,
   Typography,
   Avatar,
   Tabs,
   Table,
-  Tag,
   Button,
   Space,
   Skeleton,
   Result,
 } from "antd";
+import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import "./index.css";
 
 /* ALL COMMENTS IN ENGLISH AND CAPS */
 
 export default function CompanyShow() {
-  /* ALWAYS GET PARAMS FIRST */
+  /* GET ROUTE PARAM SAFELY */
   const params = useParams<Record<string, string | undefined>>();
-  const companyIdRaw = params?.id;
-  const companyId =
-    companyIdRaw && /^\d+$/.test(companyIdRaw) ? Number(companyIdRaw) : companyIdRaw;
+  const companyId = params?.id;
 
-  /* FETCH COMPANY RECORD (RUNS EVERY RENDER) */
-  const { queryResult, isLoading, error } = useShow({ resource: "companies" });
-  const company: any = queryResult?.data?.data;
+  /* FETCH COMPANY; STATE COMES FROM queryResult */
+  const { queryResult } = useShow({ resource: "companies" });
+  const { data, isLoading, isError, error } = queryResult;
+  const company: any = data?.data;
 
-  /* NAV HELPERS */
   const { show, push } = useNavigation();
 
-  /* PREPARE EMAILS (SAFE) */
+  /* NORMALIZE CONTACT EMAILS (MAX 2) */
   const emails: string[] = Array.isArray(company?.emails)
     ? company.emails.slice(0, 2)
     : company?.email
-    ? [company.email]
-    : [];
+      ? [company.email]
+      : [];
 
-  /* USE THREE TABLE HOOKS UNCONDITIONALLY (STABLE HOOK ORDER) */
+  /* COMMON FILTERS – USE TYPED CrudFilters TO AVOID STRING OPERATOR ERRORS */
+  const commonFilters: CrudFilters = [
+    { field: "companyId", operator: "eq", value: companyId },
+    { field: "company.id", operator: "eq", value: companyId },
+  ];
+
+  /* THREE INCIDENT TABLES – FILTERED TO THIS COMPANY ONLY */
   const draftTbl = useTable({
-    resource: "incident_logs", /* MUST MATCH APP RESOURCE NAME */
+    resource: "incident_logs",
     syncWithLocation: false,
     pagination: { pageSize: 5 },
     filters: {
       permanent: [
-        { field: "companyId", operator: "eq", value: companyId },
+        ...commonFilters,
         { field: "status", operator: "eq", value: "draft" },
       ],
     },
-    queryOptions: { enabled: !!companyId }, /* DO NOT FIRE UNTIL WE HAVE ID */
+    queryOptions: { enabled: !!companyId },
   });
 
   const openTbl = useTable({
@@ -58,7 +74,7 @@ export default function CompanyShow() {
     pagination: { pageSize: 5 },
     filters: {
       permanent: [
-        { field: "companyId", operator: "eq", value: companyId },
+        ...commonFilters,
         { field: "status", operator: "eq", value: "open" },
       ],
     },
@@ -71,42 +87,105 @@ export default function CompanyShow() {
     pagination: { pageSize: 5 },
     filters: {
       permanent: [
-        { field: "companyId", operator: "eq", value: companyId },
+        ...commonFilters,
         { field: "status", operator: "eq", value: "closed" },
       ],
     },
     queryOptions: { enabled: !!companyId },
   });
 
-  /* COMPACT COLUMNS FOR INCIDENT PREVIEW */
+  /* COLLECT CATEGORY IDS FROM ALL THREE TABLES (READONLY-SAFE) */
+  const categoryIds = useMemo(() => {
+    const set = new Set<string>();
+    for (const arr of [
+      draftTbl.tableProps.dataSource,
+      openTbl.tableProps.dataSource,
+      closedTbl.tableProps.dataSource,
+    ] as ReadonlyArray<readonly any[] | undefined>) {
+      for (const r of arr ?? []) {
+        const id = r?.category?.id;
+        if (id) set.add(id);
+      }
+    }
+    return Array.from(set);
+  }, [
+    draftTbl.tableProps.dataSource,
+    openTbl.tableProps.dataSource,
+    closedTbl.tableProps.dataSource,
+  ]);
+
+  /* RESOLVE CATEGORY TITLES */
+  const { data: categoriesResolved } = useMany({
+    resource: "categories",
+    ids: categoryIds,
+    queryOptions: { enabled: categoryIds.length > 0 },
+  });
+
+  const categoryTitle = (id?: string) =>
+    categoriesResolved?.data?.find((c: any) => c.id === id)?.title || "—";
+
+  /* INCIDENT COLUMNS – MATCH INCIDENT LIST (WITHOUT COMPANY COLUMN) */
+  /* COMPANY PAGE INCIDENT COLUMNS (MATCH INCIDENT LIST, PLUS ACTIONS) */
   const columns = [
     { title: "ID", dataIndex: "id", width: 80 },
     { title: "Title", dataIndex: "title", ellipsis: true },
     {
-      title: "Severity",
-      dataIndex: "severity",
-      width: 110,
-      render: (v: string) => (v ? <Tag>{v}</Tag> : "—"),
+      title: "Detail",
+      dataIndex: "detail",
+      render: (v: any) =>
+        v ? <MarkdownField value={String(v).slice(0, 120) + "..."} /> : "-",
     },
     {
-      title: "Updated",
-      dataIndex: "updatedAt",
+      title: "Incident type",
+      dataIndex: ["category", "id"],
       width: 160,
-      render: (v: string) => (v ? new Date(v).toLocaleString() : "—"),
+      render: (id: string) => categoryTitle(id),
+    },
+    { title: "Status", dataIndex: "status", width: 110 },
+    {
+      title: "Created at",
+      dataIndex: "createdAt",
+      width: 180,
+      render: (_: any, r: any) => (
+        <DateField value={r?.createdAt ?? r?.CreatedAt} />
+      ),
+    },
+    {
+      title: "Actions",
+      dataIndex: "actions",
+      width: 120,
+      render: (_: any, r: any) => (
+        /* PREVENT ROW CLICK WHEN CLICKING ACTION BUTTONS */
+        <span onClick={(e) => e.stopPropagation()}>
+          <Space size="small">
+            <EditButton
+              hideText
+              size="small"
+              resource="incident_logs"
+              recordItemId={r.id}
+            />
+            <DeleteButton
+              hideText
+              size="small"
+              resource="incident_logs"
+              recordItemId={r.id}
+            />
+          </Space>
+        </span>
+      ),
     },
   ];
 
-  /* RENDER AFTER HOOKS — STATE HANDLING INSIDE JSX */
-  if (error) {
+  /* ERROR / LOADING / 404 STATES */
+  if (isError) {
     return (
       <Result
         status="error"
         title="Failed to load company"
-        subTitle={(error as any)?.message ?? "Unknown error"}
+        subTitle={(error as any)?.message}
       />
     );
   }
-
   if (isLoading) {
     return (
       <Show title="Loading..." headerButtons={() => null}>
@@ -114,15 +193,12 @@ export default function CompanyShow() {
       </Show>
     );
   }
-
-  if (!company || !companyId) {
+  if (!company || !companyId)
     return <Result status="404" title="Company not found" />;
-  }
 
   return (
     <Show
       title={company.name}
-      /* KEEP ONLY EDIT + DELETE BUTTONS */
       headerButtons={() => (
         <>
           <EditButton resource="companies" recordItemId={company.id} />
@@ -173,7 +249,7 @@ export default function CompanyShow() {
         />
       </Card>
 
-      {/* INCIDENT LOGS – COMPACT, FILTERED BY COMPANY */}
+      {/* INCIDENT LOGS – FILTERED TO THIS COMPANY ONLY */}
       <div className="company-incidents">
         <div className="panel-header">
           <Typography.Title level={5} className="panel-title">
@@ -184,7 +260,9 @@ export default function CompanyShow() {
               type="primary"
               size="small"
               onClick={() =>
-                push(`/incident-logs/create?companyId=${encodeURIComponent(company.id)}`)
+                push(
+                  `/incident-logs/create?companyId=${encodeURIComponent(company.id)}`,
+                )
               }
             >
               New incident
@@ -195,21 +273,6 @@ export default function CompanyShow() {
         <Tabs
           items={[
             {
-              key: "draft",
-              label: "Draft",
-              children: (
-                <Table
-                  {...draftTbl.tableProps}
-                  rowKey="id"
-                  size="small"
-                  columns={columns as any}
-                  onRow={(record: any) => ({
-                    onClick: () => show("incident_logs", record.id), /* RESOURCE NAME FIXED */
-                  })}
-                />
-              ),
-            },
-            {
               key: "open",
               label: "Open",
               children: (
@@ -218,8 +281,8 @@ export default function CompanyShow() {
                   rowKey="id"
                   size="small"
                   columns={columns as any}
-                  onRow={(record: any) => ({
-                    onClick: () => show("incident_logs", record.id),
+                  onRow={(r: any) => ({
+                    onClick: () => show("incident_logs", r.id),
                   })}
                 />
               ),
@@ -233,8 +296,23 @@ export default function CompanyShow() {
                   rowKey="id"
                   size="small"
                   columns={columns as any}
-                  onRow={(record: any) => ({
-                    onClick: () => show("incident_logs", record.id),
+                  onRow={(r: any) => ({
+                    onClick: () => show("incident_logs", r.id),
+                  })}
+                />
+              ),
+            },
+            {
+              key: "draft",
+              label: "Draft",
+              children: (
+                <Table
+                  {...draftTbl.tableProps}
+                  rowKey="id"
+                  size="small"
+                  columns={columns as any}
+                  onRow={(r: any) => ({
+                    onClick: () => show("incident_logs", r.id),
                   })}
                 />
               ),
