@@ -28,7 +28,11 @@ export const IncidentLogEdit = () => {
   });
 
   return (
-    <Edit headerButtons={() => null} saveButtonProps={saveButtonProps} isLoading={formLoading}>
+    <Edit
+      headerButtons={() => null}
+      saveButtonProps={saveButtonProps}
+      isLoading={formLoading}
+    >
       <Form
         {...formProps}
         layout="vertical"
@@ -42,12 +46,20 @@ export const IncidentLogEdit = () => {
         {/* ROW 1: COMPANY + TITLE SIDE-BY-SIDE */}
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
-            <Form.Item label={"Company"} name={["company", "id"]} rules={[{ required: true }]}>
+            <Form.Item
+              label={"Company"}
+              name={["company", "id"]}
+              rules={[{ required: true }]}
+            >
               <Select {...companySelectProps} size="middle" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item label={"Title"} name={["title"]} rules={[{ required: true }]}>
+            <Form.Item
+              label={"Title"}
+              name={["title"]}
+              rules={[{ required: true }]}
+            >
               <Input size="middle" />
             </Form.Item>
           </Col>
@@ -56,7 +68,11 @@ export const IncidentLogEdit = () => {
         {/* ROW 2: DETAIL FULL-WIDTH (LEAVE ROOM FOR IMAGES) */}
         <Row gutter={[16, 8]}>
           <Col span={24}>
-            <Form.Item label={"Detail"} name="detail" rules={[{ required: true }]}>
+            <Form.Item
+              label={"Detail"}
+              name="detail"
+              rules={[{ required: true }]}
+            >
               {/* DARK/LIGHT SYNC; NO DANGEROUS HTML */}
               <MDEditor data-color-mode={mode as "light" | "dark"} />
             </Form.Item>
@@ -84,7 +100,11 @@ export const IncidentLogEdit = () => {
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item label={"Status"} name={["status"]} rules={[{ required: true }]}>
+            <Form.Item
+              label={"Status"}
+              name={["status"]}
+              rules={[{ required: true }]}
+            >
               <Select
                 size="middle"
                 options={[

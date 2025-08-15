@@ -3,7 +3,6 @@
    =========================== */
 
 .toolbar {
-  /* KEEP LAYOUT CLEAN AND CONSISTENT */
   display: flex;
   align-items: center;
   gap: 12px;
@@ -11,19 +10,15 @@
 }
 
 .toolbar__search {
-  /* LET SEARCH GROW BUT CAP ITS WIDTH */
   flex: 1 1 auto;
   max-width: 420px;
 }
 
-/* COMPANY CARD TWEAKS */
 .company-card__vendor {
-  /* SUBTLE SECONDARY TEXT */
   color: rgba(0, 0, 0, 0.65);
 }
 
 .company-card__emails a {
-  /* ACTION BAR LINKS: COMPACT + WRAP LONG EMAILS */
   font-size: 12px;
   word-break: break-all;
   text-decoration: none;
@@ -37,7 +32,6 @@
   cursor: pointer;
 }
 
-/* RESPONSIVE NICE-TO-HAVE */
 @media (max-width: 576px) {
   .toolbar {
     flex-wrap: wrap;
@@ -60,7 +54,6 @@
 }
 
 .company-incidents .ant-table {
-  /* KEEP IT COMPACT */
   font-size: 12px;
 }
 
@@ -85,4 +78,52 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.wizard-card {
+  position: relative;
+}
+
+.wizard-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.wizard-arrow-left {
+  left: -12px;
+}
+
+.wizard-arrow-right {
+  right: -12px;
+}
+
+.wizard-footer {
+  display: flex;
+  align-items: center;
+}
+
+.wizard-footer .wizard-spacer {
+  flex: 1 1 auto;
+}
+
+@media (max-width: 768px) {
+  .wizard-arrow-left {
+    left: -6px;
+  }
+
+  .wizard-arrow-right {
+    right: -6px;
+  }
+}
+
+.ant-upload-wrapper .ant-upload-drag {
+  border-radius: 10px;
+}
+/* CLOCK */
+@media (max-width: 768px) {
+  .wizard-card .ant-col-md-12:last-child {
+    margin-top: 6px;
+  }
 }

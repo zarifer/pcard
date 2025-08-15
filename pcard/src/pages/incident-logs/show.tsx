@@ -7,15 +7,7 @@ import {
   DeleteButton,
 } from "@refinedev/antd";
 import { useOne, useShow } from "@refinedev/core";
-import {
-  Card,
-  Typography,
-  Row,
-  Col,
-  Descriptions,
-  Space,
-  Tag,
-} from "antd";
+import { Card, Typography, Row, Col, Descriptions, Space, Tag } from "antd";
 
 const { Title, Text } = Typography;
 
@@ -102,7 +94,11 @@ export const IncidentLogShow = () => {
               </div>
             </Card>
 
-            <Card className="md-card" title="Solution" style={{ marginTop: 16 }}>
+            <Card
+              className="md-card"
+              title="Solution"
+              style={{ marginTop: 16 }}
+            >
               <div className="md-block">
                 <MarkdownField
                   value={record?.solution || "_No solution provided yet._"}

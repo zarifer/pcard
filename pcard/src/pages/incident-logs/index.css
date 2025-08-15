@@ -136,7 +136,7 @@ body.dark .w-md-editor-toolbar {
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
-  .form-compact .ant-form-item-label>label {
+  .form-compact .ant-form-item-label > label {
     font-size: 12px;
   }
 }
@@ -149,8 +149,8 @@ body.dark .w-md-editor-toolbar {
   max-width: 640px;
 }
 
-.categories-table .ant-table-thead>tr>th,
-.categories-table .ant-table-tbody>tr>td {
+.categories-table .ant-table-thead > tr > th,
+.categories-table .ant-table-tbody > tr > td {
   padding: 8px 12px;
   font-size: 13px;
 }

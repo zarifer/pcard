@@ -60,7 +60,9 @@ export default function CategoriesBox() {
     <Card className="panel-card categories-card">
       {/* HEADER ROW: TITLE LEFT, ACTIONS RIGHT */}
       <div className="panel-header">
-        <Title level={5} className="panel-title">Categories</Title>
+        <Title level={5} className="panel-title">
+          Categories
+        </Title>
         <div className="panel-actions">
           <Button
             type="primary"

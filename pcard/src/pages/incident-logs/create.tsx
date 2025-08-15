@@ -41,7 +41,7 @@ export const IncidentLogCreate = () => {
       <Form
         {...formProps}
         layout="vertical"
-        className="form-compact" 
+        className="form-compact"
         initialValues={{
           status: "draft",
           company: presetCompanyId ? { id: presetCompanyId } : undefined,
@@ -50,7 +50,8 @@ export const IncidentLogCreate = () => {
         onFinish={async (values) => {
           const now = new Date().toISOString();
           const v: any = { ...values };
-          if (!v.createdAt && !v.CreatedAt) v.createdAt = now; /* BACKEND FALLBACK */
+          if (!v.createdAt && !v.CreatedAt)
+            v.createdAt = now; /* BACKEND FALLBACK */
           v.updatedAt = now;
           if (v.dueAt?.toISOString) v.dueAt = v.dueAt.toISOString();
           return formProps.onFinish?.(v);
@@ -59,12 +60,20 @@ export const IncidentLogCreate = () => {
         {/* ROW 1: COMPANY + TITLE */}
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
-            <Form.Item label={"Company"} name={["company", "id"]} rules={[{ required: true }]}>
+            <Form.Item
+              label={"Company"}
+              name={["company", "id"]}
+              rules={[{ required: true }]}
+            >
               <Select {...companySelectProps} size="middle" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item label={"Title"} name={["title"]} rules={[{ required: true }]}>
+            <Form.Item
+              label={"Title"}
+              name={["title"]}
+              rules={[{ required: true }]}
+            >
               <Input size="middle" />
             </Form.Item>
           </Col>
@@ -73,7 +82,11 @@ export const IncidentLogCreate = () => {
         {/* ROW 2: DETAIL FULL-WIDTH (ALLOW IMAGES) */}
         <Row gutter={[16, 8]}>
           <Col span={24}>
-            <Form.Item label={"Detail"} name="detail" rules={[{ required: true }]}>
+            <Form.Item
+              label={"Detail"}
+              name="detail"
+              rules={[{ required: true }]}
+            >
               {/* SECURITY: NO DANGEROUS HTML, EDITOR SANITIZES */}
               <MDEditor data-color-mode={mode as "light" | "dark"} />
             </Form.Item>
@@ -92,12 +105,20 @@ export const IncidentLogCreate = () => {
         {/* ROW 4: INCIDENT TYPE + STATUS */}
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
-            <Form.Item label={"Incident type"} name={["category", "id"]} rules={[{ required: true }]}>
+            <Form.Item
+              label={"Incident type"}
+              name={["category", "id"]}
+              rules={[{ required: true }]}
+            >
               <Select {...categorySelectProps} size="middle" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item label={"Status"} name={["status"]} rules={[{ required: true }]}>
+            <Form.Item
+              label={"Status"}
+              name={["status"]}
+              rules={[{ required: true }]}
+            >
               <Select
                 size="middle"
                 options={[

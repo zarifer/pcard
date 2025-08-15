@@ -132,8 +132,7 @@ export const IncidentLogList = () => {
                   rowKey="id"
                   columns={columns as any}
                   onRow={(record: any) => ({
-                    onClick: () =>
-                      show("incident_logs", record.id)
+                    onClick: () => show("incident_logs", record.id),
                   })}
                 />
               </Card>
@@ -157,8 +156,7 @@ export const IncidentLogList = () => {
                   rowKey="id"
                   columns={columns as any}
                   onRow={(record: any) => ({
-                    onClick: () =>
-                      show("incident_logs", record.id)
+                    onClick: () => show("incident_logs", record.id),
                   })}
                 />
               </Card>
@@ -182,8 +180,7 @@ export const IncidentLogList = () => {
                   rowKey="id"
                   columns={columns as any}
                   onRow={(record: any) => ({
-                    onClick: () =>
-                      show("incident_logs", record.id)
+                    onClick: () => show("incident_logs", record.id),
                   })}
                 />
               </Card>
