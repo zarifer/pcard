@@ -51,11 +51,10 @@
   vertical-align: middle;
 }
 
-/* ===========================
-   MARKDOWN EDITOR – DARK MODE FIX
-   =========================== */
+/* =========================================================
+   MARKDOWN EDITOR – DARK MODE
+   ========================================================= */
 
-/* ANT DESIGN DARK THEME SELECTOR VARIANTS */
 html[data-theme="dark"] .w-md-editor,
 :root[data-theme="dark"] .w-md-editor,
 body.dark .w-md-editor {
@@ -78,8 +77,6 @@ body.dark .w-md-editor-toolbar {
   border-bottom-color: #303030 !important;
 }
 
-/* MAKE TABLE ROWS LOOK CLICKABLE, EXCEPT ACTIONS */
-/* COMPANY EMBEDDED TABLES */
 .company-incidents .ant-table-tbody > tr {
   cursor: pointer;
 }
@@ -88,11 +85,86 @@ body.dark .w-md-editor-toolbar {
   cursor: default;
 }
 
-/* INCIDENT LIST TABLES */
 .panel-card .ant-table-tbody > tr {
   cursor: pointer;
 }
 
 .panel-card .ant-table-tbody > tr .ant-space {
   cursor: default;
+}
+
+/* ===========================================================
+   INCIDENT SHOW – MAKE IT FANCYYYYY
+   =========================================================== */
+
+.incident-show {
+  border-radius: var(--radius-xl);
+}
+
+.inc-descriptions .ant-descriptions-item-label {
+  background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+  font-weight: 600;
+}
+
+.inc-descriptions .ant-descriptions-item-content {
+  background: #ffffff;
+}
+
+.md-card .ant-card-body {
+  padding: 16px;
+}
+
+.md-block img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  margin: 8px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.md-block p {
+  margin-bottom: 8px;
+}
+
+.form-compact .ant-form-item {
+  margin-bottom: 12px;
+}
+
+.form-compact .w-md-editor {
+  border-radius: 8px;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .form-compact .ant-form-item-label>label {
+    font-size: 12px;
+  }
+}
+
+/* ===========================
+   CATEGORIES – COMPACT LAYOUT
+   =========================== */
+
+.categories-card {
+  max-width: 640px;
+}
+
+.categories-table .ant-table-thead>tr>th,
+.categories-table .ant-table-tbody>tr>td {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.category-modal-small .ant-modal {
+  border-radius: 12px;
+}
+
+@media (max-width: 640px) {
+  .categories-card {
+    max-width: 100%;
+  }
+
+  .category-modal-small .ant-modal {
+    width: 92vw !important;
+  }
 }

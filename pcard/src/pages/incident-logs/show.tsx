@@ -1,10 +1,23 @@
-import { DateField, MarkdownField, Show, TextField } from "@refinedev/antd";
+import {
+  DateField,
+  MarkdownField,
+  Show,
+  TextField,
+  EditButton,
+  DeleteButton,
+} from "@refinedev/antd";
 import { useOne, useShow } from "@refinedev/core";
-import { Typography } from "antd";
+import {
+  Card,
+  Typography,
+  Row,
+  Col,
+  Descriptions,
+  Space,
+  Tag,
+} from "antd";
 
-/* ALL COMMENTS IN ENGLISH AND CAPS */
-
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export const IncidentLogShow = () => {
   const { queryResult } = useShow({});
@@ -23,39 +36,82 @@ export const IncidentLogShow = () => {
     queryOptions: { enabled: !!record?.category?.id },
   });
 
+  /* TIMESTAMPS WITH FALLBACKS */
   const created = record?.createdAt ?? record?.CreatedAt ?? null;
   const updated = record?.updatedAt ?? record?.UpdatedAt ?? null;
 
+  /* STATUS TAG COLOR HELPER */
+  const statusTag = (s?: string) => {
+    const v = String(s || "").toLowerCase();
+    const color = v === "open" ? "green" : v === "closed" ? "red" : "gold";
+    return <Tag color={color}>{s || "—"}</Tag>;
+  };
+
   return (
     <Show isLoading={isLoading} headerButtons={() => null}>
-      <Title level={5}>{"ID"}</Title>
-      <TextField value={record?.id} />
+      <Card className="incident-show">
+        <div className="panel-header">
+          <Title level={4} className="panel-title" style={{ marginBottom: 0 }}>
+            Incident log
+          </Title>
+          <Space className="panel-actions">
+            <EditButton />
+            <DeleteButton />
+          </Space>
+        </div>
 
-      <Title level={5}>{"Company"}</Title>
-      <TextField value={companyData?.data?.product} />
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={8}>
+            <Descriptions
+              className="inc-descriptions"
+              bordered
+              size="small"
+              column={1}
+              labelStyle={{ width: 140 }}
+            >
+              <Descriptions.Item label="Company">
+                <Text>{companyData?.data?.product || "—"}</Text>
+              </Descriptions.Item>
 
-      <Title level={5}>{"Title"}</Title>
-      <TextField value={record?.title} />
+              <Descriptions.Item label="Title">
+                <TextField value={record?.title} />
+              </Descriptions.Item>
 
-      <Title level={5}>{"Detail"}</Title>
-      <MarkdownField value={record?.detail} />
+              <Descriptions.Item label="Incident type">
+                <Text>{categoryData?.data?.title || "—"}</Text>
+              </Descriptions.Item>
 
-      <Title level={5}>{"Solution"}</Title>
-      <MarkdownField
-        value={record?.solution || "_No solution provided yet._"}
-      />
+              <Descriptions.Item label="Status">
+                {statusTag(record?.status)}
+              </Descriptions.Item>
 
-      <Title level={5}>{"Incident type"}</Title>
-      <TextField value={categoryData?.data?.title} />
+              <Descriptions.Item label="Created at">
+                <DateField value={created} />
+              </Descriptions.Item>
 
-      <Title level={5}>{"Status"}</Title>
-      <TextField value={record?.status} />
+              <Descriptions.Item label="Updated at">
+                <DateField value={updated} />
+              </Descriptions.Item>
+            </Descriptions>
+          </Col>
 
-      <Title level={5}>{"Created at"}</Title>
-      <DateField value={created} />
+          <Col xs={24} lg={16}>
+            <Card className="md-card" title="Detail">
+              <div className="md-block">
+                <MarkdownField value={record?.detail} />
+              </div>
+            </Card>
 
-      <Title level={5}>{"Updated at"}</Title>
-      <DateField value={updated} />
+            <Card className="md-card" title="Solution" style={{ marginTop: 16 }}>
+              <div className="md-block">
+                <MarkdownField
+                  value={record?.solution || "_No solution provided yet._"}
+                />
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      </Card>
     </Show>
   );
 };

@@ -1,16 +1,13 @@
 import { Create, useForm, useSelect } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
-import { Form, Input, Select } from "antd";
+import { Form, Input, Select, Row, Col } from "antd";
 import { useContext, useEffect } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
-
-/* ALL COMMENTS IN ENGLISH AND CAPS */
 
 export const IncidentLogCreate = () => {
   const { formProps, saveButtonProps } = useForm({});
   const { mode } = useContext(ColorModeContext); /* SYNC DARK/LIGHT */
 
-  /* COMPANY SELECT: LABEL = PRODUCT NAME */
   const { selectProps: companySelectProps } = useSelect({
     resource: "companies",
     optionLabel: "product",
@@ -37,16 +34,14 @@ export const IncidentLogCreate = () => {
     if (!presetCompanyId && !current && first) {
       form?.setFieldsValue?.({ company: { id: first } });
     }
-  }, [
-    presetCompanyId,
-    companySelectProps?.options,
-  ]); /* KEEP HOOK ORDER STABLE */
+  }, [presetCompanyId, companySelectProps?.options]);
 
   return (
     <Create headerButtons={() => null} saveButtonProps={saveButtonProps}>
       <Form
         {...formProps}
         layout="vertical"
+        className="form-compact" 
         initialValues={{
           status: "draft",
           company: presetCompanyId ? { id: presetCompanyId } : undefined,
@@ -55,58 +50,65 @@ export const IncidentLogCreate = () => {
         onFinish={async (values) => {
           const now = new Date().toISOString();
           const v: any = { ...values };
-          if (!v.createdAt && !v.CreatedAt)
-            v.createdAt = now; /* FALLBACK IF BACKEND MISSES IT */
+          if (!v.createdAt && !v.CreatedAt) v.createdAt = now; /* BACKEND FALLBACK */
           v.updatedAt = now;
           if (v.dueAt?.toISOString) v.dueAt = v.dueAt.toISOString();
           return formProps.onFinish?.(v);
         }}
       >
-        <Form.Item
-          label={"Company"}
-          name={["company", "id"]}
-          rules={[{ required: true }]}
-        >
-          <Select {...companySelectProps} />
-        </Form.Item>
+        {/* ROW 1: COMPANY + TITLE */}
+        <Row gutter={[16, 8]}>
+          <Col xs={24} md={12}>
+            <Form.Item label={"Company"} name={["company", "id"]} rules={[{ required: true }]}>
+              <Select {...companySelectProps} size="middle" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item label={"Title"} name={["title"]} rules={[{ required: true }]}>
+              <Input size="middle" />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item
-          label={"Title"}
-          name={["title"]}
-          rules={[{ required: true }]}
-        >
-          <Input />
-        </Form.Item>
+        {/* ROW 2: DETAIL FULL-WIDTH (ALLOW IMAGES) */}
+        <Row gutter={[16, 8]}>
+          <Col span={24}>
+            <Form.Item label={"Detail"} name="detail" rules={[{ required: true }]}>
+              {/* SECURITY: NO DANGEROUS HTML, EDITOR SANITIZES */}
+              <MDEditor data-color-mode={mode as "light" | "dark"} />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item label={"Detail"} name="detail" rules={[{ required: true }]}>
-          <MDEditor data-color-mode={mode as "light" | "dark"} />
-        </Form.Item>
+        {/* ROW 3: SOLUTION FULL-WIDTH */}
+        <Row gutter={[16, 8]}>
+          <Col span={24}>
+            <Form.Item label={"Solution"} name="solution">
+              <MDEditor data-color-mode={mode as "light" | "dark"} />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item label={"Solution"} name="solution">
-          <MDEditor data-color-mode={mode as "light" | "dark"} />
-        </Form.Item>
-
-        <Form.Item
-          label={"Incident type"}
-          name={["category", "id"]}
-          rules={[{ required: true }]}
-        >
-          <Select {...categorySelectProps} />
-        </Form.Item>
-
-        <Form.Item
-          label={"Status"}
-          name={["status"]}
-          rules={[{ required: true }]}
-        >
-          <Select
-            options={[
-              { value: "open", label: "Open" },
-              { value: "closed", label: "Closed" },
-              { value: "draft", label: "Draft" },
-            ]}
-          />
-        </Form.Item>
+        {/* ROW 4: INCIDENT TYPE + STATUS */}
+        <Row gutter={[16, 8]}>
+          <Col xs={24} md={12}>
+            <Form.Item label={"Incident type"} name={["category", "id"]} rules={[{ required: true }]}>
+              <Select {...categorySelectProps} size="middle" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item label={"Status"} name={["status"]} rules={[{ required: true }]}>
+              <Select
+                size="middle"
+                options={[
+                  { value: "open", label: "Open" },
+                  { value: "closed", label: "Closed" },
+                  { value: "draft", label: "Draft" },
+                ]}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
       </Form>
     </Create>
   );

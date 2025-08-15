@@ -1,10 +1,8 @@
 import { Edit, useForm, useSelect } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
-import { Form, Input, Select } from "antd";
+import { Form, Input, Select, Row, Col } from "antd";
 import { useContext } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
-
-/* ALL COMMENTS IN ENGLISH AND CAPS */
 
 export const IncidentLogEdit = () => {
   const { formProps, saveButtonProps, queryResult, formLoading } = useForm({});
@@ -20,6 +18,7 @@ export const IncidentLogEdit = () => {
     queryOptions: { enabled: true },
   });
 
+  /* INCIDENT TYPE (CATEGORIES) */
   const { selectProps: categorySelectProps } = useSelect({
     resource: "categories",
     optionLabel: "title",
@@ -29,65 +28,74 @@ export const IncidentLogEdit = () => {
   });
 
   return (
-    <Edit
-      headerButtons={() => null}
-      saveButtonProps={saveButtonProps}
-      isLoading={formLoading}
-    >
+    <Edit headerButtons={() => null} saveButtonProps={saveButtonProps} isLoading={formLoading}>
       <Form
         {...formProps}
         layout="vertical"
+        className="form-compact"
         onFinish={async (values) => {
           const v: any = { ...values, updatedAt: new Date().toISOString() };
           if (v.dueAt?.toISOString) v.dueAt = v.dueAt.toISOString();
           return formProps.onFinish?.(v);
         }}
       >
-        <Form.Item
-          label={"Company"}
-          name={["company", "id"]}
-          rules={[{ required: true }]}
-        >
-          <Select {...companySelectProps} />
-        </Form.Item>
+        {/* ROW 1: COMPANY + TITLE SIDE-BY-SIDE */}
+        <Row gutter={[16, 8]}>
+          <Col xs={24} md={12}>
+            <Form.Item label={"Company"} name={["company", "id"]} rules={[{ required: true }]}>
+              <Select {...companySelectProps} size="middle" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item label={"Title"} name={["title"]} rules={[{ required: true }]}>
+              <Input size="middle" />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item
-          label={"Title"}
-          name={["title"]}
-          rules={[{ required: true }]}
-        >
-          <Input />
-        </Form.Item>
+        {/* ROW 2: DETAIL FULL-WIDTH (LEAVE ROOM FOR IMAGES) */}
+        <Row gutter={[16, 8]}>
+          <Col span={24}>
+            <Form.Item label={"Detail"} name="detail" rules={[{ required: true }]}>
+              {/* DARK/LIGHT SYNC; NO DANGEROUS HTML */}
+              <MDEditor data-color-mode={mode as "light" | "dark"} />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item label={"Detail"} name="detail" rules={[{ required: true }]}>
-          <MDEditor data-color-mode={mode as "light" | "dark"} />
-        </Form.Item>
+        {/* ROW 3: SOLUTION FULL-WIDTH */}
+        <Row gutter={[16, 8]}>
+          <Col span={24}>
+            <Form.Item label={"Solution"} name="solution">
+              <MDEditor data-color-mode={mode as "light" | "dark"} />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item label={"Solution"} name="solution">
-          <MDEditor data-color-mode={mode as "light" | "dark"} />
-        </Form.Item>
-
-        <Form.Item
-          label={"Incident type"}
-          name={["category", "id"]}
-          rules={[{ required: true }]}
-        >
-          <Select {...categorySelectProps} />
-        </Form.Item>
-
-        <Form.Item
-          label={"Status"}
-          name={["status"]}
-          rules={[{ required: true }]}
-        >
-          <Select
-            options={[
-              { value: "open", label: "Open" },
-              { value: "closed", label: "Closed" },
-              { value: "draft", label: "Draft" },
-            ]}
-          />
-        </Form.Item>
+        {/* ROW 4: INCIDENT TYPE + STATUS SIDE-BY-SIDE */}
+        <Row gutter={[16, 8]}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label={"Incident type"}
+              name={["category", "id"]}
+              rules={[{ required: true }]}
+            >
+              <Select {...categorySelectProps} size="middle" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item label={"Status"} name={["status"]} rules={[{ required: true }]}>
+              <Select
+                size="middle"
+                options={[
+                  { value: "open", label: "Open" },
+                  { value: "closed", label: "Closed" },
+                  { value: "draft", label: "Draft" },
+                ]}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
       </Form>
     </Edit>
   );

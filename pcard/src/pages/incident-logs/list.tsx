@@ -12,8 +12,6 @@ import { Space, Table, Tabs, Typography, Card } from "antd";
 import CategoriesBox from "./categories";
 import { useNavigation } from "@refinedev/core";
 
-/* ALL COMMENTS IN ENGLISH AND CAPS */
-
 const { Title } = Typography;
 
 export const IncidentLogList = () => {
@@ -38,7 +36,6 @@ export const IncidentLogList = () => {
     },
   });
 
-  /* RESOLVE FK FIELDS FOR THE CURRENTLY ACTIVE TABLE (OPEN BY DEFAULT) */
   const ds =
     openTbl.tableProps.dataSource ||
     closedTbl.tableProps.dataSource ||
@@ -136,7 +133,7 @@ export const IncidentLogList = () => {
                   columns={columns as any}
                   onRow={(record: any) => ({
                     onClick: () =>
-                      show("incident_logs", record.id) /* ROW CLICK -> SHOW */,
+                      show("incident_logs", record.id)
                   })}
                 />
               </Card>
@@ -161,7 +158,7 @@ export const IncidentLogList = () => {
                   columns={columns as any}
                   onRow={(record: any) => ({
                     onClick: () =>
-                      show("incident_logs", record.id) /* ROW CLICK -> SHOW */,
+                      show("incident_logs", record.id)
                   })}
                 />
               </Card>
@@ -186,7 +183,7 @@ export const IncidentLogList = () => {
                   columns={columns as any}
                   onRow={(record: any) => ({
                     onClick: () =>
-                      show("incident_logs", record.id) /* ROW CLICK -> SHOW */,
+                      show("incident_logs", record.id)
                   })}
                 />
               </Card>

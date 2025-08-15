@@ -1,4 +1,3 @@
-// src/pages/incident-logs/Categories.tsx
 import { HttpError, CrudFilters, BaseRecord } from "@refinedev/core";
 import { useTable, DeleteButton, useModalForm } from "@refinedev/antd";
 import {
@@ -11,6 +10,7 @@ import {
   Card,
   Typography,
 } from "antd";
+import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
@@ -57,36 +57,47 @@ export default function CategoriesBox() {
   });
 
   return (
-    <Card className="panel-card">
+    <Card className="panel-card categories-card">
       {/* HEADER ROW: TITLE LEFT, ACTIONS RIGHT */}
       <div className="panel-header">
-        <Title level={5} className="panel-title">
-          Categories
-        </Title>
+        <Title level={5} className="panel-title">Categories</Title>
         <div className="panel-actions">
           <Button
             type="primary"
             className="btn-primary"
+            icon={<PlusOutlined />}
             onClick={() => showCreate()}
           >
-            New Category
+            Create
           </Button>
         </div>
       </div>
 
-      <Table<Category> {...tableProps} rowKey="id" size="middle">
-        <Table.Column<Category> dataIndex="id" title="ID" width={80} />
+      <Table<Category>
+        {...tableProps}
+        rowKey="id"
+        size="small"
+        className="categories-table"
+      >
+        <Table.Column<Category> dataIndex="id" title="ID" width={72} />
         <Table.Column<Category> dataIndex="title" title="Title" />
         <Table.Column<Category>
           title="Actions"
           dataIndex="actions"
-          width={180}
+          width={120}
           render={(_, record: BaseRecord) => (
-            <Space>
-              <Button size="small" onClick={() => showEdit(record.id)}>
-                Edit
-              </Button>
+            /* PREVENT ROW CLICK WHEN PRESSING ACTIONS */
+            <Space onClick={(e) => e.stopPropagation()}>
+              {/* MIMIC REFINED EDIT ICON-ONLY BUTTON */}
+              <Button
+                size="small"
+                className="ant-btn-icon-only"
+                icon={<EditOutlined />}
+                onClick={() => showEdit(record.id)}
+                aria-label="Edit"
+              />
               <DeleteButton
+                hideText
                 size="small"
                 resource="categories"
                 recordItemId={record.id}
@@ -99,12 +110,15 @@ export default function CategoriesBox() {
         />
       </Table>
 
-      {/* CREATE MODAL */}
+      {/* CREATE MODAL – SMALLER, CENTERED */}
       <Modal
         {...createModalProps}
         title="Create Category"
         okText="Save"
         destroyOnClose
+        centered
+        width={420}
+        className="category-modal-small"
       >
         <Form
           {...createFormProps}
@@ -116,17 +130,20 @@ export default function CategoriesBox() {
             name={["title"]}
             rules={[{ required: true, message: "Title is required" }]}
           >
-            <Input placeholder="e.g. Networking" />
+            <Input placeholder="e.g. Networking" maxLength={60} />
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* EDIT MODAL */}
+      {/* EDIT MODAL – SMALLER, CENTERED */}
       <Modal
         {...editModalProps}
         title="Edit Category"
         okText="Save"
         destroyOnClose
+        centered
+        width={420}
+        className="category-modal-small"
       >
         <Form
           {...editFormProps}
@@ -138,7 +155,7 @@ export default function CategoriesBox() {
             name={["title"]}
             rules={[{ required: true, message: "Title is required" }]}
           >
-            <Input />
+            <Input maxLength={60} />
           </Form.Item>
         </Form>
       </Modal>
