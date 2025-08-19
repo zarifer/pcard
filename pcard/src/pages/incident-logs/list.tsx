@@ -3,20 +3,29 @@ import {
   DeleteButton,
   EditButton,
   List,
-  MarkdownField,
-  useTable,
   CreateButton,
+  useTable,
 } from "@refinedev/antd";
-import { type BaseRecord, useMany } from "@refinedev/core";
+import { useNavigation, useMany } from "@refinedev/core";
+import { BaseRecord } from "@refinedev/core";
 import { Space, Table, Tabs, Typography, Card } from "antd";
-import CategoriesBox from "./categories";
-import { useNavigation } from "@refinedev/core";
 
 const { Title } = Typography;
 
 export const IncidentLogList = () => {
-  /* THREE TABLES – STABLE HOOK ORDER */
   const { show } = useNavigation();
+
+  const COL_W = {
+    id: 80,
+    company: 260,
+    title: 140,
+    category: 300,
+    status: 110,
+    created: 180,
+    actions: 140,
+  };
+
+  const allTbl = useTable({ syncWithLocation: false });
   const openTbl = useTable({
     syncWithLocation: false,
     filters: {
@@ -36,17 +45,13 @@ export const IncidentLogList = () => {
     },
   });
 
+  /* COLLECT LOOKUP IDS FROM ANY NON-EMPTY DS */
   const ds =
+    allTbl.tableProps.dataSource ||
     openTbl.tableProps.dataSource ||
     closedTbl.tableProps.dataSource ||
     draftTbl.tableProps.dataSource ||
     [];
-
-  const { data: categoryData, isLoading: categoryIsLoading } = useMany({
-    resource: "categories",
-    ids: ds.map((r: any) => r?.category?.id).filter(Boolean),
-    queryOptions: { enabled: ds.length > 0 },
-  });
 
   const { data: companyData, isLoading: companyIsLoading } = useMany({
     resource: "companies",
@@ -54,42 +59,54 @@ export const IncidentLogList = () => {
     queryOptions: { enabled: ds.length > 0 },
   });
 
+  const { data: categoryData, isLoading: categoryIsLoading } = useMany({
+    resource: "categories",
+    ids: ds.map((r: any) => r?.category?.id).filter(Boolean),
+    queryOptions: { enabled: ds.length > 0 },
+  });
+
+  /* REUSABLE COLUMNS */
   const columns = [
-    { dataIndex: "id", title: "ID", width: 80 },
+    { dataIndex: "id", title: "ID", width: COL_W.id },
     {
       dataIndex: "company",
       title: "Company",
-      width: 180,
+      width: COL_W.company,
       render: (value: any) =>
         companyIsLoading
           ? "…"
-          : companyData?.data?.find((c: any) => c.id === value?.id)?.product,
+          : companyData?.data?.find((c: any) => c.id === value?.id)?.name ||
+            "—",
+      onCell: () => ({ style: { whiteSpace: "nowrap" } }) /* PREVENT WRAP */,
     },
-    { dataIndex: "title", title: "Title" },
+    {
+      dataIndex: "title",
+      title: "Title",
+      width: COL_W.title,
+      ellipsis: true /* KEEP IT TIGHT */,
+    },
     {
       dataIndex: "detail",
       title: "Detail",
-      render: (value: any) =>
-        value ? (
-          <MarkdownField value={String(value).slice(0, 120) + "..."} />
-        ) : (
-          "-"
-        ),
+      /* FLEX COLUMN: DO NOT SET WIDTH, LET IT FILL FREE SPACE */
+      render: (value: any) => (value ? String(value).slice(0, 120) + "…" : "—"),
     },
     {
       dataIndex: "category",
       title: "Incident type",
-      width: 160,
+      width: COL_W.category,
       render: (value: any) =>
         categoryIsLoading
           ? "…"
-          : categoryData?.data?.find((i: any) => i.id === value?.id)?.title,
+          : categoryData?.data?.find((i: any) => i.id === value?.id)?.title ||
+            "—",
+      onCell: () => ({ style: { whiteSpace: "nowrap" } }) /* FIT FULL TEXT */,
     },
-    { dataIndex: "status", title: "Status", width: 110 },
+    { dataIndex: "status", title: "Status", width: COL_W.status },
     {
-      dataIndex: ["createdAt"],
+      dataIndex: "createdAt",
       title: "Created at",
-      width: 180,
+      width: COL_W.created,
       render: (value: any, r: any) => (
         <DateField value={value ?? r?.CreatedAt} />
       ),
@@ -97,11 +114,9 @@ export const IncidentLogList = () => {
     {
       title: "Actions",
       dataIndex: "actions",
-      width: 140,
+      width: COL_W.actions,
       render: (_: any, record: BaseRecord) => (
-        <Space
-          onClick={(e) => e.stopPropagation() /* DO NOT TRIGGER ROW CLICK */}
-        >
+        <Space onClick={(e) => e.stopPropagation()}>
           <EditButton hideText size="small" recordItemId={record.id} />
           <DeleteButton hideText size="small" recordItemId={record.id} />
         </Space>
@@ -109,87 +124,53 @@ export const IncidentLogList = () => {
     },
   ];
 
+  /* REUSABLE TABLE RENDERER */
+  const renderTable = (tableProps: any, title: string) => (
+    <Card className="panel-card">
+      <div className="panel-header">
+        <Title level={5} className="panel-title">
+          {title}
+        </Title>
+        <div className="panel-actions">
+          <CreateButton className="btn-primary" />
+        </div>
+      </div>
+      <Table
+        {...tableProps}
+        tableLayout="fixed" /* ENFORCE COLUMN WIDTHS */
+        rowKey="id"
+        columns={columns as any}
+        onRow={(record: any) => ({
+          onClick: () => show("incident_logs", record.id),
+        })}
+      />
+    </Card>
+  );
+
   return (
     <List title="Incident logs" canCreate={false} headerButtons={null}>
       <Tabs
-        defaultActiveKey="open"
+        defaultActiveKey="all"
         items={[
+          {
+            key: "all",
+            label: "All",
+            children: renderTable(allTbl.tableProps, "All"),
+          },
           {
             key: "open",
             label: "Open",
-            children: (
-              <Card className="panel-card">
-                <div className="panel-header">
-                  <Title level={5} className="panel-title">
-                    Open
-                  </Title>
-                  <div className="panel-actions">
-                    <CreateButton className="btn-primary" />
-                  </div>
-                </div>
-                <Table
-                  {...openTbl.tableProps}
-                  rowKey="id"
-                  columns={columns as any}
-                  onRow={(record: any) => ({
-                    onClick: () => show("incident_logs", record.id),
-                  })}
-                />
-              </Card>
-            ),
+            children: renderTable(openTbl.tableProps, "Open"),
           },
           {
             key: "closed",
             label: "Closed",
-            children: (
-              <Card className="panel-card">
-                <div className="panel-header">
-                  <Title level={5} className="panel-title">
-                    Closed
-                  </Title>
-                  <div className="panel-actions">
-                    <CreateButton className="btn-primary" />
-                  </div>
-                </div>
-                <Table
-                  {...closedTbl.tableProps}
-                  rowKey="id"
-                  columns={columns as any}
-                  onRow={(record: any) => ({
-                    onClick: () => show("incident_logs", record.id),
-                  })}
-                />
-              </Card>
-            ),
+            children: renderTable(closedTbl.tableProps, "Closed"),
           },
           {
             key: "draft",
             label: "Draft",
-            children: (
-              <Card className="panel-card">
-                <div className="panel-header">
-                  <Title level={5} className="panel-title">
-                    Draft
-                  </Title>
-                  <div className="panel-actions">
-                    <CreateButton className="btn-primary" />
-                  </div>
-                </div>
-                <Table
-                  {...draftTbl.tableProps}
-                  rowKey="id"
-                  columns={columns as any}
-                  onRow={(record: any) => ({
-                    onClick: () => show("incident_logs", record.id),
-                  })}
-                />
-              </Card>
-            ),
-          },
-          {
-            key: "categories",
-            label: "Categories",
-            children: <CategoriesBox />,
+            children: renderTable(draftTbl.tableProps, "Draft"),
           },
         ]}
       />

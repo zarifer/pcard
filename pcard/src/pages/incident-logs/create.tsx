@@ -6,7 +6,7 @@ import { ColorModeContext } from "../../contexts/color-mode";
 
 export const IncidentLogCreate = () => {
   const { formProps, saveButtonProps } = useForm({});
-  const { mode } = useContext(ColorModeContext); /* SYNC DARK/LIGHT */
+  const { mode } = useContext(ColorModeContext);
 
   const { selectProps: companySelectProps } = useSelect({
     resource: "companies",
@@ -15,19 +15,17 @@ export const IncidentLogCreate = () => {
     sorters: [{ field: "product", order: "asc" }],
   });
 
-  /* INCIDENT TYPE (CATEGORIES) */
   const { selectProps: categorySelectProps } = useSelect({
     resource: "categories",
     optionLabel: "title",
     optionValue: "id",
   });
 
-  /* PREFILL FROM ?companyId= IF PRESENT; OTHERWISE PICK FIRST OPTION */
   const params = new URLSearchParams(window.location.search);
   const presetCompanyId = params.get("companyId") || undefined;
 
   useEffect(() => {
-    // @ts-ignore
+    /* SET DEFAULT COMPANY IF NONE SELECTED */
     const form = formProps?.form;
     const current = form?.getFieldValue?.(["company", "id"]);
     const first = companySelectProps?.options?.[0]?.value;
@@ -46,14 +44,29 @@ export const IncidentLogCreate = () => {
           status: "draft",
           company: presetCompanyId ? { id: presetCompanyId } : undefined,
         }}
-        /* SAFELY ADD TIMESTAMPS AND SERIALIZE BEFORE SUBMIT */
         onFinish={async (values) => {
+          /* NORMALIZE PAYLOAD FOR BACKEND COMPATIBILITY */
           const now = new Date().toISOString();
           const v: any = { ...values };
-          if (!v.createdAt && !v.CreatedAt)
-            v.createdAt = now; /* BACKEND FALLBACK */
+
+          const companyId =
+            v?.company?.id ?? v?.["company.id"] ?? v?.companyId ?? undefined;
+          if (companyId) {
+            v.company = { id: String(companyId) };
+            v.companyId = String(companyId);
+          }
+
+          const categoryId =
+            v?.category?.id ?? v?.["category.id"] ?? v?.categoryId ?? undefined;
+          if (categoryId) {
+            v.category = { id: String(categoryId) };
+            v.categoryId = String(categoryId);
+          }
+
+          if (!v.createdAt && !v.CreatedAt) v.createdAt = now;
           v.updatedAt = now;
           if (v.dueAt?.toISOString) v.dueAt = v.dueAt.toISOString();
+
           return formProps.onFinish?.(v);
         }}
       >
@@ -61,7 +74,7 @@ export const IncidentLogCreate = () => {
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
             <Form.Item
-              label={"Company"}
+              label="Company"
               name={["company", "id"]}
               rules={[{ required: true }]}
             >
@@ -70,7 +83,7 @@ export const IncidentLogCreate = () => {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
-              label={"Title"}
+              label="Title"
               name={["title"]}
               rules={[{ required: true }]}
             >
@@ -79,34 +92,11 @@ export const IncidentLogCreate = () => {
           </Col>
         </Row>
 
-        {/* ROW 2: DETAIL FULL-WIDTH (ALLOW IMAGES) */}
-        <Row gutter={[16, 8]}>
-          <Col span={24}>
-            <Form.Item
-              label={"Detail"}
-              name="detail"
-              rules={[{ required: true }]}
-            >
-              {/* SECURITY: NO DANGEROUS HTML, EDITOR SANITIZES */}
-              <MDEditor data-color-mode={mode as "light" | "dark"} />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        {/* ROW 3: SOLUTION FULL-WIDTH */}
-        <Row gutter={[16, 8]}>
-          <Col span={24}>
-            <Form.Item label={"Solution"} name="solution">
-              <MDEditor data-color-mode={mode as "light" | "dark"} />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        {/* ROW 4: INCIDENT TYPE + STATUS */}
+        {/* ROW 2: INCIDENT TYPE + STATUS (MOVED UP) */}
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
             <Form.Item
-              label={"Incident type"}
+              label="Incident type"
               name={["category", "id"]}
               rules={[{ required: true }]}
             >
@@ -115,7 +105,7 @@ export const IncidentLogCreate = () => {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
-              label={"Status"}
+              label="Status"
               name={["status"]}
               rules={[{ required: true }]}
             >
@@ -127,6 +117,28 @@ export const IncidentLogCreate = () => {
                   { value: "draft", label: "Draft" },
                 ]}
               />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        {/* ROW 3: DETAIL FULL-WIDTH */}
+        <Row gutter={[16, 8]}>
+          <Col span={24}>
+            <Form.Item
+              label="Detail"
+              name="detail"
+              rules={[{ required: true }]}
+            >
+              <MDEditor data-color-mode={mode as "light" | "dark"} />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        {/* ROW 4: SOLUTION FULL-WIDTH */}
+        <Row gutter={[16, 8]}>
+          <Col span={24}>
+            <Form.Item label="Solution" name="solution">
+              <MDEditor data-color-mode={mode as "light" | "dark"} />
             </Form.Item>
           </Col>
         </Row>

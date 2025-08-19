@@ -18,7 +18,6 @@ export const IncidentLogEdit = () => {
     queryOptions: { enabled: true },
   });
 
-  /* INCIDENT TYPE (CATEGORIES) */
   const { selectProps: categorySelectProps } = useSelect({
     resource: "categories",
     optionLabel: "title",
@@ -38,16 +37,32 @@ export const IncidentLogEdit = () => {
         layout="vertical"
         className="form-compact"
         onFinish={async (values) => {
+          /* NORMALIZE PAYLOAD FOR BACKEND COMPATIBILITY */
           const v: any = { ...values, updatedAt: new Date().toISOString() };
+
+          const companyId =
+            v?.company?.id ?? v?.["company.id"] ?? v?.companyId ?? undefined;
+          if (companyId) {
+            v.company = { id: String(companyId) };
+            v.companyId = String(companyId);
+          }
+
+          const categoryId =
+            v?.category?.id ?? v?.["category.id"] ?? v?.categoryId ?? undefined;
+          if (categoryId) {
+            v.category = { id: String(categoryId) };
+            v.categoryId = String(categoryId);
+          }
+
           if (v.dueAt?.toISOString) v.dueAt = v.dueAt.toISOString();
           return formProps.onFinish?.(v);
         }}
       >
-        {/* ROW 1: COMPANY + TITLE SIDE-BY-SIDE */}
+        {/* ROW 1: COMPANY + TITLE */}
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
             <Form.Item
-              label={"Company"}
+              label="Company"
               name={["company", "id"]}
               rules={[{ required: true }]}
             >
@@ -56,7 +71,7 @@ export const IncidentLogEdit = () => {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
-              label={"Title"}
+              label="Title"
               name={["title"]}
               rules={[{ required: true }]}
             >
@@ -65,34 +80,11 @@ export const IncidentLogEdit = () => {
           </Col>
         </Row>
 
-        {/* ROW 2: DETAIL FULL-WIDTH (LEAVE ROOM FOR IMAGES) */}
-        <Row gutter={[16, 8]}>
-          <Col span={24}>
-            <Form.Item
-              label={"Detail"}
-              name="detail"
-              rules={[{ required: true }]}
-            >
-              {/* DARK/LIGHT SYNC; NO DANGEROUS HTML */}
-              <MDEditor data-color-mode={mode as "light" | "dark"} />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        {/* ROW 3: SOLUTION FULL-WIDTH */}
-        <Row gutter={[16, 8]}>
-          <Col span={24}>
-            <Form.Item label={"Solution"} name="solution">
-              <MDEditor data-color-mode={mode as "light" | "dark"} />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        {/* ROW 4: INCIDENT TYPE + STATUS SIDE-BY-SIDE */}
+        {/* ROW 2: INCIDENT TYPE + STATUS (MOVED UP) */}
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
             <Form.Item
-              label={"Incident type"}
+              label="Incident type"
               name={["category", "id"]}
               rules={[{ required: true }]}
             >
@@ -101,7 +93,7 @@ export const IncidentLogEdit = () => {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
-              label={"Status"}
+              label="Status"
               name={["status"]}
               rules={[{ required: true }]}
             >
@@ -113,6 +105,29 @@ export const IncidentLogEdit = () => {
                   { value: "draft", label: "Draft" },
                 ]}
               />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        {/* ROW 3: DETAIL FULL-WIDTH */}
+        <Row gutter={[16, 8]}>
+          <Col span={24}>
+            <Form.Item
+              label="Detail"
+              name="detail"
+              rules={[{ required: true }]}
+            >
+              {/* DARK/LIGHT SYNC; NO DANGEROUS HTML */}
+              <MDEditor data-color-mode={mode as "light" | "dark"} />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        {/* ROW 4: SOLUTION FULL-WIDTH */}
+        <Row gutter={[16, 8]}>
+          <Col span={24}>
+            <Form.Item label="Solution" name="solution">
+              <MDEditor data-color-mode={mode as "light" | "dark"} />
             </Form.Item>
           </Col>
         </Row>

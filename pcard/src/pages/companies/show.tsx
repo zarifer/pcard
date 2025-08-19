@@ -11,6 +11,7 @@ import {
   useTable,
   DateField,
   MarkdownField,
+  CreateButton,
 } from "@refinedev/antd";
 import {
   Card,
@@ -22,24 +23,65 @@ import {
   Space,
   Skeleton,
   Result,
+  Row,
+  Col,
+  Tag,
+  Carousel,
+  Image,
 } from "antd";
-import { useMemo } from "react";
+import {
+  ClockCircleOutlined,
+  PictureOutlined,
+  LeftOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
+import { useEffect, useMemo, useState, useRef, useContext } from "react";
 import { useParams } from "react-router-dom";
 import "./index.css";
-
-/* ALL COMMENTS IN ENGLISH AND CAPS */
+import type { CarouselRef } from "antd/es/carousel";
+import { AnalogClock } from "./analogclock";
+import { ColorModeContext } from "../../contexts/color-mode";
 
 export default function CompanyShow() {
   /* GET ROUTE PARAM SAFELY */
   const params = useParams<Record<string, string | undefined>>();
   const companyId = params?.id;
 
-  /* FETCH COMPANY; STATE COMES FROM queryResult */
+  /* FETCH COMPANY */
   const { queryResult } = useShow({ resource: "companies" });
   const { data, isLoading, isError, error } = queryResult;
   const company: any = data?.data;
 
   const { show, push } = useNavigation();
+
+  /* GET THEME MODE FOR ANALOG CLOCK */
+  const { mode } = useContext(ColorModeContext);
+
+  /* REF FOR CAROUSEL NAVIGATION */
+  const carouselRef = useRef<CarouselRef>(null);
+
+  /* LIVE CLOCK FOR COMPANY TIMEZONE */
+  const tz = company?.timeZone || "Europe/London";
+  const [now, setNow] = useState<Date>(new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const timeInTZ = useMemo(() => {
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        timeZone: tz,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }).format(now);
+    } catch {
+      return "";
+    }
+  }, [now, tz]);
 
   /* NORMALIZE CONTACT EMAILS (MAX 2) */
   const emails: string[] = Array.isArray(company?.emails)
@@ -48,13 +90,13 @@ export default function CompanyShow() {
       ? [company.email]
       : [];
 
-  /* COMMON FILTERS – USE TYPED CrudFilters TO AVOID STRING OPERATOR ERRORS */
+  /* COMMON FILTERS – TYPED CrudFilters */
   const commonFilters: CrudFilters = [
     { field: "companyId", operator: "eq", value: companyId },
     { field: "company.id", operator: "eq", value: companyId },
   ];
 
-  /* THREE INCIDENT TABLES – FILTERED TO THIS COMPANY ONLY */
+  /* INCIDENT TABLES */
   const draftTbl = useTable({
     resource: "incident_logs",
     syncWithLocation: false,
@@ -67,7 +109,6 @@ export default function CompanyShow() {
     },
     queryOptions: { enabled: !!companyId },
   });
-
   const openTbl = useTable({
     resource: "incident_logs",
     syncWithLocation: false,
@@ -80,7 +121,6 @@ export default function CompanyShow() {
     },
     queryOptions: { enabled: !!companyId },
   });
-
   const closedTbl = useTable({
     resource: "incident_logs",
     syncWithLocation: false,
@@ -94,13 +134,23 @@ export default function CompanyShow() {
     queryOptions: { enabled: !!companyId },
   });
 
-  /* COLLECT CATEGORY IDS FROM ALL THREE TABLES (READONLY-SAFE) */
+  /* ALL INCIDENTS TABLE */
+  const allTbl = useTable({
+    resource: "incident_logs",
+    syncWithLocation: false,
+    pagination: { pageSize: 5 },
+    filters: { permanent: [...commonFilters] },
+    queryOptions: { enabled: !!companyId },
+  });
+
+  /* COLLECT CATEGORY IDS TO RESOLVE TITLES */
   const categoryIds = useMemo(() => {
     const set = new Set<string>();
     for (const arr of [
       draftTbl.tableProps.dataSource,
       openTbl.tableProps.dataSource,
       closedTbl.tableProps.dataSource,
+      allTbl.tableProps.dataSource,
     ] as ReadonlyArray<readonly any[] | undefined>) {
       for (const r of arr ?? []) {
         const id = r?.category?.id;
@@ -112,9 +162,9 @@ export default function CompanyShow() {
     draftTbl.tableProps.dataSource,
     openTbl.tableProps.dataSource,
     closedTbl.tableProps.dataSource,
+    allTbl.tableProps.dataSource,
   ]);
 
-  /* RESOLVE CATEGORY TITLES */
   const { data: categoriesResolved } = useMany({
     resource: "categories",
     ids: categoryIds,
@@ -124,38 +174,44 @@ export default function CompanyShow() {
   const categoryTitle = (id?: string) =>
     categoriesResolved?.data?.find((c: any) => c.id === id)?.title || "—";
 
-  /* INCIDENT COLUMNS – MATCH INCIDENT LIST (WITHOUT COMPANY COLUMN) */
-  /* COMPANY PAGE INCIDENT COLUMNS (MATCH INCIDENT LIST, PLUS ACTIONS) */
+  /* INCIDENT COLUMNS */
+  const COL_W = {
+    id: 80,
+    title: 140,
+    category: 300,
+    created: 180,
+    actions: 140,
+  };
+
   const columns = [
-    { title: "ID", dataIndex: "id", width: 80 },
-    { title: "Title", dataIndex: "title", ellipsis: true },
+    { title: "ID", dataIndex: "id", width: COL_W.id },
+    { title: "Title", dataIndex: "title", width: COL_W.title, ellipsis: true },
     {
       title: "Detail",
       dataIndex: "detail",
       render: (v: any) =>
-        v ? <MarkdownField value={String(v).slice(0, 120) + "..."} /> : "-",
+        v ? String(v).slice(0, 60) + (String(v).length > 60 ? "…" : "") : "—",
     },
     {
       title: "Incident type",
       dataIndex: ["category", "id"],
-      width: 160,
-      render: (id: string) => categoryTitle(id),
+      width: COL_W.category,
+      render: (_: any, rec: any) =>
+        categoryTitle(rec?.category?.id) || rec?.category?.title || "—",
+      onCell: () => ({ style: { whiteSpace: "nowrap" } }),
     },
-    { title: "Status", dataIndex: "status", width: 110 },
     {
       title: "Created at",
       dataIndex: "createdAt",
-      width: 180,
-      render: (_: any, r: any) => (
-        <DateField value={r?.createdAt ?? r?.CreatedAt} />
-      ),
+      width: COL_W.created,
+      render: (v: any) =>
+        v ? <DateField value={v} format="YYYY-MM-DD HH:mm" /> : "—",
     },
     {
       title: "Actions",
       dataIndex: "actions",
-      width: 120,
+      width: COL_W.actions,
       render: (_: any, r: any) => (
-        /* PREVENT ROW CLICK WHEN CLICKING ACTION BUTTONS */
         <span onClick={(e) => e.stopPropagation()}>
           <Space size="small">
             <EditButton
@@ -176,7 +232,27 @@ export default function CompanyShow() {
     },
   ];
 
-  /* ERROR / LOADING / 404 STATES */
+  const images: string[] = (company?.installSteps || [])
+    .map((s: any) => s?.imageUrl)
+    .filter(Boolean);
+
+  const appearance: "Terminal" | "GUI" | "Other" = company?.interfaceType
+    ? company.interfaceType === "gui"
+      ? "GUI"
+      : company.interfaceType === "terminal"
+        ? "Terminal"
+        : "Other"
+    : company?.hasGui || company?.gui
+      ? "GUI"
+      : "Terminal";
+
+  const isOverdue = useMemo(() => {
+    if (!company?.licenseExpiry) return false;
+    const exp = new Date(company.licenseExpiry);
+    exp.setHours(23, 59, 59, 999);
+    return exp.getTime() < Date.now();
+  }, [company?.licenseExpiry]);
+
   if (isError) {
     return (
       <Result
@@ -202,123 +278,305 @@ export default function CompanyShow() {
       headerButtons={() => (
         <>
           <EditButton resource="companies" recordItemId={company.id} />
-          <DeleteButton resource="companies" recordItemId={company.id} />
+      <DeleteButton
+        resource="companies"
+        recordItemId={company.id}
+        onSuccess={() => push("/companies")}
+      />
         </>
       )}
     >
-      <Card>
-        <Card.Meta
-          avatar={
-            <Avatar src={company.logo} size={64}>
-              {(company.name || "?").charAt(0)}
-            </Avatar>
-          }
-          title={<Typography.Title level={4}>{company.name}</Typography.Title>}
-          description={
-            <>
-              <Typography.Paragraph strong>Vendor:</Typography.Paragraph>
-              <Typography.Text>{company.vendor || "—"}</Typography.Text>
-              <br />
-              <Typography.Paragraph strong>Product name:</Typography.Paragraph>
-              <Typography.Text>{company.product || "—"}</Typography.Text>
-              <br />
-              <Typography.Paragraph strong>Contacts:</Typography.Paragraph>
-              {emails.length ? (
-                <>
-                  {emails.map((e, idx) => (
-                    <div key={`${e}-${idx}`}>
-                      {/* SECURITY: ENCODE EMAIL AND USE MAILTO ONLY */}
-                      <a href={`mailto:${encodeURIComponent(e)}`}>{e}</a>
-                    </div>
-                  ))}
-                </>
-              ) : (
-                <Typography.Text>—</Typography.Text>
-              )}
-              <br />
-              <Typography.Paragraph strong>GUI:</Typography.Paragraph>
-              <Typography.Text>{company.gui || "—"}</Typography.Text>
-              <br />
-              <Typography.Paragraph strong>Log path:</Typography.Paragraph>
-              <Typography.Text>{company.log || "—"}</Typography.Text>
-              <br />
-              <Typography.Paragraph strong>Spec features:</Typography.Paragraph>
-              <Typography.Text>{company.features || "—"}</Typography.Text>
-            </>
-          }
-        />
-      </Card>
+      <div className="corkboard">
+        <Card className="note-card small product-card" bordered={false}>
+          <Card.Meta
+            avatar={
+              <Avatar src={company.logo} size={64}>
+                {(company.name || "?").charAt(0)}
+              </Avatar>
+            }
+            title={
+              <Typography.Title level={4} style={{ margin: 0 }}>
+                {company.product}
+              </Typography.Title>
+            }
+            description={
+              <div className="product-meta">
+                <div>
+                  <strong>Vendor:</strong> {company.name || "—"}
+                </div>
+                <div>
+                  <strong>Contacts:</strong>{" "}
+                  {emails.length
+                    ? emails.map((e, idx) => (
+                        <a
+                          key={`${e}-${idx}`}
+                          href={`mailto:${encodeURIComponent(e)}`}
+                          className="email-link"
+                        >
+                          {e}
+                        </a>
+                      ))
+                    : "—"}
+                </div>
+                <div>
+                  <strong>Version check:</strong>{" "}
+                  {company.versionCheckPath || "—"}
+                </div>
+                <div>
+                  <strong>License expiry:</strong>{" "}
+                  {company.licenseExpiry ? (
+                    <>
+                      <DateField value={company.licenseExpiry} />
+                      {isOverdue && (
+                        <span className="status-badge status-badge--overdue">
+                          Overdue
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </div>
+              </div>
+            }
+          />
+        </Card>
 
-      {/* INCIDENT LOGS – FILTERED TO THIS COMPANY ONLY */}
-      <div className="company-incidents">
-        <div className="panel-header">
-          <Typography.Title level={5} className="panel-title">
-            Incident logs
-          </Typography.Title>
-          <Space className="panel-actions">
-            <Button
-              type="primary"
+        <Row gutter={[16, 16]} className="notes-grid">
+          <Col xs={24} md={12} lg={8}>
+            <Card
+              className="note-card small tilt-left"
+              title="Primary Info"
+              bordered={false}
+            >
+              <div className="kv">
+                <span>Vendor name:</span>
+                <span>{company.name || "—"}</span>
+              </div>
+              <div className="kv">
+                <span>Product:</span>
+                <span>{company.product || "—"}</span>
+              </div>
+              <div className="kv">
+                <span>Version check path:</span>
+                <span>{company.versionCheckPath || "—"}</span>
+              </div>
+              <div className="kv">
+                <span>License expiry:</span>
+                <span>
+                  {company.licenseExpiry ? (
+                    <>
+                      <DateField
+                        value={company.licenseExpiry}
+                        format="YYYY-MM-DD"
+                      />
+                      {isOverdue && (
+                        <span className="status-badge status-badge--overdue">
+                          Overdue
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </span>
+              </div>
+              <div className="kv">
+                <span>Log path:</span>
+                <span>{company.log || "—"}</span>
+              </div>
+              <div className="kv">
+                <span>GUI:</span>
+                <span>
+                  {company.gui || (appearance === "GUI" ? "GUI" : "—")}
+                </span>
+              </div>
+            </Card>
+          </Col>
+
+          {/* INTERFACE + CLOCK */}
+          <Col xs={24} md={12} lg={8}>
+            <Card
+              className="note-card small tilt-right"
+              title="Interface / Timezone"
+              bordered={false}
+              extra={<Tag color="purple">{appearance}</Tag>}
+            >
+              <div className="kv">
+                <span>Timezone:</span>
+                <span>{tz}</span>
+              </div>
+              <div className="kv clock-line">
+                <ClockCircleOutlined />{" "}
+                <span className="tz-clock">{timeInTZ}</span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: 8,
+                }}
+              >
+                <AnalogClock tz={tz} size={90} mode={mode as any} />
+              </div>
+              <Typography.Paragraph type="secondary" style={{ marginTop: 8 }}>
+                Time is shown using the company&apos;s timezone.
+              </Typography.Paragraph>
+            </Card>
+          </Col>
+
+          <Col xs={24} lg={8}>
+            <Card
+              className="note-card gallery-card"
+              title="Installer & Notes"
+              bordered={false}
+            >
+              {images.length ? (
+                <div style={{ position: "relative" }}>
+                  <Button
+                    shape="circle"
+                    style={{
+                      position: "absolute",
+                      left: 8,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      zIndex: 3,
+                    }}
+                    icon={<LeftOutlined />}
+                    onClick={() => carouselRef.current?.prev()}
+                    aria-label="Previous image"
+                  />
+                  <Button
+                    shape="circle"
+                    style={{
+                      position: "absolute",
+                      right: 8,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      zIndex: 3,
+                    }}
+                    icon={<RightOutlined />}
+                    onClick={() => carouselRef.current?.next()}
+                    aria-label="Next image"
+                  />
+                  <Carousel dots className="image-carousel" ref={carouselRef}>
+                    {images.map((src, i) => (
+                      <div key={i} className="carousel-item">
+                        <Image src={src} alt={`installer_${i + 1}`} />
+                      </div>
+                    ))}
+                  </Carousel>
+                </div>
+              ) : (
+                <div className="no-images">
+                  <PictureOutlined /> No installer images
+                </div>
+              )}
+              <div className="notes-block">
+                <MarkdownField
+                  value={company.features || "_No notes provided._"}
+                />
+              </div>
+            </Card>
+          </Col>
+        </Row>
+
+        <div className="company-incidents">
+          <div
+            className="panel-header"
+            style={{ display: "flex", alignItems: "center", gap: 8 }}
+          >
+            <Typography.Title
+              level={5}
+              className="panel-title"
+              style={{ margin: 0 }}
+            >
+              Incident Logs
+            </Typography.Title>
+
+            <CreateButton
+              resource="incident_logs"
               size="small"
-              onClick={() =>
+              onClick={(e) => {
+                e.preventDefault();
                 push(
                   `/incident-logs/create?companyId=${encodeURIComponent(company.id)}`,
-                )
-              }
+                );
+              }}
             >
-              New incident
-            </Button>
-          </Space>
-        </div>
+              Add Incident
+            </CreateButton>
+          </div>
 
-        <Tabs
-          items={[
-            {
-              key: "open",
-              label: "Open",
-              children: (
-                <Table
-                  {...openTbl.tableProps}
-                  rowKey="id"
-                  size="small"
-                  columns={columns as any}
-                  onRow={(r: any) => ({
-                    onClick: () => show("incident_logs", r.id),
-                  })}
-                />
-              ),
-            },
-            {
-              key: "closed",
-              label: "Closed",
-              children: (
-                <Table
-                  {...closedTbl.tableProps}
-                  rowKey="id"
-                  size="small"
-                  columns={columns as any}
-                  onRow={(r: any) => ({
-                    onClick: () => show("incident_logs", r.id),
-                  })}
-                />
-              ),
-            },
-            {
-              key: "draft",
-              label: "Draft",
-              children: (
-                <Table
-                  {...draftTbl.tableProps}
-                  rowKey="id"
-                  size="small"
-                  columns={columns as any}
-                  onRow={(r: any) => ({
-                    onClick: () => show("incident_logs", r.id),
-                  })}
-                />
-              ),
-            },
-          ]}
-        />
+          <Tabs
+            items={[
+              {
+                key: "all",
+                label: "All",
+                children: (
+                  <Table
+                    {...allTbl.tableProps}
+                    rowKey="id"
+                    size="small"
+                    tableLayout="fixed"
+                    columns={columns as any}
+                    onRow={(r: any) => ({
+                      onClick: () => show("incident_logs", r.id),
+                    })}
+                  />
+                ),
+              },
+              {
+                key: "open",
+                label: "Open",
+                children: (
+                  <Table
+                    {...openTbl.tableProps}
+                    rowKey="id"
+                    size="small"
+                    tableLayout="fixed"
+                    columns={columns as any}
+                    onRow={(r: any) => ({
+                      onClick: () => show("incident_logs", r.id),
+                    })}
+                  />
+                ),
+              },
+              {
+                key: "closed",
+                label: "Closed",
+                children: (
+                  <Table
+                    {...closedTbl.tableProps}
+                    rowKey="id"
+                    size="small"
+                    tableLayout="fixed"
+                    columns={columns as any}
+                    onRow={(r: any) => ({
+                      onClick: () => show("incident_logs", r.id),
+                    })}
+                  />
+                ),
+              },
+              {
+                key: "draft",
+                label: "Draft",
+                children: (
+                  <Table
+                    {...draftTbl.tableProps}
+                    rowKey="id"
+                    size="small"
+                    tableLayout="fixed"
+                    columns={columns as any}
+                    onRow={(r: any) => ({
+                      onClick: () => show("incident_logs", r.id),
+                    })}
+                  />
+                ),
+              },
+            ]}
+          />
+        </div>
       </div>
     </Show>
   );

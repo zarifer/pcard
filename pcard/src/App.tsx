@@ -160,7 +160,7 @@ function App() {
                       create: "/companies/create",
                       edit: "/companies/edit/:id",
                       show: "/companies/show/:id",
-                      meta: { canDelete: true },
+                      meta: { canDelete: true, label: "Companies" },
                     },
                     {
                       name: "incident_logs",
@@ -168,19 +168,19 @@ function App() {
                       create: "/incident-logs/create",
                       edit: "/incident-logs/edit/:id",
                       show: "/incident-logs/show/:id",
-                      meta: { canDelete: true },
+                      meta: { canDelete: true, label: "Incident Logs" },
                     },
                     {
                       name: "kanban",
                       list: "/kanban",
-                      meta: { canDelete: true },
+                      meta: { canDelete: true, label: "Kanban Board" },
                     },
                     {
                       name: "calendar",
                       list: "/calendar",
                       create: "/calendar/create",
                       edit: "/calendar/edit/:id",
-                      meta: { canDelete: true },
+                      meta: { canDelete: true, label: "Calendar" },
                     },
                   ]}
                   options={{

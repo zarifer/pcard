@@ -41,6 +41,14 @@
     max-width: 100%;
   }
 }
+
+.page-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 /* ===========================
    COMPANY SHOW – INCIDENT TABS
    =========================== */
@@ -121,9 +129,199 @@
 .ant-upload-wrapper .ant-upload-drag {
   border-radius: 10px;
 }
-/* CLOCK */
+
+/* ===========================
+   CLOCK
+   =========================== */
 @media (max-width: 768px) {
   .wizard-card .ant-col-md-12:last-child {
     margin-top: 6px;
   }
+}
+
+/* ===========================
+     CORKBOARD
+   =========================== */
+
+.corkboard {
+  background:
+    radial-gradient(#c9aa7b 1px, transparent 1px),
+    radial-gradient(#c9aa7b 1px, transparent 1px), #e5c99b;
+  background-position:
+    0 0,
+    8px 8px;
+  background-size: 16px 16px;
+  padding: 8px;
+  border-radius: 12px;
+}
+
+.note-card {
+  position: relative;
+  background: #fffef7;
+  border: 0;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding-top: 8px;
+}
+
+.note-card::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  background: #a04d2a;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.25) inset,
+    0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.note-card.small {
+  min-height: 180px;
+}
+
+.tilt-left {
+  transform: rotate(-0.6deg);
+}
+
+.tilt-right {
+  transform: rotate(0.5deg);
+}
+
+.product-card .product-meta > div {
+  margin-bottom: 4px;
+}
+
+.email-link {
+  margin-right: 8px;
+}
+
+.kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
+}
+
+.kv span:first-child {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.clock-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tz-clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.gallery-card .image-carousel {
+  margin-bottom: 8px;
+}
+
+.carousel-item {
+  text-align: center;
+}
+
+.carousel-item .ant-image {
+  max-height: 240px;
+}
+
+.carousel-item img {
+  max-height: 240px;
+  object-fit: contain;
+}
+
+.no-images {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.notes-block {
+  max-height: 220px;
+  overflow: auto;
+  border-top: 1px dashed rgba(0, 0, 0, 0.06);
+  padding-top: 8px;
+}
+
+.notes-grid {
+  margin-top: 12px;
+}
+
+.company-incidents {
+  margin-top: 16px;
+  background: #fffefb;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.panel-title {
+  margin: 0 !important;
+}
+
+.gallery-card {
+  position: relative;
+}
+
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.carousel-nav.prev {
+  left: 8px;
+}
+
+.carousel-nav.next {
+  right: 8px;
+}
+
+/* OverDue badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-left: 8px;
+}
+
+.status-badge--overdue {
+  background: #ffeaea;
+  border-color: #ffb3b3;
+  color: #e02424;
 }

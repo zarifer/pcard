@@ -15,41 +15,29 @@ import {
   Card,
   Upload,
   message,
+  App,
+  Result,
+  Checkbox,
+  AutoComplete,
 } from "antd";
-import {
-  LeftOutlined,
-  RightOutlined,
-  ClockCircleOutlined,
-  InboxOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined, RightOutlined, InboxOutlined } from "@ant-design/icons";
 import MDEditor from "@uiw/react-md-editor";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
 import dayjs from "dayjs";
 import { AnalogClock } from "./analogclock";
+import { AV_TIMEZONES } from "./timezones";
 
-const { Title, Text } = Typography;
+
+const { Title } = Typography;
 const { Dragger } = Upload;
 
-const AV_TIMEZONES = [
-  { value: "Europe/London", label: "Europe/London — Sophos (UK)" },
-  { value: "Europe/Prague", label: "Europe/Prague — Avast / AVG (CZ)" },
-  { value: "Europe/Bratislava", label: "Europe/Bratislava — ESET (SK)" },
-  { value: "Europe/Bucharest", label: "Europe/Bucharest — Bitdefender (RO)" },
-  { value: "Europe/Helsinki", label: "Europe/Helsinki — F-Secure (FI)" },
-  { value: "Europe/Moscow", label: "Europe/Moscow — Kaspersky (RU)" },
-  {
-    value: "America/Los_Angeles",
-    label: "America/Los_Angeles — Norton/McAfee (US West)",
-  },
-  {
-    value: "America/Phoenix",
-    label: "America/Phoenix — NortonLifeLock (US AZ)",
-  },
-  { value: "Asia/Tokyo", label: "Asia/Tokyo — Trend Micro (JP)" },
-  { value: "Asia/Seoul", label: "Asia/Seoul — AhnLab (KR)" },
-  { value: "Asia/Shanghai", label: "Asia/Shanghai — Qihoo 360 (CN)" },
-  { value: "Pacific/Auckland", label: "Pacific/Auckland — Emsisoft (NZ)" },
+const UNIQUE_PATH_SUGGESTIONS = [
+  "C:\\Program Files\\Vendor\\Product",
+  "C:\\ProgramData\\Vendor\\Product\\Logs",
+  "/opt/vendor/product",
+  "/var/log/vendor/product",
+  "/Library/Application Support/Vendor/Product",
 ];
 
 const fileToBase64 = (file: File) =>
@@ -61,59 +49,35 @@ const fileToBase64 = (file: File) =>
   });
 
 export default function CompanyEdit() {
+  const { message: toast } = App.useApp();
   const { formProps, saveButtonProps, queryResult } = useForm({
     resource: "companies",
+    redirect: "show",
   });
   const { goBack } = useNavigation();
   const record: any = queryResult?.data?.data;
   const { mode } = useContext(ColorModeContext);
-
-  /* WIZARD STATE */
-  const TAB_KEYS = ["primary", "ui", "installer", "updates"] as const;
+  const TAB_KEYS = ["primary", "ui", "installer", "updates", "rtod"] as const;
   const [activeKey, setActiveKey] =
     useState<(typeof TAB_KEYS)[number]>("primary");
   const idx = TAB_KEYS.indexOf(activeKey);
   const goPrev = () => setActiveKey(TAB_KEYS[Math.max(0, idx - 1)]);
   const goNext = () =>
     setActiveKey(TAB_KEYS[Math.min(TAB_KEYS.length - 1, idx + 1)]);
-
-  /* LIVE TZ CLOCK */
   const [tz, setTz] = useState<string>(record?.timeZone || "Europe/London");
   const [now, setNow] = useState<Date>(new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
-  const timeInTZ = useMemo(() => {
-    try {
-      return new Intl.DateTimeFormat(undefined, {
-        timeZone: tz,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(now);
-    } catch {
-      return "";
-    }
-  }, [now, tz]);
 
-  /* EMAIL + INTERFACE INITIALS */
-  const initialPrimary = Array.isArray(record?.emails)
-    ? record.emails[0]
-    : record?.email || "";
-  const initialSecondary = Array.isArray(record?.emails)
-    ? record.emails[1]
-    : "";
-  const initialInterface: "terminal" | "gui" | "other" = record?.hasGui
-    ? "gui"
-    : record?.gui
-      ? "gui"
-      : "terminal";
+  const initialEmails = Array.isArray(record?.emails) ? record.emails : [];
+  const initialPrimary = initialEmails[0] || "";
+  const initialSecondary = initialEmails[1] || "";
+  const initialInterface: "cli" | "gui" | "web" | "other" =
+    (record?.interfaceType as "cli" | "gui" | "web" | "other") ??
+    (record?.hasGui ? "gui" : record?.gui ? "other" : "cli");
 
-  /* PREP FILE LIST FROM EXISTING installSteps */
   const initialFileList = (record?.installSteps || [])
     .filter((s: any) => s?.imageUrl)
     .map((s: any, i: number) => ({
@@ -122,10 +86,32 @@ export default function CompanyEdit() {
       url: s.imageUrl,
     }));
 
+  const initialLogoList = record?.logo
+    ? [{ uid: "logo", name: "logo.png", url: record.logo }]
+    : [];
+
+  if (queryResult?.isError) {
+    return (
+      <Result
+        status="500"
+        title="Failed to load"
+        subTitle={String(queryResult.error)}
+      />
+    );
+  }
+  if (queryResult?.isLoading) {
+    return <Result status="info" title="Loading…" />;
+  }
+  if (!record) {
+    return <Result status="404" title="Company not found" />;
+  }
+
   return (
     <Edit
+      breadcrumb={false}
+      title={record?.product || "Edit Product"}
       headerButtons={() => null}
-      /* KEEP DEFAULT OUTER DELETE + SAVE, NO EXTRA FOOTER NEEDED */
+      footerButtons={() => null}
     >
       <Card className="wizard-card">
         <Button
@@ -146,6 +132,7 @@ export default function CompanyEdit() {
         />
 
         <Form
+          id="company-edit-form"
           {...formProps}
           layout="vertical"
           className="form-compact"
@@ -154,14 +141,19 @@ export default function CompanyEdit() {
             emailPrimary: initialPrimary,
             emailSecondary: initialSecondary,
             interfaceType: initialInterface,
+            interfaceOther:
+              initialInterface === "other" ? record?.gui : undefined,
             timeZone: record?.timeZone || "Europe/London",
             licenseExpiry: record?.licenseExpiry
               ? dayjs(record.licenseExpiry)
               : undefined,
             installerImages: initialFileList,
+            hasRT: record?.hasRT ?? true,
+            hasOD: record?.hasOD ?? true,
+            scanType: record?.customScan?.type || "context_menu",
+            logoUpload: initialLogoList,
           }}
           onFinish={async (values: any) => {
-            /* NORMALIZE IMAGES -> installSteps */
             const fileList = (values.installerImages || []) as any[];
             const steps = [];
             for (const f of fileList) {
@@ -172,26 +164,34 @@ export default function CompanyEdit() {
                   : undefined);
               if (url) steps.push({ imageUrl: url });
             }
-            const emails = [values.emailPrimary, values.emailSecondary].filter(
-              Boolean,
-            );
-
+            const logoFile = values.logoUpload?.[0] as any;
+            const logoUrl =
+              logoFile?.url ||
+              (logoFile?.originFileObj
+                ? await fileToBase64(logoFile.originFileObj)
+                : undefined);
             const payload: any = {
               ...values,
-              emails,
-              installSteps: steps,
+              interfaceType: values.interfaceType,
               hasGui: values.interfaceType === "gui",
               gui:
                 values.interfaceType === "gui"
-                  ? values.gui || "GUI"
-                  : undefined,
-              customScan: {
-                type: values.scanType || record?.customScan?.type,
-                path:
-                  (values.scanType || record?.customScan?.type) === "unique"
-                    ? values.customScanPath || record?.customScan?.path
+                  ? "GUI"
+                  : values.interfaceType === "other"
+                    ? values.interfaceOther || record?.gui
                     : undefined,
-              },
+              hasRT: !!values.hasRT,
+              hasOD: !!values.hasOD,
+              customScan: values.hasOD
+                ? {
+                    type: values.scanType || record?.customScan?.type,
+                    path:
+                      (values.scanType || record?.customScan?.type) === "unique"
+                        ? values.customScanPath || record?.customScan?.path
+                        : undefined,
+                  }
+                : undefined,
+              logo: logoUrl ?? record?.logo,
               licenseExpiry: values.licenseExpiry
                 ? values.licenseExpiry.toISOString()
                 : undefined,
@@ -200,7 +200,7 @@ export default function CompanyEdit() {
             delete payload.emailSecondary;
             delete payload.installerImages;
             delete payload.customScanPath;
-
+            delete payload.logoUpload;
             return formProps.onFinish?.(payload);
           }}
         >
@@ -210,18 +210,18 @@ export default function CompanyEdit() {
             items={[
               {
                 key: "primary",
-                label: "Primary info",
+                label: "PRIMARY INFO",
                 children: (
                   <>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={12}>
                         <Form.Item
-                          label="Company Name"
+                          label="Vendor Name"
                           name="name"
                           rules={[
                             {
                               required: true,
-                              message: "Company name is required",
+                              message: "Vendor name is required",
                             },
                           ]}
                         >
@@ -271,57 +271,114 @@ export default function CompanyEdit() {
                         </Form.Item>
                       </Col>
                     </Row>
+
+                    <Divider orientation="left">Meta Data</Divider>
+                    <Row gutter={[16, 8]}>
+                      <Col xs={24} md={8}>
+                        <Form.Item
+                          label="Product ID"
+                          name="productId"
+                          rules={[
+                            {
+                              required: true,
+                              message: "Product name is required",
+                            },
+                          ]}
+                        >
+                          <Input placeholder="e.g. XY-AV" />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={16}>
+                        <Form.Item
+                          name="logoUpload"
+                          valuePropName="fileList"
+                          getValueFromEvent={(e) => e?.fileList}
+                        >
+                          <Dragger
+                            accept="image/*"
+                            multiple={false}
+                            maxCount={1}
+                            listType="picture"
+                            beforeUpload={() => false}
+                            onChange={({ file }) => {
+                              if (file.status === "removed") return;
+                              if (
+                                file.type &&
+                                !file.type.startsWith("image/")
+                              ) {
+                                message.error("Only images are allowed");
+                              }
+                            }}
+                          >
+                            <p className="ant-upload-drag-icon">
+                              <InboxOutlined />
+                            </p>
+                            <p className="ant-upload-text">
+                              Click or drag a logo image
+                            </p>
+                            <p className="ant-upload-hint">
+                              PNG/SVG/JPG – 1 file
+                            </p>
+                          </Dragger>
+                        </Form.Item>
+                      </Col>
+                    </Row>
                   </>
                 ),
               },
               {
                 key: "ui",
-                label: "Interface",
+                label: "INTERFACE",
                 children: (
                   <>
+                    <Divider orientation="left">Interface</Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={12}>
-                        <Form.Item label="Appearance" name="interfaceType">
-                          <Select
-                            options={[
-                              { value: "terminal", label: "Terminal" },
-                              { value: "gui", label: "GUI" },
-                              { value: "other", label: "Other" },
-                            ]}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} md={12}>
-                        <Form.Item label="UI notes" name="gui">
-                          <Input placeholder="e.g. Web UI, Desktop app, shortcuts…" />
+                        <Form.Item name="interfaceType">
+                          <Radio.Group optionType="button" buttonStyle="solid">
+                            <Radio value="cli">CLI-Only</Radio>
+                            <Radio value="gui">GUI Client</Radio>
+                            <Radio value="web">Headless</Radio>
+                            <Radio value="other">Other</Radio>
+                          </Radio.Group>
                         </Form.Item>
                       </Col>
                     </Row>
 
+                    <Form.Item noStyle shouldUpdate>
+                      {({ getFieldValue }) =>
+                        getFieldValue("interfaceType") === "other" ? (
+                          <Row gutter={[16, 8]}>
+                            <Col xs={24} md={12}>
+                              <Form.Item
+                                name="interfaceOther"
+                                label="Specify interface"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please specify the interface",
+                                  },
+                                ]}
+                              >
+                                <Input placeholder="e.g. Hybrid / Web-only / Plug-in" />
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                        ) : null
+                      }
+                    </Form.Item>
+
                     <Divider orientation="left">Timezone (AV vendors)</Divider>
                     <Row gutter={[16, 8]} align="middle">
                       <Col xs={24} md={12}>
-                        <Form.Item
-                          label={
-                            <span>
-                              City / Timezone{" "}
-                              <Text type="secondary">
-                                <ClockCircleOutlined /> {timeInTZ}
-                              </Text>
-                            </span>
-                          }
-                          name="timeZone"
-                          initialValue="Europe/London"
-                        >
+                        <Form.Item name="timeZone" style={{ marginBottom: 0 }}>
                           <Select
-                            showSearch
                             options={AV_TIMEZONES}
+                            value={tz}
                             onChange={(v) => setTz(v)}
                           />
                         </Form.Item>
                       </Col>
-
-                      {/* ANALOG CLOCK ON THE RIGHT */}
                       <Col
                         xs={24}
                         md={12}
@@ -334,25 +391,48 @@ export default function CompanyEdit() {
                         />
                       </Col>
                     </Row>
-
-                    <Row gutter={[16, 8]}>
-                      <Col span={24}>
-                        <Form.Item label="Log files path" name="log">
-                          <Input placeholder="e.g. C:\ProgramData\Vendor\Product\Logs" />
-                        </Form.Item>
-                      </Col>
-                    </Row>
                   </>
                 ),
               },
               {
                 key: "installer",
-                label: "Installer & Notes",
+                label: "INSTALLATION",
                 children: (
                   <>
                     <Divider orientation="left">
-                      Installer images (drag & drop or browse)
+                      Windows Defender & Process Creation Trigger{" "}
                     </Divider>
+                    <Row gutter={[16, 8]}>
+                      <Col xs={24} md={8}>
+                        <Form.Item
+                          label="Need To Manually Disable Windows Defender?"
+                          name="wdManuallyOff"
+                          rules={[
+                            { required: true, message: "Select Yes or No" },
+                          ]}
+                        >
+                          <Radio.Group optionType="button" buttonStyle="solid">
+                            <Radio value={true}>Yes</Radio>
+                            <Radio value={false}>No</Radio>
+                          </Radio.Group>
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={8}>
+                        <Form.Item
+                          label="Need To Manually Disable Process Creation Trigger?"
+                          name="pctManuallyOff"
+                          rules={[
+                            { required: true, message: "Select Yes or No" },
+                          ]}
+                        >
+                          <Radio.Group optionType="button" buttonStyle="solid">
+                            <Radio value={true}>Yes</Radio>
+                            <Radio value={false}>No</Radio>
+                          </Radio.Group>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                    <Divider orientation="left">Installer Images</Divider>
                     <Form.Item
                       name="installerImages"
                       valuePropName="fileList"
@@ -366,7 +446,7 @@ export default function CompanyEdit() {
                         onChange={({ file }) => {
                           if (file.status === "removed") return;
                           if (file.type && !file.type.startsWith("image/")) {
-                            message.error("Only images are allowed");
+                            toast.error("Only images are allowed");
                           }
                         }}
                       >
@@ -374,18 +454,16 @@ export default function CompanyEdit() {
                           <InboxOutlined />
                         </p>
                         <p className="ant-upload-text">
-                          Click or drag images to upload
+                          Click or Drag & Drop Images Here
                         </p>
                         <p className="ant-upload-hint">
-                          We’ll store them with the record
+                          PNG/JPG only. Files are stored client-side until save.
                         </p>
                       </Dragger>
                     </Form.Item>
 
-                    <Divider orientation="left">
-                      Notes / Special features
-                    </Divider>
-                    <Form.Item name="features">
+                    <Divider orientation="left">Installation Notes</Divider>
+                    <Form.Item name="installProcedure">
                       <MDEditor data-color-mode={mode as "light" | "dark"} />
                     </Form.Item>
                   </>
@@ -393,14 +471,13 @@ export default function CompanyEdit() {
               },
               {
                 key: "updates",
-                label: "Update & Scan",
+                label: "UPDATES",
                 children: (
                   <>
-                    {/* ABOVE THE MARKDOWN */}
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={12}>
                         <Form.Item
-                          label="Where to check current version"
+                          label="Current Version Check"
                           name="versionCheckPath"
                         >
                           <Input placeholder="e.g. Help → About • or URL/KB" />
@@ -408,64 +485,124 @@ export default function CompanyEdit() {
                       </Col>
                       <Col xs={24} md={12}>
                         <Form.Item
-                          label="License expiry date"
+                          label="License Expiry Date"
                           name="licenseExpiry"
-                          initialValue={
-                            record?.licenseExpiry
-                              ? dayjs(record.licenseExpiry)
-                              : undefined
-                          }
                         >
                           <DatePicker style={{ width: "100%" }} />
                         </Form.Item>
                       </Col>
                     </Row>
 
-                    <Divider orientation="left">Update procedure</Divider>
+                    <Divider orientation="left">Update Procedure</Divider>
                     <Form.Item name="updateProcedure">
                       <MDEditor data-color-mode={mode as "light" | "dark"} />
                     </Form.Item>
-
-                    <Divider orientation="left">Custom scan</Divider>
+                  </>
+                ),
+              },
+              {
+                key: "rtod",
+                label: "RT & OD",
+                children: (
+                  <>
+                    <Divider orientation="left">
+                      Real-Time & Custom Scan
+                    </Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={12}>
                         <Form.Item
-                          name="scanType"
-                          initialValue={
-                            record?.customScan?.type || "context_menu"
-                          }
+                          name="hasRT"
+                          valuePropName="checked"
+                          initialValue={record?.hasRT ?? true}
                         >
-                          <Radio.Group>
-                            <Radio value="context_menu">
-                              Right-click context menu
-                            </Radio>
-                            <Radio value="gui_custom_scan">
-                              GUI scans → Custom scan
-                            </Radio>
-                            <Radio value="unique">Unique (specify path)</Radio>
-                          </Radio.Group>
+                          <Checkbox>Real-Time Scan Available</Checkbox>
                         </Form.Item>
                       </Col>
                       <Col xs={24} md={12}>
-                        <Form.Item noStyle shouldUpdate>
-                          {({ getFieldValue }) =>
-                            (getFieldValue("scanType") ||
-                              record?.customScan?.type) === "unique" ? (
-                              <Form.Item
-                                label="Custom scan path"
-                                name="customScanPath"
-                                initialValue={record?.customScan?.path}
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: "Path required for Unique",
-                                  },
-                                ]}
-                              >
-                                <Input placeholder="e.g. C:\Scans\custom.cmd" />
-                              </Form.Item>
-                            ) : null
-                          }
+                        <Form.Item
+                          name="hasOD"
+                          valuePropName="checked"
+                          initialValue={record?.hasOD ?? true}
+                        >
+                          <Checkbox>Custom Scan Available</Checkbox>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                    <Divider orientation="left">Custom Scan</Divider>
+                    <Form.Item noStyle shouldUpdate>
+                      {({ getFieldValue }) => {
+                        const odEnabled = !!getFieldValue("hasOD");
+                        const st =
+                          getFieldValue("scanType") ||
+                          record?.customScan?.type ||
+                          "context_menu";
+                        return (
+                          <>
+                            <Row gutter={[16, 8]}>
+                              <Col xs={24} md={16}>
+                                <Form.Item
+                                  name="scanType"
+                                  initialValue={
+                                    record?.customScan?.type || "context_menu"
+                                  }
+                                >
+                                  <Radio.Group
+                                    disabled={!odEnabled}
+                                    optionType="button"
+                                    buttonStyle="solid"
+                                  >
+                                    <Radio value="context_menu">
+                                      Right-Click Context Menu
+                                    </Radio>
+                                    <Radio value="gui_custom_scan">
+                                      GUI → Custom Scan
+                                    </Radio>
+                                    <Radio value="unique">
+                                      Unique (specify path)
+                                    </Radio>
+                                  </Radio.Group>
+                                </Form.Item>
+                              </Col>
+                            </Row>
+                            {st === "unique" && (
+                              <Row gutter={[16, 8]}>
+                                <Col xs={24} md={16}>
+                                  <Form.Item
+                                    name="customScanPath"
+                                    initialValue={record?.customScan?.path}
+                                    rules={[
+                                      {
+                                        required: true,
+                                        message: "Path is required for Unique",
+                                      },
+                                    ]}
+                                  >
+                                    <AutoComplete
+                                      options={UNIQUE_PATH_SUGGESTIONS.map(
+                                        (v) => ({ value: v }),
+                                      )}
+                                      filterOption={(input, option) =>
+                                        (option?.value ?? "")
+                                          .toLowerCase()
+                                          .includes(input.toLowerCase())
+                                      }
+                                      disabled={!odEnabled}
+                                    >
+                                      <Input placeholder="e.g. C:\ProgramData\Vendor\Product\Logs" />
+                                    </AutoComplete>
+                                  </Form.Item>
+                                </Col>
+                              </Row>
+                            )}
+                          </>
+                        );
+                      }}
+                    </Form.Item>
+                    <Divider orientation="left">Logs</Divider>
+                    <Row gutter={[16, 8]}>
+                      <Col span={24}>
+                        <Form.Item label="Path To Collect Logs" name="log">
+                          <Input placeholder="e.g. C:\ProgramData\Vendor\Product\Logs" />
                         </Form.Item>
                       </Col>
                     </Row>
@@ -475,7 +612,6 @@ export default function CompanyEdit() {
             ]}
           />
 
-          {/* INNER FOOTER: ONLY PREV / NEXT */}
           <Divider />
           <div
             className="wizard-footer"
@@ -490,6 +626,18 @@ export default function CompanyEdit() {
           </div>
         </Form>
       </Card>
+      <div className="page-actions">
+        <Button onClick={() => goBack()}>Cancel</Button>
+        <Button
+          type="primary"
+          htmlType="submit"
+          form="company-edit-form"
+          loading={saveButtonProps.loading}
+          disabled={saveButtonProps.disabled}
+        >
+          Save
+        </Button>
+      </div>
     </Edit>
   );
 }

@@ -264,7 +264,7 @@ export default function KanbanList() {
   const onClearStage = (s: Stage) => {
     modal.confirm({
       title: `Move all cards from "${s.title}" to "${stages[0]?.title || "To Do"}"?`,
-      okText: "Clear all cards",
+      okText: "Clear All Cards",
       cancelText: "Cancel",
       onOk: () => clearStageCards(s),
     });
@@ -272,7 +272,7 @@ export default function KanbanList() {
 
   const onDeleteStage = (s: Stage) => {
     modal.confirm({
-      title: `Delete stage "${s.title}"?`,
+      title: `Delete Stage "${s.title}"?`,
       content:
         "Cards in this stage will be moved to the first column before deletion.",
       okText: "Delete",
@@ -346,12 +346,12 @@ export default function KanbanList() {
           const menuItems: MenuProps["items"] = [
             {
               key: "edit",
-              label: "Edit status",
+              label: "Edit Stage",
               onClick: () => openRenameStage(col),
             },
             {
               key: "clear",
-              label: "Clear all cards",
+              label: "Clear All Cards",
               onClick: () => onClearStage(col),
             },
             {
@@ -359,7 +359,7 @@ export default function KanbanList() {
             },
             {
               key: "delete",
-              label: <span className="danger-text">Delete status</span>,
+              label: <span className="danger-text">Delete Stage</span>,
               onClick: () => onDeleteStage(col),
             },
           ];
@@ -433,14 +433,14 @@ export default function KanbanList() {
             onClick={onAddStage}
             block
           >
-            + Add stage
+            + Add Stage
           </Button>
         </div>
       </div>
 
       {/* CREATE CARD MODAL */}
       <Modal
-        title="Add new card"
+        title="Add New Card"
         open={open}
         onCancel={() => setOpen(false)}
         footer={
@@ -479,7 +479,7 @@ export default function KanbanList() {
             />
           </Form.Item>
 
-          <Form.Item label="Due date" name="dueDate">
+          <Form.Item label="Due Date" name="dueDate">
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
         </Form>
@@ -496,7 +496,7 @@ export default function KanbanList() {
 
       {/* ADD STAGE MODAL */}
       <Modal
-        title="Add stage"
+        title="Add Stage"
         open={stageAddOpen}
         onCancel={() => setStageAddOpen(false)}
         onOk={saveNewStage}
@@ -515,7 +515,7 @@ export default function KanbanList() {
 
       {/* RENAME STAGE MODAL */}
       <Modal
-        title="Edit stage"
+        title="Edit Stage"
         open={stageRenameOpen}
         onCancel={() => setStageRenameOpen(false)}
         onOk={saveStageRename}

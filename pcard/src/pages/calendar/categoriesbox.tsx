@@ -109,7 +109,7 @@ export const CategoriesBox: React.FC<CategoriesBoxProps> = ({
         />
         <Space style={{ marginTop: 16 }}>
           <Input
-            placeholder="Add category"
+            placeholder="Add Category"
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             onPressEnter={handleAdd}
