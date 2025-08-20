@@ -1,6 +1,6 @@
 import { Create, useForm, useSelect } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
-import { Form, Input, Select, Row, Col } from "antd";
+import { Form, Input, Select, Row, Col, DatePicker } from "antd";
 import { useContext, useEffect } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
 
@@ -45,7 +45,6 @@ export const IncidentLogCreate = () => {
           company: presetCompanyId ? { id: presetCompanyId } : undefined,
         }}
         onFinish={async (values) => {
-          /* NORMALIZE PAYLOAD FOR BACKEND COMPATIBILITY */
           const now = new Date().toISOString();
           const v: any = { ...values };
 
@@ -63,14 +62,15 @@ export const IncidentLogCreate = () => {
             v.categoryId = String(categoryId);
           }
 
-          if (!v.createdAt && !v.CreatedAt) v.createdAt = now;
+          v.createdAt = v.incidentDate?.toISOString?.() || now;
           v.updatedAt = now;
           if (v.dueAt?.toISOString) v.dueAt = v.dueAt.toISOString();
+          delete v.incidentDate;
 
           return formProps.onFinish?.(v);
         }}
       >
-        {/* ROW 1: COMPANY + TITLE */}
+        {/* ROW 1: COMPANY + INCIDENT TYPE */}
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
             <Form.Item
@@ -83,24 +83,24 @@ export const IncidentLogCreate = () => {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
-              label="Title"
-              name={["title"]}
-              rules={[{ required: true }]}
-            >
-              <Input size="middle" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        {/* ROW 2: INCIDENT TYPE + STATUS (MOVED UP) */}
-        <Row gutter={[16, 8]}>
-          <Col xs={24} md={12}>
-            <Form.Item
               label="Incident type"
               name={["category", "id"]}
               rules={[{ required: true }]}
             >
               <Select {...categorySelectProps} size="middle" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        {/* ROW 2: INCIDENT DATE + STATUS */}
+        <Row gutter={[16, 8]}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Incident date"
+              name="incidentDate"
+              rules={[{ required: true }]}
+            >
+              <DatePicker style={{ width: "100%" }} />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>

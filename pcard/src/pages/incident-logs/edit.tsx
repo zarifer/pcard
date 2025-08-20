@@ -1,6 +1,7 @@
 import { Edit, useForm, useSelect } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
-import { Form, Input, Select, Row, Col } from "antd";
+import { Form, Input, Select, Row, Col, DatePicker } from "antd";
+import dayjs from "dayjs";
 import { useContext } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
 
@@ -37,7 +38,6 @@ export const IncidentLogEdit = () => {
         layout="vertical"
         className="form-compact"
         onFinish={async (values) => {
-          /* NORMALIZE PAYLOAD FOR BACKEND COMPATIBILITY */
           const v: any = { ...values, updatedAt: new Date().toISOString() };
 
           const companyId =
@@ -54,7 +54,11 @@ export const IncidentLogEdit = () => {
             v.categoryId = String(categoryId);
           }
 
+          if (v.incidentDate?.toISOString)
+            v.createdAt = v.incidentDate.toISOString();
           if (v.dueAt?.toISOString) v.dueAt = v.dueAt.toISOString();
+          delete v.incidentDate;
+
           return formProps.onFinish?.(v);
         }}
       >
@@ -71,11 +75,11 @@ export const IncidentLogEdit = () => {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
-              label="Title"
-              name={["title"]}
+              label="Incident type"
+              name={["category", "id"]}
               rules={[{ required: true }]}
             >
-              <Input size="middle" />
+              <Select {...categorySelectProps} size="middle" />
             </Form.Item>
           </Col>
         </Row>
@@ -84,11 +88,18 @@ export const IncidentLogEdit = () => {
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
             <Form.Item
-              label="Incident type"
-              name={["category", "id"]}
+              label="Incident date"
+              name="incidentDate"
+              initialValue={
+                record?.createdAt
+                  ? dayjs(record.createdAt)
+                  : record?.CreatedAt
+                    ? dayjs(record.CreatedAt)
+                    : undefined
+              }
               rules={[{ required: true }]}
             >
-              <Select {...categorySelectProps} size="middle" />
+              <DatePicker style={{ width: "100%" }} />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>

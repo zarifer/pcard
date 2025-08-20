@@ -23,7 +23,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { useContext, useEffect, useState } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
 import { AnalogClock } from "./analogclock";
-import { AV_TIMEZONES } from "./timezones";
+import AV_TIMEZONES from "./timezones";
 
 const { Title } = Typography;
 const { Dragger } = Upload;
@@ -102,6 +102,7 @@ export default function CompanyCreate() {
           }}
           onFinish={async (values: any) => {
             const fileList = (values.installerImages || []) as any[];
+
             const steps = [];
             for (const f of fileList) {
               const url =
@@ -111,7 +112,9 @@ export default function CompanyCreate() {
                   : undefined);
               if (url) steps.push({ imageUrl: url });
             }
+
             const logoFile = values.logoUpload?.[0] as any;
+
             const logoUrl =
               logoFile?.url ||
               (logoFile?.originFileObj

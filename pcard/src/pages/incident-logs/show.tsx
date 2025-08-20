@@ -65,10 +65,6 @@ export const IncidentLogShow = () => {
                 <Text>{companyData?.data?.product || "—"}</Text>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Title">
-                <TextField value={record?.title} />
-              </Descriptions.Item>
-
               <Descriptions.Item label="Incident type">
                 <Text>{categoryData?.data?.title || "—"}</Text>
               </Descriptions.Item>

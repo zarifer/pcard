@@ -24,29 +24,21 @@ import { Helmet } from "react-helmet";
 import { CredentialResponse } from "./interfaces/google";
 import { parseJwt } from "./utils/parse-jwt";
 
-//Login imports
+//Own imports
 import { Login } from "./pages/login";
-
-//Calendar imports
-import CalendarList from "./pages/calendar/list";
-import CalendarCreate from "./pages/calendar/create";
-import CalendarEdit from "./pages/calendar/edit";
-
-//Companies imports
-import CompanyList from "./pages/companies/list";
-import CompanyCreate from "./pages/companies/create";
-import CompanyEdit from "./pages/companies/edit";
-import CompanyShow from "./pages/companies/show";
-
-//Incident logs import
+import { CalendarList, CalendarCreate, CalendarEdit } from "./pages/calendar";
+import {
+  CompanyList,
+  CompanyCreate,
+  CompanyEdit,
+  CompanyShow,
+} from "./pages/companies";
 import {
   IncidentLogList,
   IncidentLogCreate,
   IncidentLogEdit,
   IncidentLogShow,
 } from "./pages/incident-logs";
-
-//Kanban imports
 import KanbanList from "./pages/kanban/list";
 
 const axiosInstance = axios.create();

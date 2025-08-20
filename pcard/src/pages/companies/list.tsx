@@ -1,13 +1,33 @@
-import { useList, useNavigation } from "@refinedev/core";
+import {
+  useList,
+  useNavigation,
+  useDelete,
+  useInvalidate,
+} from "@refinedev/core";
 import { List, CreateButton } from "@refinedev/antd";
-import { Row, Col, Card, Avatar, Typography, Input } from "antd";
+import {
+  Row,
+  Col,
+  Card,
+  Avatar,
+  Typography,
+  Input,
+  Dropdown,
+  Button,
+  App,
+} from "antd";
+import type { MenuProps } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import "./index.css";
 
 export default function CompanyList() {
   const { data } = useList({ resource: "companies" });
-  const { show } = useNavigation();
+  const { show, push } = useNavigation();
   const [search, setSearch] = useState("");
+  const { modal } = App.useApp();
+  const { mutate: deleteCompany } = useDelete();
+  const invalidate = useInvalidate();
 
   const filtered =
     data?.data?.filter((company: any) =>
@@ -17,9 +37,36 @@ export default function CompanyList() {
         .includes(search.toLowerCase()),
     ) || [];
 
+  const onMenuClick = (key: string, company: any) => {
+    if (key === "incidents") {
+      push(`/companies/show/${company.id}?tab=incidents`);
+      return;
+    }
+    if (key === "edit") {
+      push(`/companies/edit/${company.id}`);
+      return;
+    }
+    if (key === "delete") {
+      modal.confirm({
+        title: `Do you really want to delete ${company.product || company.name || "product's card"}?`,
+        okText: "Delete",
+        cancelText: "Cancel",
+        okButtonProps: { danger: true },
+        onOk: () =>
+          deleteCompany(
+            { resource: "companies", id: company.id },
+            {
+              onSuccess: () => {
+                invalidate({ resource: "companies", invalidates: ["list"] });
+              },
+            },
+          ),
+      });
+    }
+  };
+
   return (
     <List title="Companies" canCreate={false} headerButtons={() => null}>
-      {/* TOP TOOLBAR: SEARCH + CREATE */}
       <div className="toolbar">
         <Input.Search
           className="toolbar__search"
@@ -38,6 +85,16 @@ export default function CompanyList() {
             : company.email
               ? [company.email]
               : [];
+
+          const menuItems: MenuProps["items"] = [
+            { key: "incidents", label: "Show Incident Logs" },
+            { key: "edit", label: "Edit Card" },
+            { type: "divider" },
+            {
+              key: "delete",
+              label: <span className="danger-text">Delete Card</span>,
+            },
+          ];
 
           return (
             <Col xs={24} sm={12} md={8} lg={6} key={company.id}>
@@ -75,6 +132,26 @@ export default function CompanyList() {
                       ]
                 }
               >
+                <div
+                  className="company-card__menu"
+                  onClick={(ev) => ev.stopPropagation()}
+                >
+                  <Dropdown
+                    menu={{
+                      items: menuItems,
+                      onClick: ({ key }) => onMenuClick(String(key), company),
+                    }}
+                    trigger={["click"]}
+                    placement="bottomRight"
+                  >
+                    <Button
+                      type="text"
+                      shape="circle"
+                      icon={<MoreOutlined />}
+                    />
+                  </Dropdown>
+                </div>
+
                 <Card.Meta
                   avatar={
                     <Avatar src={company.logo} size={48}>

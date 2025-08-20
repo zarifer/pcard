@@ -1,16 +1,7 @@
 import { HttpError, CrudFilters, BaseRecord } from "@refinedev/core";
-import { useTable, DeleteButton, useModalForm } from "@refinedev/antd";
-import {
-  Button,
-  Modal,
-  Form,
-  Input,
-  Space,
-  Table,
-  Card,
-  Typography,
-} from "antd";
-import { PlusOutlined, EditOutlined } from "@ant-design/icons";
+import { useTable, DeleteButton, useModalForm, CreateButton } from "@refinedev/antd";
+import { Button, Modal, Form, Input, Space, Table, Card, Typography } from "antd";
+import { EditOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
@@ -20,7 +11,6 @@ type Category = {
 };
 
 export default function CategoriesBox() {
-  /* USE THE ANTD HOOK SO WE GET tableProps */
   const {
     tableProps,
     tableQueryResult: { refetch },
@@ -30,7 +20,6 @@ export default function CategoriesBox() {
     pagination: { pageSize: 10 },
   });
 
-  /* MODAL FORM FOR CREATE */
   const {
     modalProps: createModalProps,
     formProps: createFormProps,
@@ -43,7 +32,6 @@ export default function CategoriesBox() {
     onMutationSuccess: () => refetch(),
   });
 
-  /* MODAL FORM FOR EDIT */
   const {
     modalProps: editModalProps,
     formProps: editFormProps,
@@ -58,39 +46,34 @@ export default function CategoriesBox() {
 
   return (
     <Card className="panel-card categories-card">
-      {/* HEADER ROW: TITLE LEFT, ACTIONS RIGHT */}
       <div className="panel-header">
-        <Title level={5} className="panel-title">
-          Categories
-        </Title>
+        <Title level={5} className="panel-title">Categories</Title>
         <div className="panel-actions">
-          <Button
-            type="primary"
-            className="btn-primary"
-            icon={<PlusOutlined />}
-            onClick={() => showCreate()}
+          <CreateButton
+            resource="categories"
+            onClick={(e) => {
+              e.preventDefault();
+              showCreate();
+            }}
           >
-            Create
-          </Button>
+            Add Category
+          </CreateButton>
         </div>
       </div>
 
       <Table<Category>
         {...tableProps}
         rowKey="id"
-        size="small"
+        size="middle"
         className="categories-table"
       >
-        <Table.Column<Category> dataIndex="id" title="ID" width={72} />
         <Table.Column<Category> dataIndex="title" title="Title" />
         <Table.Column<Category>
           title="Actions"
           dataIndex="actions"
           width={120}
           render={(_, record: BaseRecord) => (
-            /* PREVENT ROW CLICK WHEN PRESSING ACTIONS */
             <Space onClick={(e) => e.stopPropagation()}>
-              {/* MIMIC REFINED EDIT ICON-ONLY BUTTON */}
               <Button
                 size="small"
                 className="ant-btn-icon-only"
@@ -112,7 +95,6 @@ export default function CategoriesBox() {
         />
       </Table>
 
-      {/* CREATE MODAL – SMALLER, CENTERED */}
       <Modal
         {...createModalProps}
         title="Create Category"
@@ -122,11 +104,7 @@ export default function CategoriesBox() {
         width={420}
         className="category-modal-small"
       >
-        <Form
-          {...createFormProps}
-          layout="vertical"
-          /* SECURITY: PREVENT EMPTY TITLES */
-        >
+        <Form {...createFormProps} layout="vertical">
           <Form.Item
             label="Title"
             name={["title"]}
@@ -137,7 +115,6 @@ export default function CategoriesBox() {
         </Form>
       </Modal>
 
-      {/* EDIT MODAL – SMALLER, CENTERED */}
       <Modal
         {...editModalProps}
         title="Edit Category"
@@ -147,11 +124,7 @@ export default function CategoriesBox() {
         width={420}
         className="category-modal-small"
       >
-        <Form
-          {...editFormProps}
-          layout="vertical"
-          /* SECURITY: PREVENT EMPTY/UNSANITIZED VALUES */
-        >
+        <Form {...editFormProps} layout="vertical">
           <Form.Item
             label="Title"
             name={["title"]}

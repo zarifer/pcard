@@ -215,7 +215,7 @@ export const CalendarList = () => {
           onClick={() => create("calendar")}
         >
           <PlusOutlined style={{ fontSize: 12, marginRight: 2 }} />
-          Create event
+          Add Event
         </button>
         <CategoriesBox
           categories={allCategories}

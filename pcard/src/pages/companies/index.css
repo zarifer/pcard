@@ -50,6 +50,26 @@
 }
 
 /* ===========================
+   COMPANY CARDS
+   =========================== */
+
+.company-card {
+  position: relative;
+}
+
+.company-card__menu {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+.danger-text {
+  color: #d32029;
+  font-weight: 600;
+}
+
+/* ===========================
    COMPANY SHOW – INCIDENT TABS
    =========================== */
 
@@ -324,4 +344,52 @@
   background: #ffeaea;
   border-color: #ffb3b3;
   color: #e02424;
+}
+
+/* Product summary merged layout */
+.product-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.product-summary .product-meta {
+  flex: 1 1 auto;
+  min-width: 260px;
+}
+
+.product-summary__clock {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+}
+
+.product-summary__tz {
+  flex: 0 0 280px;
+  text-align: right;
+}
+
+.product-summary__tz .tz-note {
+  margin-top: 6px;
+}
+
+/* Responsive stacking */
+@media (max-width: 992px) {
+  .product-summary {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .product-summary__tz {
+    text-align: left;
+    width: 100%;
+  }
+
+  .product-summary__clock {
+    order: -1;
+    justify-content: center;
+  }
 }

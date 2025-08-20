@@ -9,8 +9,13 @@ import {
 import { useNavigation, useMany } from "@refinedev/core";
 import { BaseRecord } from "@refinedev/core";
 import { Space, Table, Tabs, Typography, Card } from "antd";
+import CategoriesBox from "./categories";
 
 const { Title } = Typography;
+
+const cmpText = (a: any, b: any) =>
+  String(a ?? "")
+    .localeCompare(String(b ?? ""), undefined, { sensitivity: "base", numeric: true });
 
 export const IncidentLogList = () => {
   const { show } = useNavigation();
@@ -18,7 +23,6 @@ export const IncidentLogList = () => {
   const COL_W = {
     id: 80,
     company: 260,
-    title: 140,
     category: 300,
     status: 110,
     created: 180,
@@ -45,7 +49,6 @@ export const IncidentLogList = () => {
     },
   });
 
-  /* COLLECT LOOKUP IDS FROM ANY NON-EMPTY DS */
   const ds =
     allTbl.tableProps.dataSource ||
     openTbl.tableProps.dataSource ||
@@ -65,51 +68,68 @@ export const IncidentLogList = () => {
     queryOptions: { enabled: ds.length > 0 },
   });
 
-  /* REUSABLE COLUMNS */
+  const companyNameOf = (r: any) =>
+    companyIsLoading
+      ? ""
+      : companyData?.data?.find((c: any) => c.id === r?.company?.id)?.name ?? "";
+
+  const categoryTitleOf = (r: any) =>
+    categoryIsLoading
+      ? ""
+      : categoryData?.data?.find((i: any) => i.id === r?.category?.id)?.title ?? "";
+
+  const createdTs = (r: any) => {
+    const v = r?.createdAt ?? r?.CreatedAt;
+    const t = v ? new Date(v).getTime() : 0;
+    return Number.isFinite(t) ? t : 0;
+  };
+
   const columns = [
-    { dataIndex: "id", title: "ID", width: COL_W.id },
     {
       dataIndex: "company",
       title: "Company",
       width: COL_W.company,
-      render: (value: any) =>
+      render: (value: any, r: any) =>
         companyIsLoading
           ? "…"
-          : companyData?.data?.find((c: any) => c.id === value?.id)?.name ||
-            "—",
-      onCell: () => ({ style: { whiteSpace: "nowrap" } }) /* PREVENT WRAP */,
-    },
-    {
-      dataIndex: "title",
-      title: "Title",
-      width: COL_W.title,
-      ellipsis: true /* KEEP IT TIGHT */,
+          : companyData?.data?.find((c: any) => c.id === value?.id)?.name || "—",
+      onCell: () => ({ style: { whiteSpace: "nowrap" } }),
+      sorter: (a: any, b: any) => cmpText(companyNameOf(a), companyNameOf(b)),
+      sortDirections: ["ascend", "descend"],
     },
     {
       dataIndex: "detail",
       title: "Detail",
-      /* FLEX COLUMN: DO NOT SET WIDTH, LET IT FILL FREE SPACE */
       render: (value: any) => (value ? String(value).slice(0, 120) + "…" : "—"),
+      sorter: (a: any, b: any) => cmpText(a?.detail, b?.detail),
+      sortDirections: ["ascend", "descend"],
     },
     {
       dataIndex: "category",
       title: "Incident type",
       width: COL_W.category,
-      render: (value: any) =>
+      render: (value: any, r: any) =>
         categoryIsLoading
           ? "…"
-          : categoryData?.data?.find((i: any) => i.id === value?.id)?.title ||
-            "—",
-      onCell: () => ({ style: { whiteSpace: "nowrap" } }) /* FIT FULL TEXT */,
+          : categoryData?.data?.find((i: any) => i.id === value?.id)?.title || "—",
+      onCell: () => ({ style: { whiteSpace: "nowrap" } }),
+      sorter: (a: any, b: any) => cmpText(categoryTitleOf(a), categoryTitleOf(b)),
+      sortDirections: ["ascend", "descend"],
     },
-    { dataIndex: "status", title: "Status", width: COL_W.status },
+    {
+      dataIndex: "status",
+      title: "Status",
+      width: COL_W.status,
+      sorter: (a: any, b: any) => cmpText(a?.status, b?.status),
+      sortDirections: ["ascend", "descend"],
+    },
     {
       dataIndex: "createdAt",
       title: "Created at",
       width: COL_W.created,
-      render: (value: any, r: any) => (
-        <DateField value={value ?? r?.CreatedAt} />
-      ),
+      render: (value: any, r: any) => <DateField value={value ?? r?.CreatedAt} />,
+      sorter: (a: any, b: any) => createdTs(a) - createdTs(b),
+      sortDirections: ["ascend", "descend"],
     },
     {
       title: "Actions",
@@ -124,7 +144,6 @@ export const IncidentLogList = () => {
     },
   ];
 
-  /* REUSABLE TABLE RENDERER */
   const renderTable = (tableProps: any, title: string) => (
     <Card className="panel-card">
       <div className="panel-header">
@@ -132,17 +151,20 @@ export const IncidentLogList = () => {
           {title}
         </Title>
         <div className="panel-actions">
-          <CreateButton className="btn-primary" />
+          <CreateButton resource="incident_logs">Add Incident</CreateButton>
         </div>
       </div>
       <Table
         {...tableProps}
-        tableLayout="fixed" /* ENFORCE COLUMN WIDTHS */
+        tableLayout="fixed"
         rowKey="id"
         columns={columns as any}
         onRow={(record: any) => ({
           onClick: () => show("incident_logs", record.id),
         })}
+        onChange={(pagination, filters, _sorter, extra) => {
+          tableProps.onChange?.(pagination, filters, [], extra);
+        }}
       />
     </Card>
   );
@@ -155,23 +177,29 @@ export const IncidentLogList = () => {
           {
             key: "all",
             label: "All",
-            children: renderTable(allTbl.tableProps, "All"),
+            children: renderTable(allTbl.tableProps, "All Logs"),
           },
           {
             key: "open",
             label: "Open",
-            children: renderTable(openTbl.tableProps, "Open"),
+            children: renderTable(openTbl.tableProps, "Open Logs"),
           },
           {
             key: "closed",
             label: "Closed",
-            children: renderTable(closedTbl.tableProps, "Closed"),
+            children: renderTable(closedTbl.tableProps, "Closed Logs"),
           },
           {
             key: "draft",
             label: "Draft",
-            children: renderTable(draftTbl.tableProps, "Draft"),
+            children: renderTable(draftTbl.tableProps, "Draft Logs"),
           },
+          {
+  key: "categories",
+  label: "Categories",
+  children: <CategoriesBox />,
+}
+
         ]}
       />
     </List>
