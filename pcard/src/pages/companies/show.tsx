@@ -196,15 +196,11 @@ export default function CompanyShow() {
     categoriesResolved?.data?.find((c: any) => c.id === id)?.title || "—";
 
   const COL_W = {
-    id: 80,
-    title: 140,
     category: 300,
-    created: 180,
+    created: 140,
     actions: 140,
   };
   const columns = [
-    { title: "ID", dataIndex: "id", width: COL_W.id },
-    { title: "Title", dataIndex: "title", width: COL_W.title, ellipsis: true },
     {
       title: "Detail",
       dataIndex: "detail",
@@ -220,11 +216,13 @@ export default function CompanyShow() {
       onCell: () => ({ style: { whiteSpace: "nowrap" } }),
     },
     {
-      title: "Created at",
+      title: "Created",
       dataIndex: "createdAt",
       width: COL_W.created,
-      render: (v: any) =>
-        v ? <DateField value={v} format="YYYY-MM-DD HH:mm" /> : "—",
+      render: (v: any, r: any) => {
+        const val = v ?? r?.CreatedAt ?? r?.createdAt;
+        return val ? <DateField value={val} format="DD/MM/YYYY" /> : "—";
+      },
     },
     {
       title: "Actions",

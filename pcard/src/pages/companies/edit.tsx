@@ -69,6 +69,7 @@ export default function CompanyEdit() {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const initialEmails = Array.isArray(record?.emails) ? record.emails : [];
   const initialPrimary = initialEmails[0] || "";
@@ -104,6 +105,16 @@ export default function CompanyEdit() {
   if (!record) {
     return <Result status="404" title="Company not found" />;
   }
+
+  const acceptImages = ".png,.jpg,.jpeg";
+  const validateImage = (file: File) => {
+    const ok = /\.(png|jpe?g)$/i.test(file.name);
+    if (!ok) {
+      message.error("Invalid image format. Please upload .png or .jpg/.jpeg.");
+      return Upload.LIST_IGNORE;
+    }
+    return false;
+  };
 
   return (
     <Edit
@@ -155,6 +166,7 @@ export default function CompanyEdit() {
           onFinish={async (values: any) => {
             const fileList = (values.installerImages || []) as any[];
             const steps = [];
+            setSubmitError(null);
             for (const f of fileList) {
               const url =
                 f.url ||
@@ -201,6 +213,18 @@ export default function CompanyEdit() {
             delete payload.customScanPath;
             delete payload.logoUpload;
             return formProps.onFinish?.(payload);
+          }}
+          onFinishFailed={(info) => {
+            const hasFormatError = info.errorFields.some((f) =>
+              (f.errors || []).some((m) =>
+                /valid|format|email|invalid/i.test(m),
+              ),
+            );
+            setSubmitError(
+              hasFormatError
+                ? "Some fields have invalid format."
+                : "Please fill out all required fields.",
+            );
           }}
         >
           <Tabs
@@ -294,11 +318,11 @@ export default function CompanyEdit() {
                           getValueFromEvent={(e) => e?.fileList}
                         >
                           <Dragger
-                            accept="image/*"
+                            accept={acceptImages}
                             multiple={false}
                             maxCount={1}
                             listType="picture"
-                            beforeUpload={() => false}
+                            beforeUpload={validateImage}
                             onChange={({ file }) => {
                               if (file.status === "removed") return;
                               if (
@@ -438,10 +462,10 @@ export default function CompanyEdit() {
                       getValueFromEvent={(e) => e?.fileList}
                     >
                       <Dragger
-                        accept="image/*"
+                        accept={acceptImages}
                         multiple
                         listType="picture"
-                        beforeUpload={() => false}
+                        beforeUpload={validateImage}
                         onChange={({ file }) => {
                           if (file.status === "removed") return;
                           if (file.type && !file.type.startsWith("image/")) {
@@ -637,6 +661,11 @@ export default function CompanyEdit() {
           Save
         </Button>
       </div>
+      {submitError && (
+        <div className="form-submit-error" style={{ textAlign: "right" }}>
+          {submitError}
+        </div>
+      )}
     </Edit>
   );
 }

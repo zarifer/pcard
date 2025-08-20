@@ -8,17 +8,21 @@ import {
 } from "@refinedev/antd";
 import { useNavigation, useMany } from "@refinedev/core";
 import { BaseRecord } from "@refinedev/core";
-import { Space, Table, Tabs, Typography, Card } from "antd";
+import { Space, Table, Tabs, Typography, Card, Input } from "antd";
+import { useMemo, useState } from "react";
 import CategoriesBox from "./categories";
 
 const { Title } = Typography;
 
 const cmpText = (a: any, b: any) =>
-  String(a ?? "")
-    .localeCompare(String(b ?? ""), undefined, { sensitivity: "base", numeric: true });
+  String(a ?? "").localeCompare(String(b ?? ""), undefined, {
+    sensitivity: "base",
+    numeric: true,
+  });
 
 export const IncidentLogList = () => {
   const { show } = useNavigation();
+  const [search, setSearch] = useState("");
 
   const COL_W = {
     id: 80,
@@ -71,12 +75,14 @@ export const IncidentLogList = () => {
   const companyNameOf = (r: any) =>
     companyIsLoading
       ? ""
-      : companyData?.data?.find((c: any) => c.id === r?.company?.id)?.name ?? "";
+      : (companyData?.data?.find((c: any) => c.id === r?.company?.id)?.name ??
+        "");
 
   const categoryTitleOf = (r: any) =>
     categoryIsLoading
       ? ""
-      : categoryData?.data?.find((i: any) => i.id === r?.category?.id)?.title ?? "";
+      : (categoryData?.data?.find((i: any) => i.id === r?.category?.id)
+          ?.title ?? "");
 
   const createdTs = (r: any) => {
     const v = r?.createdAt ?? r?.CreatedAt;
@@ -84,15 +90,22 @@ export const IncidentLogList = () => {
     return Number.isFinite(t) ? t : 0;
   };
 
+  const filterByCompany = (rows: any[]) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) => companyNameOf(r).toLowerCase().includes(q));
+  };
+
   const columns = [
     {
       dataIndex: "company",
       title: "Company",
       width: COL_W.company,
-      render: (value: any, r: any) =>
+      render: (value: any) =>
         companyIsLoading
           ? "…"
-          : companyData?.data?.find((c: any) => c.id === value?.id)?.name || "—",
+          : companyData?.data?.find((c: any) => c.id === value?.id)?.name ||
+            "—",
       onCell: () => ({ style: { whiteSpace: "nowrap" } }),
       sorter: (a: any, b: any) => cmpText(companyNameOf(a), companyNameOf(b)),
       sortDirections: ["ascend", "descend"],
@@ -108,12 +121,14 @@ export const IncidentLogList = () => {
       dataIndex: "category",
       title: "Incident type",
       width: COL_W.category,
-      render: (value: any, r: any) =>
+      render: (value: any) =>
         categoryIsLoading
           ? "…"
-          : categoryData?.data?.find((i: any) => i.id === value?.id)?.title || "—",
+          : categoryData?.data?.find((i: any) => i.id === value?.id)?.title ||
+            "—",
       onCell: () => ({ style: { whiteSpace: "nowrap" } }),
-      sorter: (a: any, b: any) => cmpText(categoryTitleOf(a), categoryTitleOf(b)),
+      sorter: (a: any, b: any) =>
+        cmpText(categoryTitleOf(a), categoryTitleOf(b)),
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -127,7 +142,9 @@ export const IncidentLogList = () => {
       dataIndex: "createdAt",
       title: "Created at",
       width: COL_W.created,
-      render: (value: any, r: any) => <DateField value={value ?? r?.CreatedAt} />,
+      render: (value: any, r: any) => (
+        <DateField value={value ?? r?.CreatedAt} />
+      ),
       sorter: (a: any, b: any) => createdTs(a) - createdTs(b),
       sortDirections: ["ascend", "descend"],
     },
@@ -144,33 +161,51 @@ export const IncidentLogList = () => {
     },
   ];
 
-  const renderTable = (tableProps: any, title: string) => (
-    <Card className="panel-card">
-      <div className="panel-header">
-        <Title level={5} className="panel-title">
-          {title}
-        </Title>
-        <div className="panel-actions">
-          <CreateButton resource="incident_logs">Add Incident</CreateButton>
+  const renderTable = (tableProps: any, title: string) => {
+    const filteredData = useMemo(
+      () => filterByCompany(tableProps.dataSource || []),
+      [tableProps.dataSource, search, companyData, companyIsLoading],
+    );
+
+    return (
+      <Card className="panel-card">
+        <div className="panel-header">
+          <Title level={5} className="panel-title">
+            {title}
+          </Title>
+          <div className="panel-actions">
+            <CreateButton resource="incident_logs">Add Incident</CreateButton>
+          </div>
         </div>
-      </div>
-      <Table
-        {...tableProps}
-        tableLayout="fixed"
-        rowKey="id"
-        columns={columns as any}
-        onRow={(record: any) => ({
-          onClick: () => show("incident_logs", record.id),
-        })}
-        onChange={(pagination, filters, _sorter, extra) => {
-          tableProps.onChange?.(pagination, filters, [], extra);
-        }}
-      />
-    </Card>
-  );
+        <Table
+          {...tableProps}
+          dataSource={filteredData}
+          tableLayout="fixed"
+          rowKey="id"
+          columns={columns as any}
+          onRow={(record: any) => ({
+            onClick: () => show("incident_logs", record.id),
+          })}
+          onChange={(pagination, filters, _sorter, extra) => {
+            tableProps.onChange?.(pagination, filters, [], extra);
+          }}
+        />
+      </Card>
+    );
+  };
 
   return (
     <List title="Incident logs" canCreate={false} headerButtons={null}>
+      <div className="toolbar">
+        <Input.Search
+          className="toolbar__search"
+          placeholder="Search by..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          allowClear
+        />
+      </div>
+
       <Tabs
         defaultActiveKey="all"
         items={[
@@ -195,11 +230,10 @@ export const IncidentLogList = () => {
             children: renderTable(draftTbl.tableProps, "Draft Logs"),
           },
           {
-  key: "categories",
-  label: "Categories",
-  children: <CategoriesBox />,
-}
-
+            key: "categories",
+            label: "Categories",
+            children: <CategoriesBox />,
+          },
         ]}
       />
     </List>

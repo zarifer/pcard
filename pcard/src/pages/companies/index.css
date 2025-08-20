@@ -49,6 +49,12 @@
   margin-top: 12px;
 }
 
+.form-submit-error {
+  color: #d32029;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
 /* ===========================
    COMPANY CARDS
    =========================== */

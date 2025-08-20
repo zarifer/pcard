@@ -57,11 +57,22 @@ export default function CompanyCreate() {
     setActiveKey(TAB_KEYS[Math.min(TAB_KEYS.length - 1, idx + 1)]);
   const [tz, setTz] = useState<string>("Europe/London");
   const [Now, setNow] = useState<Date>(new Date());
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  const acceptImages = ".png,.jpg,.jpeg";
+  const validateImage = (file: File) => {
+    const ok = /\.(png|jpe?g)$/i.test(file.name);
+    if (!ok) {
+      message.error("Invalid image format. Please upload .png or .jpg/.jpeg.");
+      return Upload.LIST_IGNORE;
+    }
+    return false;
+  };
 
   return (
     <Create
@@ -102,6 +113,7 @@ export default function CompanyCreate() {
           }}
           onFinish={async (values: any) => {
             const fileList = (values.installerImages || []) as any[];
+            setSubmitError(null);
 
             const steps = [];
             for (const f of fileList) {
@@ -150,12 +162,25 @@ export default function CompanyCreate() {
                 ? values.licenseExpiry.toISOString()
                 : undefined,
             };
+
             delete payload.emailPrimary;
             delete payload.emailSecondary;
             delete payload.installerImages;
             delete payload.customScanPath;
             delete payload.logoUpload;
             return formProps.onFinish?.(payload);
+          }}
+          onFinishFailed={(info) => {
+            const hasFormatError = info.errorFields.some((f) =>
+              (f.errors || []).some((m) =>
+                /valid|format|email|invalid/i.test(m),
+              ),
+            );
+            setSubmitError(
+              hasFormatError
+                ? "Some fields have invalid format."
+                : "Please fill out all required fields.",
+            );
           }}
         >
           <Tabs
@@ -250,11 +275,11 @@ export default function CompanyCreate() {
                           getValueFromEvent={(e) => e?.fileList}
                         >
                           <Dragger
-                            accept="image/*"
+                            accept={acceptImages}
                             multiple={false}
                             maxCount={1}
                             listType="picture"
-                            beforeUpload={() => false}
+                            beforeUpload={validateImage}
                             onChange={({ file }) => {
                               if (file.status === "removed") return;
                               if (
@@ -395,10 +420,10 @@ export default function CompanyCreate() {
                       getValueFromEvent={(e) => e?.fileList}
                     >
                       <Dragger
-                        accept="image/*"
+                        accept={acceptImages}
                         multiple
                         listType="picture"
-                        beforeUpload={() => false}
+                        beforeUpload={validateImage}
                         onChange={({ file }) => {
                           if (file.status === "removed") return;
                           if (file.type && !file.type.startsWith("image/")) {
@@ -537,7 +562,7 @@ export default function CompanyCreate() {
                                       }
                                       disabled={!odEnabled}
                                     >
-                                      <Input placeholder="e.g. C:\ProgramData\Vendor\Product\Logs" />
+                                      <Input placeholder="e.g. Start the OD scan from the website client" />
                                     </AutoComplete>
                                   </Form.Item>
                                 </Col>
@@ -589,6 +614,11 @@ export default function CompanyCreate() {
           Save
         </Button>
       </div>
+      {submitError && (
+        <div className="form-submit-error" style={{ textAlign: "right" }}>
+          {submitError}
+        </div>
+      )}
     </Create>
   );
 }

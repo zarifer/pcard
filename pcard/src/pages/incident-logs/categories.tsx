@@ -1,6 +1,20 @@
 import { HttpError, CrudFilters, BaseRecord } from "@refinedev/core";
-import { useTable, DeleteButton, useModalForm, CreateButton } from "@refinedev/antd";
-import { Button, Modal, Form, Input, Space, Table, Card, Typography } from "antd";
+import {
+  useTable,
+  DeleteButton,
+  useModalForm,
+  CreateButton,
+} from "@refinedev/antd";
+import {
+  Button,
+  Modal,
+  Form,
+  Input,
+  Space,
+  Table,
+  Card,
+  Typography,
+} from "antd";
 import { EditOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -47,7 +61,9 @@ export default function CategoriesBox() {
   return (
     <Card className="panel-card categories-card">
       <div className="panel-header">
-        <Title level={5} className="panel-title">Categories</Title>
+        <Title level={5} className="panel-title">
+          Categories
+        </Title>
         <div className="panel-actions">
           <CreateButton
             resource="categories"

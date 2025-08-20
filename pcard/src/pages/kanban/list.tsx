@@ -15,6 +15,7 @@ import {
   Dropdown,
   Typography,
   App,
+  Checkbox,
 } from "antd";
 import type { MenuProps } from "antd";
 import { useMemo, useState, useCallback } from "react";
@@ -23,12 +24,11 @@ import { useApiUrl } from "@refinedev/core";
 import "./index.css";
 import KanbanEdit from "./edit";
 
-/* NOTE: MAKE COLUMN IDS FLEXIBLE BECAUSE STAGES ARE NOW DYNAMIC */
 type ColumnId = string;
 
 type KanbanItem = {
   id?: string;
-  title: string;
+  title: string; // ← listnézetben csak ezt mutatjuk (Product ID)
   description?: string;
   stage: ColumnId;
   checklist?: { id: string; text: string; done: boolean }[];
@@ -40,7 +40,17 @@ type KanbanItem = {
 
 type Stage = { id: string; key: string; title: string; order?: number };
 
-/* DEFAULT STAGES AS FALLBACK – USED ONLY IF BACKEND HAS NO 'stages' RESOURCE YET */
+type Company = {
+  id: string;
+  name?: string;
+  product?: string;
+  productId?: string;
+  licenseExpiry?: string;
+  versionCheckPath?: string;
+  wdManuallyOff?: boolean;
+  pctManuallyOff?: boolean;
+};
+
 const DEFAULT_STAGES: Stage[] = [
   { id: "todo", key: "todo", title: "To Do" },
   { id: "in-progress", key: "in-progress", title: "In Progress" },
@@ -49,42 +59,50 @@ const DEFAULT_STAGES: Stage[] = [
   { id: "done", key: "done", title: "Done" },
 ];
 
-/* BASIC SANITIZER TO AVOID XSS */
 const sanitize = (raw: string) => raw.replace(/<[^>]*>/g, "").trim();
-/* SAFE SLUG FOR NEW STAGE.KEY */
 const slugify = (s: string) =>
   sanitize(s)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
+const yesno = (v: any) => (v === true ? "Yes" : v === false ? "No" : "—");
+const fmtDate = (v?: string) =>
+  v
+    ? new Intl.DateTimeFormat("en-GB", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(v))
+    : "—";
+
 export default function KanbanList() {
   const API_URL = useApiUrl();
   const { message, modal } = App.useApp();
 
-  /* LOAD CARDS */
+  // CARDS
   const { data, isLoading } = useList<KanbanItem>({
     resource: "kanban",
     config: { pagination: { pageSize: 500 } },
   });
   const items = data?.data ?? [];
 
-  /* LOAD STAGES (DYNAMIC) */
+  // STAGES
   const { data: stagesRes } = useList<Stage>({
     resource: "stages",
     config: { pagination: { pageSize: 100 } },
-    queryOptions: {
-      /* IF BACKEND DOESN'T HAVE THIS RESOURCE, IGNORE ERROR */
-      retry: false,
-    },
+    queryOptions: { retry: false },
   });
   const stages: Stage[] = stagesRes?.data?.length
     ? stagesRes.data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     : DEFAULT_STAGES;
 
   const firstStageKey = stages[0]?.key || "todo";
+  const importStageKey =
+    stages.find((s) => s.title.toLowerCase().startsWith("prepare"))?.key ??
+    firstStageKey;
 
-  /* GROUP CARDS PER STAGE */
+  // GROUP
   const grouped = useMemo(() => {
     const map: Record<string, KanbanItem[]> = {};
     stages.forEach((s) => (map[s.key] = []));
@@ -95,91 +113,24 @@ export default function KanbanList() {
     return map;
   }, [items, stages]);
 
-  /* MUTATIONS */
+  // MUTATIONS
   const invalidate = useInvalidate();
   const { mutate: createKanban, isPending: creating } = useCreate();
   const { mutate: updateKanban } = useUpdate();
   const { mutate: deleteStageMut } = useDelete();
 
-  /* CREATE CARD MODAL STATE */
+  // CREATE MODAL
   const [open, setOpen] = useState(false);
   const [targetStage, setTargetStage] = useState<ColumnId>(firstStageKey);
   const [form] = Form.useForm<KanbanItem>();
 
-  /* EDIT DRAWER */
+  // EDIT DRAWER
   const [editId, setEditId] = useState<string | null>(null);
 
-  /* DRAG & DROP STATE */
+  // DND
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<ColumnId | null>(null);
 
-  /* STAGE MODALS */
-  const [stageForm] = Form.useForm<{ title: string }>();
-  const [stageEditTarget, setStageEditTarget] = useState<Stage | null>(null);
-  const [stageAddOpen, setStageAddOpen] = useState(false);
-  const [stageRenameOpen, setStageRenameOpen] = useState(false);
-
-  /* OPEN CREATE CARD */
-  function onOpenCreate(stage: ColumnId) {
-    setTargetStage(stage);
-    form.setFieldsValue({
-      title: "",
-      stage,
-      description: "",
-      checklist: [],
-      comments: [],
-      assignees: [],
-      dueDate: undefined,
-      calendarId: null,
-    } as any);
-    setOpen(true);
-  }
-
-  /* SAVE CARD */
-  function onSubmit() {
-    form.validateFields().then(async (values: any) => {
-      const payload: KanbanItem = {
-        ...values,
-        title: sanitize(values.title).slice(0, 120),
-        stage: values.stage,
-        dueDate: values.dueDate ? values.dueDate.toDate().toISOString() : null,
-      };
-
-      createKanban(
-        { resource: "kanban", values: payload },
-        {
-          onSuccess: async (res) => {
-            invalidate({ resource: "kanban", invalidates: ["list"] });
-            setOpen(false);
-            form.resetFields();
-
-            /* SILENT CALENDAR SYNC */
-            const newId = (res?.data as any)?.id;
-            if (newId && payload.dueDate) {
-              try {
-                const cres = await axios.post(`${API_URL}/calendar`, {
-                  title: payload.title,
-                  date: [payload.dueDate, payload.dueDate],
-                  type: "Kanban",
-                  refKanbanId: newId,
-                });
-                const calId = cres.data?.id;
-                if (calId) {
-                  await axios.patch(`${API_URL}/kanban/${newId}`, {
-                    calendarId: calId,
-                  });
-                }
-              } catch {
-                /* IGNORE */
-              }
-            }
-          },
-        },
-      );
-    });
-  }
-
-  /* DND HANDLERS */
   const handleDragStart = useCallback((id: string) => setDraggingId(id), []);
   const handleDragEnd = useCallback(() => {
     setDraggingId(null);
@@ -219,39 +170,33 @@ export default function KanbanList() {
     [draggingId, items, updateKanban, invalidate],
   );
 
-  /* === STAGE ACTIONS =================================================== */
+  // STAGE MODALS
+  const [stageForm] = Form.useForm<{ title: string }>();
+  const [stageEditTarget, setStageEditTarget] = useState<Stage | null>(null);
+  const [stageAddOpen, setStageAddOpen] = useState(false);
+  const [stageRenameOpen, setStageRenameOpen] = useState(false);
 
   const openRenameStage = (s: Stage) => {
     setStageEditTarget(s);
     stageForm.setFieldsValue({ title: s.title });
     setStageRenameOpen(true);
   };
-
   const saveStageRename = async () => {
     const vals = await stageForm.validateFields();
     const title = sanitize(vals.title).slice(0, 40);
     if (!title || !stageEditTarget) return setStageRenameOpen(false);
-
-    /* IF BACKEND HAS NO 'stages' RESOURCE, JUST UPDATE LOCAL TITLES (NO-OP HERE) */
     if (!stagesRes?.data?.length) {
       message.info("STAGES RESOURCE NOT FOUND – USING DEFAULT TITLES LOCALLY.");
       setStageRenameOpen(false);
       return;
     }
-
-    await axios.patch(`${API_URL}/stages/${stageEditTarget.id}`, {
-      title,
-    });
-
+    await axios.patch(`${API_URL}/stages/${stageEditTarget.id}`, { title });
     setStageRenameOpen(false);
     invalidate({ resource: "stages", invalidates: ["list"] });
   };
-
   const clearStageCards = async (s: Stage) => {
     const affected = (grouped[s.key] ?? []).map((c) => c.id!).filter(Boolean);
-    if (affected.length === 0) return;
-
-    /* BATCH MOVE TO FIRST COLUMN (USUALLY 'TODO') */
+    if (!affected.length) return;
     await Promise.all(
       affected.map((id) =>
         axios.patch(`${API_URL}/kanban/${id}`, { stage: firstStageKey }),
@@ -260,7 +205,6 @@ export default function KanbanList() {
     invalidate({ resource: "kanban", invalidates: ["list"] });
     message.success("ALL CARDS MOVED TO TODO.");
   };
-
   const onClearStage = (s: Stage) => {
     modal.confirm({
       title: `Move all cards from "${s.title}" to "${stages[0]?.title || "To Do"}"?`,
@@ -269,7 +213,6 @@ export default function KanbanList() {
       onOk: () => clearStageCards(s),
     });
   };
-
   const onDeleteStage = (s: Stage) => {
     modal.confirm({
       title: `Delete Stage "${s.title}"?`,
@@ -277,17 +220,13 @@ export default function KanbanList() {
         "Cards in this stage will be moved to the first column before deletion.",
       okText: "Delete",
       cancelText: "Cancel",
-      okButtonProps: { danger: true }, // RED, NOT GREY
+      okButtonProps: { danger: true },
       onOk: async () => {
-        /* MOVE CARDS OUT FIRST */
         await clearStageCards(s);
-
-        /* IF NO BACKEND 'stages', WE CANNOT DELETE – FAIL SAFE */
         if (!stagesRes?.data?.length) {
           message.warning("STAGES RESOURCE NOT FOUND – DELETE IS DISABLED.");
           return;
         }
-
         deleteStageMut(
           { resource: "stages", id: s.id },
           {
@@ -300,63 +239,204 @@ export default function KanbanList() {
       },
     });
   };
-
   const onAddStage = () => {
     stageForm.resetFields();
     setStageAddOpen(true);
   };
-
   const saveNewStage = async () => {
     const { title } = await stageForm.validateFields();
     const clean = sanitize(title).slice(0, 40);
     if (!clean) return;
-
-    /* NO 'stages' RESOURCE? JUST INFO AND HIDE */
     if (!stagesRes?.data?.length) {
       message.info("STAGES RESOURCE NOT FOUND – CAN'T CREATE STAGE YET.");
       setStageAddOpen(false);
       return;
     }
-
-    /* UNIQUE KEY */
     let base = slugify(clean) || `stage-${Date.now()}`;
     let key = base;
     const taken = new Set(stages.map((s) => s.key));
     let i = 1;
     while (taken.has(key)) key = `${base}-${i++}`;
-
     await axios.post(`${API_URL}/stages`, {
       title: clean,
       key,
       order: (stages[stages.length - 1]?.order ?? stages.length - 1) + 1,
     });
-
     setStageAddOpen(false);
     invalidate({ resource: "stages", invalidates: ["list"] });
     message.success("STAGE CREATED.");
   };
 
+  // CREATE CARD (modal)
+  function onOpenCreate(stage: ColumnId) {
+    setTargetStage(stage);
+    form.setFieldsValue({
+      title: "",
+      stage,
+      description: "",
+      checklist: [],
+      comments: [],
+      assignees: [],
+      dueDate: undefined,
+      calendarId: null,
+    } as any);
+    setOpen(true);
+  }
+  function onSubmit() {
+    form.validateFields().then(async (values: any) => {
+      const payload: KanbanItem = {
+        ...values,
+        title: sanitize(values.title).slice(0, 120),
+        stage: values.stage,
+        dueDate: values.dueDate ? values.dueDate.toDate().toISOString() : null,
+      };
+      createKanban(
+        { resource: "kanban", values: payload },
+        {
+          onSuccess: async (res) => {
+            invalidate({ resource: "kanban", invalidates: ["list"] });
+            setOpen(false);
+            form.resetFields();
+            const newId = (res?.data as any)?.id;
+            if (newId && payload.dueDate) {
+              try {
+                const cres = await axios.post(`${API_URL}/calendar`, {
+                  title: payload.title,
+                  date: [payload.dueDate, payload.dueDate],
+                  type: "Kanban",
+                  refKanbanId: newId,
+                });
+                const calId = cres.data?.id;
+                if (calId) {
+                  await axios.patch(`${API_URL}/kanban/${newId}`, {
+                    calendarId: calId,
+                  });
+                }
+              } catch {}
+            }
+          },
+        },
+      );
+    });
+  }
+
+  // IMPORT MODAL
+  const { data: companiesRes } = useList<Company>({
+    resource: "companies",
+    config: { pagination: { pageSize: 1000 } },
+  });
+  const companies: Company[] = companiesRes?.data ?? [];
+  const [importOpen, setImportOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [selectedCompanyIds, setSelectedCompanyIds] = useState<string[]>([]);
+  const [searchCompanies, setSearchCompanies] = useState("");
+
+  const filteredCompanies = useMemo(() => {
+    const q = searchCompanies.trim().toLowerCase();
+    if (!q) return companies;
+    return companies.filter((c) =>
+      [c.productId, c.product, c.name]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [companies, searchCompanies]);
+
+  const handleImport = async () => {
+    if (!selectedCompanyIds.length) return;
+    setImporting(true);
+    try {
+      const now = new Date();
+      const due = new Date(now);
+      due.setDate(due.getDate() + 15);
+      const dueISO = due.toISOString();
+
+      const checklistTexts = [
+        "Windows Update",
+        "Product Update",
+        "Bootstrap Check",
+        "WD Check",
+        "Config File Update",
+        "Snapshot Created",
+      ];
+
+      const chosen = companies.filter((c) =>
+        selectedCompanyIds.includes(String(c.id)),
+      );
+
+      for (const c of chosen) {
+        // TITLE = STRICTLY PRODUCT ID for list view
+        const title = sanitize(c.productId || "(no Product ID)").slice(0, 120);
+
+        const desc = [
+          `Vendor: ${sanitize(c.name || "—")}`,
+          `Product: ${sanitize(c.product || "—")}`,
+          `License expiry: ${fmtDate(c.licenseExpiry)}`,
+          `Current version check: ${sanitize(c.versionCheckPath || "—")}`,
+          `Disable Windows Defender: ${yesno(c.wdManuallyOff)}`,
+          `Disable PCT: ${yesno(c.pctManuallyOff)}`,
+        ].join("\n");
+
+        const checklist = checklistTexts.map((t, i) => ({
+          id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 8)}`,
+          text: t,
+          done: false,
+        }));
+
+        const res = await axios.post(`${API_URL}/kanban`, {
+          title,
+          description: desc,
+          stage: importStageKey,
+          checklist,
+          dueDate: dueISO,
+        });
+
+        const newId = res.data?.id;
+        if (newId) {
+          try {
+            const cres = await axios.post(`${API_URL}/calendar`, {
+              title,
+              date: [dueISO, dueISO],
+              type: "Kanban",
+              refKanbanId: newId,
+            });
+            const calId = cres.data?.id;
+            if (calId) {
+              await axios.patch(`${API_URL}/kanban/${newId}`, {
+                calendarId: calId,
+              });
+            }
+          } catch {}
+        }
+      }
+
+      // nincs extra toast → csak zárunk és frissítünk
+      setImportOpen(false);
+      setSelectedCompanyIds([]);
+      invalidate({ resource: "kanban", invalidates: ["list"] });
+    } finally {
+      setImporting(false);
+    }
+  };
+
   if (isLoading) return <div>Loading…</div>;
 
   return (
-    <>
-      {/* BOARD */}
+    <div className="kanban-page">
+      <div className="toolbar" style={{ marginTop: 8 }}>
+        <Button type="primary" onClick={() => setImportOpen(true)}>
+          Import Companies
+        </Button>
+        <div style={{ flex: 1 }} />
+      </div>
+
       <div className="kanban-board">
         {stages.map((col) => {
           const menuItems: MenuProps["items"] = [
-            {
-              key: "edit",
-              label: "Edit Stage",
-              onClick: () => openRenameStage(col),
-            },
-            {
-              key: "clear",
-              label: "Clear All Cards",
-              onClick: () => onClearStage(col),
-            },
-            {
-              type: "divider",
-            },
+            { key: "edit", label: "Edit Stage", onClick: () => openRenameStage(col) },
+            { key: "clear", label: "Clear All Cards", onClick: () => onClearStage(col) },
+            { type: "divider" },
             {
               key: "delete",
               label: <span className="danger-text">Delete Stage</span>,
@@ -373,7 +453,11 @@ export default function KanbanList() {
               onDrop={() => handleDropOnCol(col.key)}
             >
               <div className="kanban-column-header">
-                <span className="stage-title">{col.title}</span>
+                <Typography.Text className="stage-title" strong>
+                  {col.title}
+                </Typography.Text>
+
+                {/* BAL OLDALT: + gomb, mellette a … menü */}
                 <div className="kanban-header-actions">
                   <button
                     className="kanban-add-btn"
@@ -383,17 +467,8 @@ export default function KanbanList() {
                   >
                     +
                   </button>
-
-                  <Dropdown
-                    menu={{ items: menuItems }}
-                    trigger={["click"]}
-                    placement="bottomRight"
-                  >
-                    <button
-                      className="stage-menu-btn"
-                      aria-label={`Stage menu for ${col.title}`}
-                      title="Stage actions"
-                    >
+                  <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
+                    <button className="stage-menu-btn" aria-label={`Stage menu for ${col.title}`} title="Stage actions">
                       ⋯
                     </button>
                   </Dropdown>
@@ -401,7 +476,7 @@ export default function KanbanList() {
               </div>
 
               <div className="kanban-column-content">
-                {dragOverCol === col.key && (
+                {draggingId && dragOverCol === col.key && (
                   <div className="kanban-drop-placeholder" aria-hidden />
                 )}
 
@@ -414,10 +489,8 @@ export default function KanbanList() {
                     onDragEnd={handleDragEnd}
                     onClick={() => setEditId(card.id!.toString())}
                   >
+                    {/* LIST VIEW: csak Product ID (title) */}
                     <div className="kanban-card-title">{card.title}</div>
-                    <div className="kanban-card-desc">
-                      {card.description || "Click to edit…"}
-                    </div>
                   </div>
                 ))}
               </div>
@@ -425,112 +498,112 @@ export default function KanbanList() {
           );
         })}
 
-        {/* ADD STAGE AT THE FAR RIGHT */}
+        {/* JOBB SZÉL: új oszlop */}
         <div className="kanban-column add-stage-column">
-          <Button
-            type="dashed"
-            className="add-stage-btn"
-            onClick={onAddStage}
-            block
-          >
+          <Button type="dashed" className="add-stage-btn" onClick={onAddStage} block>
             + Add Stage
           </Button>
         </div>
       </div>
 
-      {/* CREATE CARD MODAL */}
+      {/* CREATE CARD */}
       <Modal
-        title="Add New Card"
         open={open}
+        title="Create card"
         onCancel={() => setOpen(false)}
-        footer={
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-            <Button onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="primary" loading={creating} onClick={onSubmit}>
-              Save
-            </Button>
-          </div>
-        }
-        destroyOnClose
+        onOk={onSubmit}
+        okText="Create"
+        confirmLoading={creating}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{ stage: targetStage || firstStageKey }}
-        >
+        <Form form={form} layout="vertical" initialValues={{ stage: targetStage }}>
           <Form.Item
             label="Title"
             name="title"
             rules={[{ required: true, message: "Title is required" }]}
           >
-            <Input placeholder="Short card title…" maxLength={120} />
+            <Input maxLength={120} />
           </Form.Item>
-
-          <Form.Item label="Stage" name="stage" rules={[{ required: true }]}>
-            <Select
-              options={stages.map((s) => ({ value: s.key, label: s.title }))}
-            />
+          <Form.Item label="Stage" name="stage">
+            <Select options={stages.map((s) => ({ value: s.key, label: s.title }))} />
           </Form.Item>
-
           <Form.Item label="Description" name="description">
-            <Input.TextArea
-              placeholder="(Optional) Description…"
-              autoSize={{ minRows: 2, maxRows: 6 }}
-            />
+            <Input.TextArea rows={4} />
           </Form.Item>
-
-          <Form.Item label="Due Date" name="dueDate">
+          <Form.Item label="Due date" name="dueDate">
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* EDIT CARD DRAWER */}
-      {editId && (
-        <KanbanEdit
-          visible={!!editId}
-          onClose={() => setEditId(null)}
-          cardId={editId}
-        />
-      )}
-
-      {/* ADD STAGE MODAL */}
-      <Modal
-        title="Add Stage"
-        open={stageAddOpen}
-        onCancel={() => setStageAddOpen(false)}
-        onOk={saveNewStage}
-        okText="Create"
-      >
+      {/* ADD / RENAME STAGE */}
+      <Modal open={stageAddOpen} title="Add Stage" onCancel={() => setStageAddOpen(false)} onOk={saveNewStage} okText="Create">
         <Form form={stageForm} layout="vertical">
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: "Title is required" }]}
-          >
-            <Input placeholder="e.g., Backlog" />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/* RENAME STAGE MODAL */}
-      <Modal
-        title="Edit Stage"
-        open={stageRenameOpen}
-        onCancel={() => setStageRenameOpen(false)}
-        onOk={saveStageRename}
-        okText="Save"
-      >
-        <Form form={stageForm} layout="vertical">
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: "Title is required" }]}
-          >
+          <Form.Item label="Stage title" name="title" rules={[{ required: true, message: "Title is required" }]}>
             <Input maxLength={40} />
           </Form.Item>
         </Form>
       </Modal>
-    </>
+      <Modal open={stageRenameOpen} title="Edit Stage" onCancel={() => setStageRenameOpen(false)} onOk={saveStageRename} okText="Save">
+        <Form form={stageForm} layout="vertical">
+          <Form.Item label="Stage title" name="title" rules={[{ required: true, message: "Title is required" }]}>
+            <Input maxLength={40} />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* EDIT DRAWER */}
+      {editId && (
+        <KanbanEdit visible={!!editId} cardId={editId!} onClose={() => setEditId(null)} />
+      )}
+
+      {/* IMPORT COMPANIES */}
+      <Modal
+        open={importOpen}
+        title="Import Companies"
+        onCancel={() => setImportOpen(false)}
+        okText="Import"
+        cancelText="Cancel"
+        onOk={handleImport}
+        okButtonProps={{ disabled: selectedCompanyIds.length === 0 || importing }}
+        confirmLoading={importing}
+      >
+        <Input.Search
+          placeholder="Search companies…"
+          value={searchCompanies}
+          onChange={(e) => setSearchCompanies(e.target.value)}
+          allowClear
+          style={{ marginBottom: 12 }}
+        />
+        <div style={{ maxHeight: 360, overflow: "auto", paddingRight: 4 }}>
+          {filteredCompanies.map((c) => {
+            const label =
+              sanitize([c.productId, c.product, c.name].filter(Boolean).join(" — ")) ||
+              `Company #${c.id}`;
+            const checked = selectedCompanyIds.includes(String(c.id));
+            return (
+              <div key={c.id} style={{ display: "flex", alignItems: "center", padding: "6px 0", borderBottom: "1px solid rgba(0,0,0,0.03)" }}>
+                <Checkbox
+                  checked={checked}
+                  onChange={(e) => {
+                    const val = String(c.id);
+                    setSelectedCompanyIds((prev) =>
+                      e.target.checked ? [...prev, val] : prev.filter((x) => x !== val),
+                    );
+                  }}
+                >
+                  {label}
+                </Checkbox>
+              </div>
+            );
+          })}
+          {!filteredCompanies.length && (
+            <Typography.Text type="secondary">No companies found.</Typography.Text>
+          )}
+        </div>
+        <div style={{ marginTop: 8 }}>
+          <Typography.Text type="secondary">Selected: {selectedCompanyIds.length}</Typography.Text>
+        </div>
+      </Modal>
+    </div>
   );
 }

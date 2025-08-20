@@ -509,3 +509,33 @@
 [data-theme="dark"] .cm-s-easymde .CodeMirror-cursor {
   border-left: 1px solid #eaeaea;
 }
+
+.kanban-column {
+  background: #fff;
+  border-radius: 12px;
+  /* nagyobb kerekítés */
+  border: 1px solid #eae6ff;
+  /* halvány lila körvonal */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .kanban-column {
+  background: #1e1a2b;
+  border-color: #3b3259;
+  /* sötét témában tompább */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.kanban-column.drag-target {
+  outline: 2px dashed #7c41f7;
+  outline-offset: 4px;
+}
+
+.kanban-drop-placeholder {
+  border: 2px dashed #b599ff;
+  border-radius: 10px;
+  height: 56px;
+  margin-bottom: 12px;
+  background: transparent;
+}
