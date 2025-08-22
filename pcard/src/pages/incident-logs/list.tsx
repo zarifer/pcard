@@ -1,211 +1,220 @@
+import { useNavigation, useMany, useList } from "@refinedev/core";
 import {
-  DateField,
-  DeleteButton,
-  EditButton,
-  List,
-  CreateButton,
   useTable,
+  List,
+  EditButton,
+  DeleteButton,
+  DateField,
+  CreateButton,
 } from "@refinedev/antd";
-import { useNavigation, useMany } from "@refinedev/core";
-import { BaseRecord } from "@refinedev/core";
-import { Space, Table, Tabs, Typography, Card, Input } from "antd";
+import { Table, Input, Space, Typography, Card, Tabs } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import { useMemo, useState } from "react";
 import CategoriesBox from "./categories";
+import { SearchOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
-const cmpText = (a: any, b: any) =>
-  String(a ?? "").localeCompare(String(b ?? ""), undefined, {
-    sensitivity: "base",
-    numeric: true,
+export default function IncidentLogList() {
+  const { show } = useNavigation();
+
+  const allTbl = useTable({
+    resource: "incident_logs",
+    pagination: { pageSize: 10 },
+    syncWithLocation: true,
   });
 
-export const IncidentLogList = () => {
-  const { show } = useNavigation();
-  const [search, setSearch] = useState("");
-
-  const COL_W = {
-    id: 80,
-    company: 260,
-    category: 300,
-    status: 110,
-    created: 180,
-    actions: 140,
-  };
-
-  const allTbl = useTable({ syncWithLocation: false });
   const openTbl = useTable({
+    resource: "incident_logs",
+    pagination: { pageSize: 10 },
     syncWithLocation: false,
     filters: {
       permanent: [{ field: "status", operator: "eq", value: "open" }],
     },
   });
+
   const closedTbl = useTable({
+    resource: "incident_logs",
+    pagination: { pageSize: 10 },
     syncWithLocation: false,
     filters: {
       permanent: [{ field: "status", operator: "eq", value: "closed" }],
     },
   });
+
   const draftTbl = useTable({
+    resource: "incident_logs",
+    pagination: { pageSize: 10 },
     syncWithLocation: false,
     filters: {
       permanent: [{ field: "status", operator: "eq", value: "draft" }],
     },
   });
 
-  const ds =
-    allTbl.tableProps.dataSource ||
-    openTbl.tableProps.dataSource ||
-    closedTbl.tableProps.dataSource ||
-    draftTbl.tableProps.dataSource ||
-    [];
+  const rows = (allTbl.tableProps?.dataSource ?? []) as any[];
 
-  const { data: companyData, isLoading: companyIsLoading } = useMany({
+  const { data: companiesRes } = useList({
     resource: "companies",
-    ids: ds.map((r: any) => r?.company?.id).filter(Boolean),
-    queryOptions: { enabled: ds.length > 0 },
+    pagination: { pageSize: 1000 },
+    queryOptions: { staleTime: 60000 },
   });
+  const companies: any[] = companiesRes?.data ?? [];
+  const companyById = useMemo(() => {
+    const m = new Map<string, any>();
+    companies.forEach((c) => m.set(String(c.id), c));
+    return m;
+  }, [companies]);
 
-  const { data: categoryData, isLoading: categoryIsLoading } = useMany({
+  const categoryIds = Array.from(
+    new Set(rows.map((r: any) => r?.category?.id).filter(Boolean)),
+  );
+  const { data: categoriesRes } = useMany({
     resource: "categories",
-    ids: ds.map((r: any) => r?.category?.id).filter(Boolean),
-    queryOptions: { enabled: ds.length > 0 },
+    ids: categoryIds,
+    queryOptions: { enabled: categoryIds.length > 0 },
   });
+  const catTitle = (id?: string) =>
+    categoriesRes?.data?.find((c: any) => c.id === id)?.title ?? "—";
 
-  const companyNameOf = (r: any) =>
-    companyIsLoading
-      ? ""
-      : (companyData?.data?.find((c: any) => c.id === r?.company?.id)?.name ??
-        "");
-
-  const categoryTitleOf = (r: any) =>
-    categoryIsLoading
-      ? ""
-      : (categoryData?.data?.find((i: any) => i.id === r?.category?.id)
-          ?.title ?? "");
-
-  const createdTs = (r: any) => {
-    const v = r?.createdAt ?? r?.CreatedAt;
-    const t = v ? new Date(v).getTime() : 0;
-    return Number.isFinite(t) ? t : 0;
+  const [q, setQ] = useState("");
+  const filterRows = (src: any[]) => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return src;
+    return src.filter((r: any) => {
+      const comp = r?.company?.id
+        ? companyById.get(String(r.company.id))
+        : undefined;
+      const hay = [comp?.name, comp?.productId, r?.detail]
+        .filter(Boolean)
+        .map((s) => String(s).toLowerCase())
+        .join(" ");
+      return hay.includes(needle);
+    });
   };
 
-  const filterByCompany = (rows: any[]) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) => companyNameOf(r).toLowerCase().includes(q));
-  };
-
-  const columns = [
+  const columns: ColumnsType<any> = [
     {
-      dataIndex: "company",
+      title: "Product ID",
+      dataIndex: "productId",
+      width: 140,
+      render: (_: any, r: any) => {
+        const c = r?.company?.id ? companyById.get(String(r.company.id)) : null;
+        return c?.productId ?? "—";
+      },
+    },
+    {
       title: "Company",
-      width: COL_W.company,
-      render: (value: any) =>
-        companyIsLoading
-          ? "…"
-          : companyData?.data?.find((c: any) => c.id === value?.id)?.name ||
-            "—",
-      onCell: () => ({ style: { whiteSpace: "nowrap" } }),
-      sorter: (a: any, b: any) => cmpText(companyNameOf(a), companyNameOf(b)),
-      sortDirections: ["ascend", "descend"],
+      dataIndex: ["company", "id"],
+      render: (_: any, r: any) => {
+        const c = r?.company?.id ? companyById.get(String(r.company.id)) : null;
+        return c?.name ?? "—";
+      },
+      sorter: true,
     },
     {
-      dataIndex: "detail",
       title: "Detail",
-      render: (value: any) => (value ? String(value).slice(0, 120) + "…" : "—"),
-      sorter: (a: any, b: any) => cmpText(a?.detail, b?.detail),
-      sortDirections: ["ascend", "descend"],
+      dataIndex: "detail",
+      ellipsis: true,
+      render: (v: any) =>
+        v ? String(v).slice(0, 80) + (String(v).length > 80 ? "…" : "") : "—",
     },
     {
-      dataIndex: "category",
       title: "Incident type",
-      width: COL_W.category,
-      render: (value: any) =>
-        categoryIsLoading
-          ? "…"
-          : categoryData?.data?.find((i: any) => i.id === value?.id)?.title ||
-            "—",
+      dataIndex: ["category", "id"],
+      width: 240,
+      render: (_: any, r: any) => catTitle(r?.category?.id),
       onCell: () => ({ style: { whiteSpace: "nowrap" } }),
-      sorter: (a: any, b: any) =>
-        cmpText(categoryTitleOf(a), categoryTitleOf(b)),
-      sortDirections: ["ascend", "descend"],
     },
     {
-      dataIndex: "status",
       title: "Status",
-      width: COL_W.status,
-      sorter: (a: any, b: any) => cmpText(a?.status, b?.status),
-      sortDirections: ["ascend", "descend"],
+      dataIndex: "status",
+      width: 110,
+      render: (v: any) => v ?? "—",
     },
-    {
-      dataIndex: "createdAt",
-      title: "Created at",
-      width: COL_W.created,
-      render: (value: any, r: any) => (
-        <DateField value={value ?? r?.CreatedAt} />
-      ),
-      sorter: (a: any, b: any) => createdTs(a) - createdTs(b),
-      sortDirections: ["ascend", "descend"],
-    },
+{
+  title: "Created",
+  dataIndex: "createdAt",
+  width: 120,
+  sorter: true,
+  render: (_: any, r: any) => {
+    const val = r?.createdAt ?? r?.CreatedAt ?? r?.incidentDate;
+    return val ? <DateField value={val} format="DD/MM/YYYY" /> : "—";
+  },
+},
+
     {
       title: "Actions",
       dataIndex: "actions",
-      width: COL_W.actions,
-      render: (_: any, record: BaseRecord) => (
-        <Space onClick={(e) => e.stopPropagation()}>
-          <EditButton hideText size="small" recordItemId={record.id} />
-          <DeleteButton hideText size="small" recordItemId={record.id} />
+      width: 120,
+      render: (_: any, r: any) => (
+        <Space size="small" onClick={(e) => e.stopPropagation()}>
+          <EditButton
+            hideText
+            size="small"
+            resource="incident_logs"
+            recordItemId={r?.id}
+          />
+          <DeleteButton
+            hideText
+            size="small"
+            resource="incident_logs"
+            recordItemId={r?.id}
+          />
         </Space>
       ),
     },
   ];
 
-  const renderTable = (tableProps: any, title: string) => {
-    const filteredData = useMemo(
-      () => filterByCompany(tableProps.dataSource || []),
-      [tableProps.dataSource, search, companyData, companyIsLoading],
-    );
-
-    return (
-      <Card className="panel-card">
-        <div className="panel-header">
-          <Title level={5} className="panel-title">
-            {title}
-          </Title>
-          <div className="panel-actions">
-            <CreateButton resource="incident_logs">Add Incident</CreateButton>
-          </div>
+  const renderTable = (tableProps: any, title: string) => (
+    <Card className="panel-card">
+      <div className="panel-header">
+        <Title level={5} className="panel-title">
+          {title}
+        </Title>
+        <div className="panel-actions">
+          <CreateButton resource="incident_logs">Add Incident</CreateButton>
         </div>
-        <Table
-          {...tableProps}
-          dataSource={filteredData}
-          tableLayout="fixed"
-          rowKey="id"
-          columns={columns as any}
-          onRow={(record: any) => ({
-            onClick: () => show("incident_logs", record.id),
-          })}
-          onChange={(pagination, filters, _sorter, extra) => {
-            tableProps.onChange?.(pagination, filters, [], extra);
-          }}
-        />
-      </Card>
-    );
-  };
+      </div>
+      <Table
+        {...tableProps}
+        tableLayout="fixed"
+        rowKey="id"
+        columns={columns as any}
+        dataSource={[...filterRows(tableProps.dataSource ?? [])]}
+        onRow={(record: any) => ({
+          onClick: () => show("incident_logs", record.id),
+        })}
+        onChange={(pagination, filters, _sorter, extra) => {
+          tableProps.onChange?.(pagination, filters, [], extra);
+        }}
+      />
+    </Card>
+  );
 
   return (
-    <List title="Incident logs" canCreate={false} headerButtons={null}>
-      <div className="toolbar">
-        <Input.Search
-          className="toolbar__search"
-          placeholder="Search by..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          allowClear
-        />
-      </div>
-
+    <List
+      title="Incident logs"
+      canCreate={false}
+      headerButtons={() => null}
+      headerProps={{
+        title: (
+          <Space direction="vertical" size={2}>
+            <Title level={4} style={{ margin: 0 }}>
+              Incident logs
+            </Title>
+            <Input.Search
+              allowClear
+              placeholder="Search company or Product ID…"
+              style={{ width: 340 }}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onSearch={(v) => setQ(v)}
+              enterButton={<SearchOutlined />}
+            />
+          </Space>
+        ),
+      }}
+    >
       <Tabs
         defaultActiveKey="all"
         items={[
@@ -238,4 +247,4 @@ export const IncidentLogList = () => {
       />
     </List>
   );
-};
+}

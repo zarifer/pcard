@@ -434,8 +434,16 @@ export default function KanbanList() {
       <div className="kanban-board">
         {stages.map((col) => {
           const menuItems: MenuProps["items"] = [
-            { key: "edit", label: "Edit Stage", onClick: () => openRenameStage(col) },
-            { key: "clear", label: "Clear All Cards", onClick: () => onClearStage(col) },
+            {
+              key: "edit",
+              label: "Edit Stage",
+              onClick: () => openRenameStage(col),
+            },
+            {
+              key: "clear",
+              label: "Clear All Cards",
+              onClick: () => onClearStage(col),
+            },
             { type: "divider" },
             {
               key: "delete",
@@ -467,8 +475,16 @@ export default function KanbanList() {
                   >
                     +
                   </button>
-                  <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
-                    <button className="stage-menu-btn" aria-label={`Stage menu for ${col.title}`} title="Stage actions">
+                  <Dropdown
+                    menu={{ items: menuItems }}
+                    trigger={["click"]}
+                    placement="bottomRight"
+                  >
+                    <button
+                      className="stage-menu-btn"
+                      aria-label={`Stage menu for ${col.title}`}
+                      title="Stage actions"
+                    >
                       ⋯
                     </button>
                   </Dropdown>
@@ -500,7 +516,12 @@ export default function KanbanList() {
 
         {/* JOBB SZÉL: új oszlop */}
         <div className="kanban-column add-stage-column">
-          <Button type="dashed" className="add-stage-btn" onClick={onAddStage} block>
+          <Button
+            type="dashed"
+            className="add-stage-btn"
+            onClick={onAddStage}
+            block
+          >
             + Add Stage
           </Button>
         </div>
@@ -515,7 +536,11 @@ export default function KanbanList() {
         okText="Create"
         confirmLoading={creating}
       >
-        <Form form={form} layout="vertical" initialValues={{ stage: targetStage }}>
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{ stage: targetStage }}
+        >
           <Form.Item
             label="Title"
             name="title"
@@ -524,7 +549,9 @@ export default function KanbanList() {
             <Input maxLength={120} />
           </Form.Item>
           <Form.Item label="Stage" name="stage">
-            <Select options={stages.map((s) => ({ value: s.key, label: s.title }))} />
+            <Select
+              options={stages.map((s) => ({ value: s.key, label: s.title }))}
+            />
           </Form.Item>
           <Form.Item label="Description" name="description">
             <Input.TextArea rows={4} />
@@ -536,16 +563,36 @@ export default function KanbanList() {
       </Modal>
 
       {/* ADD / RENAME STAGE */}
-      <Modal open={stageAddOpen} title="Add Stage" onCancel={() => setStageAddOpen(false)} onOk={saveNewStage} okText="Create">
+      <Modal
+        open={stageAddOpen}
+        title="Add Stage"
+        onCancel={() => setStageAddOpen(false)}
+        onOk={saveNewStage}
+        okText="Create"
+      >
         <Form form={stageForm} layout="vertical">
-          <Form.Item label="Stage title" name="title" rules={[{ required: true, message: "Title is required" }]}>
+          <Form.Item
+            label="Stage title"
+            name="title"
+            rules={[{ required: true, message: "Title is required" }]}
+          >
             <Input maxLength={40} />
           </Form.Item>
         </Form>
       </Modal>
-      <Modal open={stageRenameOpen} title="Edit Stage" onCancel={() => setStageRenameOpen(false)} onOk={saveStageRename} okText="Save">
+      <Modal
+        open={stageRenameOpen}
+        title="Edit Stage"
+        onCancel={() => setStageRenameOpen(false)}
+        onOk={saveStageRename}
+        okText="Save"
+      >
         <Form form={stageForm} layout="vertical">
-          <Form.Item label="Stage title" name="title" rules={[{ required: true, message: "Title is required" }]}>
+          <Form.Item
+            label="Stage title"
+            name="title"
+            rules={[{ required: true, message: "Title is required" }]}
+          >
             <Input maxLength={40} />
           </Form.Item>
         </Form>
@@ -553,7 +600,11 @@ export default function KanbanList() {
 
       {/* EDIT DRAWER */}
       {editId && (
-        <KanbanEdit visible={!!editId} cardId={editId!} onClose={() => setEditId(null)} />
+        <KanbanEdit
+          visible={!!editId}
+          cardId={editId!}
+          onClose={() => setEditId(null)}
+        />
       )}
 
       {/* IMPORT COMPANIES */}
@@ -564,7 +615,9 @@ export default function KanbanList() {
         okText="Import"
         cancelText="Cancel"
         onOk={handleImport}
-        okButtonProps={{ disabled: selectedCompanyIds.length === 0 || importing }}
+        okButtonProps={{
+          disabled: selectedCompanyIds.length === 0 || importing,
+        }}
         confirmLoading={importing}
       >
         <Input.Search
@@ -577,17 +630,28 @@ export default function KanbanList() {
         <div style={{ maxHeight: 360, overflow: "auto", paddingRight: 4 }}>
           {filteredCompanies.map((c) => {
             const label =
-              sanitize([c.productId, c.product, c.name].filter(Boolean).join(" — ")) ||
-              `Company #${c.id}`;
+              sanitize(
+                [c.productId, c.product, c.name].filter(Boolean).join(" — "),
+              ) || `Company #${c.id}`;
             const checked = selectedCompanyIds.includes(String(c.id));
             return (
-              <div key={c.id} style={{ display: "flex", alignItems: "center", padding: "6px 0", borderBottom: "1px solid rgba(0,0,0,0.03)" }}>
+              <div
+                key={c.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "6px 0",
+                  borderBottom: "1px solid rgba(0,0,0,0.03)",
+                }}
+              >
                 <Checkbox
                   checked={checked}
                   onChange={(e) => {
                     const val = String(c.id);
                     setSelectedCompanyIds((prev) =>
-                      e.target.checked ? [...prev, val] : prev.filter((x) => x !== val),
+                      e.target.checked
+                        ? [...prev, val]
+                        : prev.filter((x) => x !== val),
                     );
                   }}
                 >
@@ -597,11 +661,15 @@ export default function KanbanList() {
             );
           })}
           {!filteredCompanies.length && (
-            <Typography.Text type="secondary">No companies found.</Typography.Text>
+            <Typography.Text type="secondary">
+              No companies found.
+            </Typography.Text>
           )}
         </div>
         <div style={{ marginTop: 8 }}>
-          <Typography.Text type="secondary">Selected: {selectedCompanyIds.length}</Typography.Text>
+          <Typography.Text type="secondary">
+            Selected: {selectedCompanyIds.length}
+          </Typography.Text>
         </div>
       </Modal>
     </div>

@@ -2,7 +2,6 @@ import {
   DateField,
   MarkdownField,
   Show,
-  TextField,
   EditButton,
   DeleteButton,
 } from "@refinedev/antd";
@@ -61,6 +60,10 @@ export const IncidentLogShow = () => {
               column={1}
               labelStyle={{ width: 140 }}
             >
+              <Descriptions.Item label="Product ID">
+                <Text>{companyData?.data?.productId || "—"}</Text>
+              </Descriptions.Item>
+
               <Descriptions.Item label="Company">
                 <Text>{companyData?.data?.product || "—"}</Text>
               </Descriptions.Item>
@@ -107,3 +110,5 @@ export const IncidentLogShow = () => {
     </Show>
   );
 };
+
+export default IncidentLogShow;

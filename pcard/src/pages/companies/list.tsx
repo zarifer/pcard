@@ -17,7 +17,7 @@ import {
   App,
 } from "antd";
 import type { MenuProps } from "antd";
-import { MoreOutlined } from "@ant-design/icons";
+import { MoreOutlined, SearchOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import "./index.css";
 
@@ -73,7 +73,9 @@ export default function CompanyList() {
           placeholder="Search companies..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onSearch={(v) => setSearch(v)}
           allowClear
+          enterButton={<Button type="primary" icon={<SearchOutlined />} />}
         />
         <CreateButton resource="companies">Add Company</CreateButton>
       </div>

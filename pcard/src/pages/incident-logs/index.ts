@@ -1,7 +1,8 @@
-export * from "./create";
-export * from "./edit";
-export * from "./list";
-export * from "./show";
-export * from "./index.css";
+import IncidentLogList from "./list";
+import IncidentLogCreate from "./create";
+import IncidentLogEdit from "./edit";
+import IncidentLogShow from "./show";
+
+export { IncidentLogList, IncidentLogCreate, IncidentLogEdit, IncidentLogShow };
 //Extra
 export * from "./categories";
