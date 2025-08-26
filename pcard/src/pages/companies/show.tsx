@@ -116,6 +116,25 @@ export default function CompanyShow() {
           ? "Unique path"
           : "—";
 
+  const activationTypeLabel = (v?: string) =>
+    v === "oem"
+      ? "OEM"
+      : v === "floating"
+        ? "Floating (License Server)"
+        : v === "trial"
+          ? "Trial"
+          : v === "none"
+            ? "No Activation"
+            : v === "serial"
+              ? "Serial Key"
+              : v === "license_file"
+                ? "License File"
+                : v === "vendor_account"
+                  ? "Vendor Account"
+                  : v === "email_based"
+                    ? "E-mail Based"
+                    : "—";
+
   const commonFilters: CrudFilters = [
     { field: "companyId", operator: "eq", value: companyId },
     { field: "company.id", operator: "eq", value: companyId },
@@ -200,7 +219,6 @@ export default function CompanyShow() {
     created: 140,
     actions: 140,
   };
-  // show.tsx (CompanyShow) – columns bővítés az Incidents tabhoz
   const columns = [
     {
       title: "Product ID",
@@ -345,19 +363,61 @@ export default function CompanyShow() {
                             <strong>Interface:</strong> {appearanceLabel}
                           </div>
                           <div>
+                            <strong>Activation:</strong>{" "}
+                            {activationTypeLabel(company?.activationType)}
+                          </div>
+                          {company?.activationType === "serial" && (
+                            <div>
+                              <strong>Serial key:</strong>{" "}
+                              {company.activationSerial || "—"}
+                            </div>
+                          )}
+                          {company?.activationType === "license_file" && (
+                            <div>
+                              <strong>License file:</strong>{" "}
+                              {company.activationFileName || "Attached"}
+                            </div>
+                          )}
+                          {company?.activationType === "vendor_account" && (
+                            <>
+                              <div>
+                                <strong>Vendor e-mail:</strong>{" "}
+                                {company.activationEmail || "—"}
+                              </div>
+                              <div>
+                                <strong>Password:</strong>{" "}
+                                {company.activationPassword
+                                  ? "••••••••"
+                                  : "—"}
+                              </div>
+                            </>
+                          )}
+                          {company?.activationType === "email_based" && (
+                            <div>
+                              <strong>Activation e-mail:</strong>{" "}
+                              {company.activationEmail || "—"}
+                            </div>
+                          )}
+                          <div>
                             <strong>License expiry:</strong>{" "}
-                            {company.licenseExpiry ? (
-                              <>
-                                <DateField value={company.licenseExpiry} />
-                                {isOverdue && (
-                                  <span className="status-badge status-badge--overdue">
-                                    Overdue
-                                  </span>
-                                )}
-                              </>
-                            ) : (
-                              "—"
-                            )}
+                            {company.licenseExpiryMode === "perpetual"
+                              ? "Perpetual"
+                              : company.licenseExpiryMode === "none"
+                                ? "No expiry"
+                                : company.licenseExpiry
+                                  ? (
+                                      <>
+                                        <DateField
+                                          value={company.licenseExpiry}
+                                        />
+                                        {isOverdue && (
+                                          <span className="status-badge status-badge--overdue">
+                                            Overdue
+                                          </span>
+                                        )}
+                                      </>
+                                    )
+                                  : "—"}
                           </div>
                         </div>
 

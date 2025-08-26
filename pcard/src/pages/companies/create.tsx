@@ -24,6 +24,7 @@ import { useContext, useEffect, useState } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
 import { AnalogClock } from "./analogclock";
 import AV_TIMEZONES from "./timezones";
+import dayjs, { Dayjs } from "dayjs";
 
 const { Title } = Typography;
 const { Dragger } = Upload;
@@ -43,6 +44,17 @@ const fileToBase64 = (file: File) =>
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+
+const ACTIVATION_OPTIONS = [
+  { label: "OEM", value: "oem" },
+  { label: "Floating (License Server)", value: "floating" },
+  { label: "Trial", value: "trial" },
+  { label: "No Activation Needed", value: "none" },
+  { label: "Serial Key", value: "serial" },
+  { label: "License File", value: "license_file" },
+  { label: "Vendor Account", value: "vendor_account" },
+  { label: "E-mail Based", value: "email_based" },
+];
 
 export default function CompanyCreate() {
   const { formProps, saveButtonProps } = useForm({ resource: "companies" });
@@ -69,6 +81,16 @@ export default function CompanyCreate() {
     const ok = /\.(png|jpe?g)$/i.test(file.name);
     if (!ok) {
       message.error("Invalid image format. Please upload .png or .jpg/.jpeg.");
+      return Upload.LIST_IGNORE;
+    }
+    return false;
+  };
+
+  const acceptLicenseFiles = ".lic,.dat,.bin";
+  const validateLicenseFile = (file: File) => {
+    const ok = /\.(lic|dat|bin)$/i.test(file.name);
+    if (!ok) {
+      message.error("Invalid file. Allowed: .lic, .dat, .bin");
       return Upload.LIST_IGNORE;
     }
     return false;
@@ -110,6 +132,9 @@ export default function CompanyCreate() {
             scanType: "context_menu",
             hasRT: true,
             hasOD: true,
+            activationType: "none",
+            expiryPerpetual: false,
+            expiryNone: false,
           }}
           onFinish={async (values: any) => {
             const fileList = (values.installerImages || []) as any[];
@@ -135,6 +160,28 @@ export default function CompanyCreate() {
             const emails = [values.emailPrimary, values.emailSecondary].filter(
               Boolean,
             );
+
+            let licenseExpiry: string | null | undefined = undefined;
+            let licenseExpiryMode: "date" | "perpetual" | "none" | undefined =
+              undefined;
+            if (values.expiryNone) {
+              licenseExpiry = null;
+              licenseExpiryMode = "none";
+            } else if (values.expiryPerpetual) {
+              licenseExpiry = dayjs("2099-12-31").toISOString();
+              licenseExpiryMode = "perpetual";
+            } else if (values.licenseExpiry) {
+              licenseExpiry = (values.licenseExpiry as Dayjs).toISOString();
+              licenseExpiryMode = "date";
+            }
+
+            const activationFileRaw = values.activationFile?.[0] as any;
+            const activationFile =
+              activationFileRaw?.url ||
+              (activationFileRaw?.originFileObj
+                ? await fileToBase64(activationFileRaw.originFileObj)
+                : undefined);
+
             const payload: any = {
               ...values,
               emails,
@@ -158,9 +205,30 @@ export default function CompanyCreate() {
                   }
                 : undefined,
               logo: logoUrl,
-              licenseExpiry: values.licenseExpiry
-                ? values.licenseExpiry.toISOString()
-                : undefined,
+              activationType: values.activationType,
+              activationSerial:
+                values.activationType === "serial"
+                  ? values.activationSerial
+                  : undefined,
+              activationEmail:
+                values.activationType === "vendor_account" ||
+                values.activationType === "email_based"
+                  ? values.activationEmail
+                  : undefined,
+              activationPassword:
+                values.activationType === "vendor_account"
+                  ? values.activationPassword
+                  : undefined,
+              activationFile:
+                values.activationType === "license_file"
+                  ? activationFile
+                  : undefined,
+              activationFileName:
+                values.activationType === "license_file"
+                  ? activationFileRaw?.name
+                  : undefined,
+              licenseExpiry,
+              licenseExpiryMode,
             };
 
             delete payload.emailPrimary;
@@ -168,6 +236,12 @@ export default function CompanyCreate() {
             delete payload.installerImages;
             delete payload.customScanPath;
             delete payload.logoUpload;
+            delete payload.activationFile;
+
+            if (activationFile && values.activationType === "license_file") {
+              payload.activationFile = activationFile;
+            }
+
             return formProps.onFinish?.(payload);
           }}
           onFinishFailed={(info) => {
@@ -261,7 +335,7 @@ export default function CompanyCreate() {
                           rules={[
                             {
                               required: true,
-                              message: "Product name is required",
+                              message: "Product ID is required",
                             },
                           ]}
                         >
@@ -297,7 +371,7 @@ export default function CompanyCreate() {
                               Click or drag a logo image
                             </p>
                             <p className="ant-upload-hint">
-                              PNG/SVG/JPG – 1 file
+                              PNG/JPG – 1 file
                             </p>
                           </Dragger>
                         </Form.Item>
@@ -464,15 +538,175 @@ export default function CompanyCreate() {
                           <Input placeholder="e.g. Help → About • or URL/KB" />
                         </Form.Item>
                       </Col>
-                      <Col xs={24} md={12}>
-                        <Form.Item
-                          label="License Expiry Date"
-                          name="licenseExpiry"
-                        >
-                          <DatePicker style={{ width: "100%" }} />
+                    </Row>
+
+                    <Divider orientation="left">Activation Type</Divider>
+                    <Row gutter={[16, 8]}>
+                      <Col xs={24}>
+                        <Form.Item name="activationType">
+                          <Radio.Group buttonStyle="solid">
+                            <Radio value="oem">OEM</Radio>
+                            <Radio value="floating">Floating</Radio>
+                            <Radio value="trial">Trial</Radio>
+                            <Radio value="none">No Activation</Radio>
+                            <Radio value="serial">Serial Key</Radio>
+                            <Radio value="license_file">License File</Radio>
+                            <Radio value="vendor_account">Vendor Account</Radio>
+                            <Radio value="email_based">E-mail Based</Radio>
+                          </Radio.Group>
                         </Form.Item>
                       </Col>
                     </Row>
+
+                    <Form.Item noStyle shouldUpdate>
+                      {({ getFieldValue, setFieldsValue }) => {
+                        const t = getFieldValue("activationType");
+                        const showAct =
+                          t === "serial" ||
+                          t === "license_file" ||
+                          t === "vendor_account" ||
+                          t === "email_based";
+                        return showAct ? (
+                          <>
+                            <Divider orientation="left">
+                              License Activation
+                            </Divider>
+                            <Row gutter={[16, 8]}>
+                              <Col xs={24} md={12}>
+                                <Form.Item
+                                  label="License Expiry Date"
+                                  name="licenseExpiry"
+                                >
+                                  <DatePicker style={{ width: "100%" }} />
+                                </Form.Item>
+                              </Col>
+                              <Col xs={24} md={12}>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    gap: 12,
+                                    alignItems: "center",
+                                    height: "100%",
+                                  }}
+                                >
+                                  <Form.Item
+                                    name="expiryPerpetual"
+                                    valuePropName="checked"
+                                    style={{ margin: 0 }}
+                                  >
+                                    <Checkbox
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setFieldsValue({
+                                            expiryNone: false,
+                                            licenseExpiry: dayjs("2099-12-31"),
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      Perpetual license
+                                    </Checkbox>
+                                  </Form.Item>
+                                  <Form.Item
+                                    name="expiryNone"
+                                    valuePropName="checked"
+                                    style={{ margin: 0 }}
+                                  >
+                                    <Checkbox
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setFieldsValue({
+                                            expiryPerpetual: false,
+                                            licenseExpiry: null,
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      No expiry
+                                    </Checkbox>
+                                  </Form.Item>
+                                </div>
+                              </Col>
+                            </Row>
+
+                            {t === "serial" && (
+                              <Row gutter={[16, 8]}>
+                                <Col xs={24} md={12}>
+                                  <Form.Item
+                                    label="Serial key"
+                                    name="activationSerial"
+                                  >
+                                    <Input placeholder="XXXX-XXXX-XXXX-XXXX" />
+                                  </Form.Item>
+                                </Col>
+                              </Row>
+                            )}
+
+                            {t === "license_file" && (
+                              <Row gutter={[16, 8]}>
+                                <Col xs={24} md={12}>
+                                  <Form.Item
+                                    label="License file"
+                                    name="activationFile"
+                                    valuePropName="fileList"
+                                    getValueFromEvent={(e) => e?.fileList}
+                                  >
+                                    <Dragger
+                                      accept={acceptLicenseFiles}
+                                      maxCount={1}
+                                      beforeUpload={validateLicenseFile}
+                                    >
+                                      <p className="ant-upload-drag-icon">
+                                        <InboxOutlined />
+                                      </p>
+                                      <p className="ant-upload-text">
+                                        Click or drag .lic/.dat/.bin
+                                      </p>
+                                    </Dragger>
+                                  </Form.Item>
+                                </Col>
+                              </Row>
+                            )}
+
+                            {t === "vendor_account" && (
+                              <Row gutter={[16, 8]}>
+                                <Col xs={24} md={12}>
+                                  <Form.Item
+                                    label="Vendor account e-mail"
+                                    name="activationEmail"
+                                    rules={[{ type: "email" }]}
+                                  >
+                                    <Input placeholder="email@vendor.com" />
+                                  </Form.Item>
+                                </Col>
+                                <Col xs={24} md={12}>
+                                  <Form.Item
+                                    label="Vendor account password"
+                                    name="activationPassword"
+                                  >
+                                    <Input.Password placeholder="Password" />
+                                  </Form.Item>
+                                </Col>
+                              </Row>
+                            )}
+
+                            {t === "email_based" && (
+                              <Row gutter={[16, 8]}>
+                                <Col xs={24} md={12}>
+                                  <Form.Item
+                                    label="Activation e-mail"
+                                    name="activationEmail"
+                                    rules={[{ type: "email" }]}
+                                  >
+                                    <Input placeholder="email@vendor.com" />
+                                  </Form.Item>
+                                </Col>
+                              </Row>
+                            )}
+                          </>
+                        ) : null;
+                      }}
+                    </Form.Item>
 
                     <Divider orientation="left">Update Procedure</Divider>
                     <Form.Item name="updateProcedure">
