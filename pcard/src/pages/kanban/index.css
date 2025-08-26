@@ -1,48 +1,54 @@
-/* =======================================================================
-   KANBAN BOARD – LAYOUT WRAPPER
-   ======================================================================= */
 .kanban-board {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
   gap: 16px;
   padding: 20px;
   background: var(--background, #f5f5f5);
   min-height: 80vh;
+  align-items: stretch;
 }
 
 [data-theme="dark"] .kanban-board {
   background: #0d0b1a;
-  /* MATCHES CALENDAR DARK BACKGROUND */
 }
 
-/* =======================================================================
-   KANBAN COLUMN – CONTAINER
-   ======================================================================= */
 .kanban-column {
   background: #fff;
-  border-radius: 8px;
+  border: 1px solid #eae6ff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex: 1 1 220px;
+  min-width: 160px;
+  overflow: hidden;
 }
 
 [data-theme="dark"] .kanban-column {
   background: #1e1a2b;
+  border-color: #3b3259;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
-/* =======================================================================
-   KANBAN COLUMN – HEADER (TITLE + ACTIONS)
-   ======================================================================= */
+.add-stage-column {
+  background: transparent;
+  box-shadow: none;
+  border: 1px dashed #e0d9ff;
+  border-radius: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+
 .kanban-column-header {
   padding: 12px 16px;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 16px;
   border-bottom: 1px solid #e0e0e0;
   background: #fafafa;
   color: #222;
-
-  /* NEW: MAKE SPACE FOR THE SMALL PLUS BUTTON ON THE RIGHT */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -54,15 +60,12 @@
   color: #fff;
 }
 
-/* =======================================================================
-   KANBAN COLUMN – HEADER ACTIONS (+ BUTTON AREA)
-   ======================================================================= */
 .kanban-header-actions {
   display: flex;
   gap: 8px;
 }
 
-/* SMALL ROUNDED PLUS BUTTON */
+.stage-menu-btn,
 .kanban-add-btn {
   width: 28px;
   height: 28px;
@@ -77,44 +80,37 @@
   user-select: none;
 }
 
+.stage-menu-btn:hover,
 .kanban-add-btn:hover {
   background: #f4f4f4;
 }
 
-.kanban-add-btn:focus-visible {
-  outline: 2px solid #4f46e5;
-  /* ACCESSIBLE FOCUS */
-  outline-offset: 2px;
-}
-
+[data-theme="dark"] .stage-menu-btn,
 [data-theme="dark"] .kanban-add-btn {
   background: #352a53;
   border-color: #4a3a6e;
   color: #fff;
 }
 
+[data-theme="dark"] .stage-menu-btn:hover,
 [data-theme="dark"] .kanban-add-btn:hover {
   background: #3e315f;
 }
 
-/* =======================================================================
-   KANBAN COLUMN – CONTENT AREA
-   ======================================================================= */
 .kanban-column-content {
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 60vh;
 }
 
-/* =======================================================================
-   KANBAN CARD – BASE VISUALS
-   ======================================================================= */
 .kanban-card {
   background: #fff;
-  border-radius: 6px;
+  border-radius: 12px;
+  border: 1px solid #eae6ff;
   padding: 10px 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   transition: transform 0.1s ease;
   cursor: pointer;
 }
@@ -122,6 +118,7 @@
 [data-theme="dark"] .kanban-card {
   background: #2a2440;
   color: #eaeaea;
+  border-color: #3b3259;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
@@ -129,9 +126,6 @@
   transform: translateY(-2px);
 }
 
-/* =======================================================================
-   KANBAN CARD – TITLE & DESCRIPTION
-   ======================================================================= */
 .kanban-card-title {
   font-weight: 600;
   margin-bottom: 4px;
@@ -150,158 +144,6 @@
   color: #b8b8b8;
 }
 
-/* =======================================================================
-   CREATE MODAL – BACKDROP & SHELL
-   ======================================================================= */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: grid;
-  place-items: center;
-  z-index: 50;
-}
-
-.modal {
-  width: min(560px, 92vw);
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  padding: 16px;
-}
-
-[data-theme="dark"] .modal {
-  background: #1e1a2b;
-  color: #f2f2f2;
-}
-
-/* =======================================================================
-   CREATE MODAL – HEADER (TITLE + CLOSE ICON)
-   ======================================================================= */
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.icon-btn {
-  appearance: none;
-  border: none;
-  background: transparent;
-  font-size: 22px;
-  cursor: pointer;
-  color: inherit;
-}
-
-/* =======================================================================
-   CREATE MODAL – FORM / INPUTS / ERRORS
-   ======================================================================= */
-.modal-label {
-  display: grid;
-  gap: 6px;
-  font-size: 14px;
-  margin: 8px 0 12px;
-}
-
-.modal-label input {
-  border: 1px solid #dcdcdc;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 14px;
-  outline: none;
-  width: 100%;
-}
-
-.modal-label input:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-}
-
-[data-theme="dark"] .modal-label input {
-  background: #2a2440;
-  border-color: #4a3a6e;
-  color: #fff;
-}
-
-.modal-error {
-  color: #c0392b;
-  margin-bottom: 8px;
-  font-size: 13px;
-}
-
-/* =======================================================================
-   CREATE MODAL – ACTION BUTTONS
-   ======================================================================= */
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.btn-primary,
-.btn-secondary {
-  border-radius: 8px;
-  padding: 8px 14px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.btn-secondary {
-  background: #f3f3f3;
-  border-color: #e0e0e0;
-  color: #111;
-}
-
-.btn-primary {
-  background: #4f46e5;
-  color: #fff;
-}
-
-.btn-primary:disabled,
-.btn-secondary:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-[data-theme="dark"] .btn-secondary {
-  background: #352a53;
-  border-color: #4a3a6e;
-  color: #fff;
-}
-
-/* =======================================================================
-   SHOW MODAL
-   ======================================================================= */
-
-.markdown-body p {
-  margin: 0 0 8px;
-}
-
-.markdown-body ul {
-  margin: 0 0 8px 18px;
-}
-
-.markdown-body code {
-  background: #0000000d;
-  padding: 0 4px;
-  border-radius: 4px;
-}
-
-[data-theme="dark"] .markdown-body code {
-  background: #ffffff1a;
-}
-
-/* =======================================================================
-   DRAG & DROP
-   ======================================================================= */
-
-.kanban-column.drag-target {
-  outline: 2px dashed #7c41f7;
-  outline-offset: 4px;
-}
-
 .kanban-drop-placeholder {
   border: 2px dashed #b599ff;
   border-radius: 10px;
@@ -310,89 +152,59 @@
   background: transparent;
 }
 
+.kanban-column.drag-target {
+  outline: 2px dashed #7c41f7;
+  outline-offset: 4px;
+}
+
 .kanban-card.dragging {
   opacity: 0.6;
 }
 
-/* =======================================================================
-   STAGE HEADER – MENU BUTTON (THREE DOTS)
-   ======================================================================= */
-.stage-menu-btn {
-  width: 28px;
-  height: 28px;
-  border: 1px solid #dcdcdc;
-  background: #fff;
-  color: #333;
-  border-radius: 6px;
-  font-weight: 700;
-  text-align: center;
-  cursor: pointer;
-  user-select: none;
+/* Card tints driven by Results flags */
+.kanban-card.private {
+  background: #f7f1ff;
+  border-color: #e0d9ff;
 }
 
-.stage-menu-btn:hover {
-  background: #f4f4f4;
+.kanban-card.invres {
+  background: #f3f3f3;
+  color: #666;
+  cursor: default;
 }
 
-[data-theme="dark"] .stage-menu-btn {
-  background: #352a53;
-  border-color: #4a3a6e;
-  color: #fff;
+.kanban-card.invres:hover {
+  transform: none;
 }
 
-[data-theme="dark"] .stage-menu-btn:hover {
-  background: #3e315f;
+/* Results site */
+.ant-table-tbody > tr.results-row-private > td {
+  background: #f7f1ff;
+  border-color: #e0d9ff;
 }
 
-.danger-text {
-  color: #d32029;
-  font-weight: 600;
+[data-theme="dark"] .ant-table-tbody > tr.results-row-private > td {
+  background: #2b1f47;
 }
 
-/* =======================================================================
-   ADD STAGE COLUMN (RIGHT EDGE)
-   ======================================================================= */
-.add-stage-column {
-  background: transparent;
-  box-shadow: none;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
+.ant-table-tbody > tr.results-row-locked > td {
+  background: #f3f3f3;
+  color: #666;
 }
 
-.add-stage-btn {
-  border-radius: 10px !important;
-  height: 44px;
+[data-theme="dark"] .ant-table-tbody > tr.results-row-locked > td {
+  background: #2a2a2a;
+  color: #a8a8a8;
 }
 
-.stage-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.ant-table-tbody > tr.results-row-snapshot > td {
+  background: #fafafa;
 }
 
-/* =======================================================================
-   OVERDUE / SECTION TITLES (INLINE TAG NEXT TO H5)
-   ======================================================================= */
-.section-title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+[data-theme="dark"] .ant-table-tbody > tr.results-row-snapshot > td {
+  background: #1e1a2b;
 }
-
-.overdue-tag {
-  font-weight: 600;
-}
-
-/* =======================================================================
-  CHECKLIST – CORE
-   =======================================================================*/
-.checklist-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
+/* Checklist layout */ 
 
 .checklist-list {
   display: grid;
@@ -400,142 +212,33 @@
 }
 
 .checklist-item {
-  display: grid;
-  grid-template-columns: 24px 1fr auto;
+  display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--card-bg, #fff0);
-  border: 1px solid #eae6ff22;
-  border-radius: 8px;
-  padding: 8px;
 }
 
-[data-theme="dark"] .checklist-item {
-  border-color: #3b3259;
+.checklist-input {
+  flex: 1;
+  min-width: 0;
 }
 
-.checklist-item.done {
-  opacity: 0.6;
-  transition: opacity 0.15s ease-in-out;
-}
-
-.checklist-item.done input {
-  text-decoration: line-through;
-}
-
-.checklist-add-row {
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 8px;
-}
-
-.checklist-add-btn {
-  height: 40px;
-  border: 1px dashed #dcdcdc;
-  border-radius: 8px;
-  text-align: left;
-  padding-left: 12px;
+.icon-btn {
+  border: 0;
   background: transparent;
-}
-
-.checklist-add-btn:hover {
-  background: #f7f7f7;
-}
-
-[data-theme="dark"] .checklist-add-btn {
-  border-color: #4a3a6e;
-  background: #2a2440;
-  color: #fff;
-}
-
-[data-theme="dark"] .checklist-add-btn:hover {
-  background: #352a53;
-}
-
-/* =======================================================================
-   COMMENTS – PINNED & ACTIONS
-   ======================================================================= */
-.comment-item.pinned {
-  background: rgba(255, 213, 79, 0.08);
-  border-left: 3px solid #fadb14;
-  border-radius: 6px;
-}
-
-[data-theme="dark"] .comment-item.pinned {
-  background: rgba(250, 219, 20, 0.08);
-  border-left-color: #ffd666;
-}
-
-.comment-actions {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-/* =======================================================================
-   MARKDOWN EDITOR (SIMPLEMDE) – THEME TWEAKS
-   ======================================================================= */
-.EasyMDEContainer {
+  padding: 6px;
   border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #eae6ff22;
+  cursor: pointer;
 }
 
-.editor-toolbar {
-  border: none !important;
-  background: #f7f7f7;
-}
-
-.editor-toolbar button:hover {
+.icon-btn:hover {
   background: rgba(0, 0, 0, 0.06);
 }
 
-.CodeMirror {
-  border: none !important;
-  min-height: 180px;
-  font-size: 14px;
+[data-theme="dark"] .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
-[data-theme="dark"] .editor-toolbar {
-  background: #2a2440;
-  border-bottom: 1px solid #3b3259 !important;
-}
-
-[data-theme="dark"] .CodeMirror {
-  background: #1e1a2b;
-  color: #eaeaea;
-}
-
-[data-theme="dark"] .cm-s-easymde .CodeMirror-cursor {
-  border-left: 1px solid #eaeaea;
-}
-
-.kanban-column {
-  background: #fff;
-  border-radius: 12px;
-  /* nagyobb kerekítés */
-  border: 1px solid #eae6ff;
-  /* halvány lila körvonal */
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="dark"] .kanban-column {
-  background: #1e1a2b;
-  border-color: #3b3259;
-  /* sötét témában tompább */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-.kanban-column.drag-target {
-  outline: 2px dashed #7c41f7;
-  outline-offset: 4px;
-}
-
-.kanban-drop-placeholder {
-  border: 2px dashed #b599ff;
-  border-radius: 10px;
-  height: 56px;
-  margin-bottom: 12px;
-  background: transparent;
+.checklist-item.done .checklist-input input {
+  text-decoration: line-through;
+  opacity: 0.65;
 }

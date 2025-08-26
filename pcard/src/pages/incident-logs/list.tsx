@@ -1,4 +1,4 @@
-import { useNavigation, useMany, useList } from "@refinedev/core";
+import { useMany, useList } from "@refinedev/core";
 import {
   useTable,
   List,
@@ -16,8 +16,6 @@ import { SearchOutlined } from "@ant-design/icons";
 const { Title } = Typography;
 
 export default function IncidentLogList() {
-  const { show } = useNavigation();
-
   const allTbl = useTable({
     resource: "incident_logs",
     pagination: { pageSize: 10 },
@@ -92,11 +90,65 @@ export default function IncidentLogList() {
     });
   };
 
+  const [ilogSort, setIlogSort] = useState<{
+    key: "company" | "status" | "created" | null;
+    order: "ascend" | "descend" | null;
+  }>({ key: null, order: null });
+
+  const sortRows = (src: any[]) => {
+    if (!ilogSort.key || !ilogSort.order) return src;
+    const dir = ilogSort.order === "ascend" ? 1 : -1;
+    return [...src].sort((a: any, b: any) => {
+      if (ilogSort.key === "company") {
+        const an = a?.company?.id
+          ? (companyById.get(String(a.company.id))?.name ?? "")
+          : "";
+        const bn = b?.company?.id
+          ? (companyById.get(String(b.company.id))?.name ?? "")
+          : "";
+        return an.localeCompare(bn) * dir;
+      }
+      if (ilogSort.key === "status") {
+        return (
+          String(a?.status ?? "").localeCompare(String(b?.status ?? "")) * dir
+        );
+      }
+      if (ilogSort.key === "created") {
+        const av = new Date(
+          a?.createdAt ?? a?.CreatedAt ?? a?.incidentDate ?? 0,
+        ).valueOf();
+        const bv = new Date(
+          b?.createdAt ?? b?.CreatedAt ?? b?.incidentDate ?? 0,
+        ).valueOf();
+        return (av - bv) * dir;
+      }
+      return 0;
+    });
+  };
+
   const columns: ColumnsType<any> = [
     {
       title: "Product ID",
       dataIndex: "productId",
       width: 140,
+      sorter: true,
+      sortOrder:
+        ilogSort.key === "status" ? (ilogSort.order ?? undefined) : undefined,
+      onHeaderCell: () => ({
+        onClick: () =>
+          setIlogSort((s) => ({
+            key: "status",
+            order:
+              s.key === "status"
+                ? s.order === "ascend"
+                  ? "descend"
+                  : s.order === "descend"
+                    ? null
+                    : "ascend"
+                : "ascend",
+          })),
+        style: { cursor: "pointer" },
+      }),
       render: (_: any, r: any) => {
         const c = r?.company?.id ? companyById.get(String(r.company.id)) : null;
         return c?.productId ?? "—";
@@ -105,11 +157,28 @@ export default function IncidentLogList() {
     {
       title: "Company",
       dataIndex: ["company", "id"],
+      sorter: true,
+      sortOrder:
+        ilogSort.key === "company" ? (ilogSort.order ?? undefined) : undefined,
+      onHeaderCell: () => ({
+        onClick: () =>
+          setIlogSort((s) => ({
+            key: "company",
+            order:
+              s.key === "company"
+                ? s.order === "ascend"
+                  ? "descend"
+                  : s.order === "descend"
+                    ? null
+                    : "ascend"
+                : "ascend",
+          })),
+        style: { cursor: "pointer" },
+      }),
       render: (_: any, r: any) => {
         const c = r?.company?.id ? companyById.get(String(r.company.id)) : null;
         return c?.name ?? "—";
       },
-      sorter: true,
     },
     {
       title: "Detail",
@@ -122,32 +191,85 @@ export default function IncidentLogList() {
       title: "Incident type",
       dataIndex: ["category", "id"],
       width: 240,
-      render: (_: any, r: any) => catTitle(r?.category?.id),
+
       onCell: () => ({ style: { whiteSpace: "nowrap" } }),
+      sorter: true,
+      sortOrder:
+        ilogSort.key === "status" ? (ilogSort.order ?? undefined) : undefined,
+      onHeaderCell: () => ({
+        onClick: () =>
+          setIlogSort((s) => ({
+            key: "status",
+            order:
+              s.key === "status"
+                ? s.order === "ascend"
+                  ? "descend"
+                  : s.order === "descend"
+                    ? null
+                    : "ascend"
+                : "ascend",
+          })),
+        style: { cursor: "pointer" },
+      }),
+      render: (_: any, r: any) => catTitle(r?.category?.id),
     },
     {
       title: "Status",
       dataIndex: "status",
       width: 110,
+      sorter: true,
+      sortOrder:
+        ilogSort.key === "status" ? (ilogSort.order ?? undefined) : undefined,
+      onHeaderCell: () => ({
+        onClick: () =>
+          setIlogSort((s) => ({
+            key: "status",
+            order:
+              s.key === "status"
+                ? s.order === "ascend"
+                  ? "descend"
+                  : s.order === "descend"
+                    ? null
+                    : "ascend"
+                : "ascend",
+          })),
+        style: { cursor: "pointer" },
+      }),
       render: (v: any) => v ?? "—",
     },
-{
-  title: "Created",
-  dataIndex: "createdAt",
-  width: 120,
-  sorter: true,
-  render: (_: any, r: any) => {
-    const val = r?.createdAt ?? r?.CreatedAt ?? r?.incidentDate;
-    return val ? <DateField value={val} format="DD/MM/YYYY" /> : "—";
-  },
-},
-
+    {
+      title: "Created",
+      dataIndex: "createdAt",
+      width: 120,
+      sorter: true,
+      sortOrder:
+        ilogSort.key === "created" ? (ilogSort.order ?? undefined) : undefined,
+      onHeaderCell: () => ({
+        onClick: () =>
+          setIlogSort((s) => ({
+            key: "created",
+            order:
+              s.key === "created"
+                ? s.order === "ascend"
+                  ? "descend"
+                  : s.order === "descend"
+                    ? null
+                    : "ascend"
+                : "ascend",
+          })),
+        style: { cursor: "pointer" },
+      }),
+      render: (_: any, r: any) => {
+        const val = r?.createdAt ?? r?.CreatedAt ?? r?.incidentDate;
+        return val ? <DateField value={val} format="DD/MM/YYYY" /> : "—";
+      },
+    },
     {
       title: "Actions",
       dataIndex: "actions",
       width: 120,
       render: (_: any, r: any) => (
-        <Space size="small" onClick={(e) => e.stopPropagation()}>
+        <Space size="small">
           <EditButton
             hideText
             size="small"
@@ -165,31 +287,31 @@ export default function IncidentLogList() {
     },
   ];
 
-  const renderTable = (tableProps: any, title: string) => (
-    <Card className="panel-card">
-      <div className="panel-header">
-        <Title level={5} className="panel-title">
-          {title}
-        </Title>
-        <div className="panel-actions">
-          <CreateButton resource="incident_logs">Add Incident</CreateButton>
+  const renderTable = (tableProps: any, title: string) => {
+    const base = filterRows(tableProps.dataSource ?? []);
+    const data = sortRows(base);
+    return (
+      <Card className="panel-card">
+        <div className="panel-header">
+          <Title level={5} className="panel-title">
+            {title}
+          </Title>
+          <div className="panel-actions">
+            <CreateButton resource="incident_logs">Add Incident</CreateButton>
+          </div>
         </div>
-      </div>
-      <Table
-        {...tableProps}
-        tableLayout="fixed"
-        rowKey="id"
-        columns={columns as any}
-        dataSource={[...filterRows(tableProps.dataSource ?? [])]}
-        onRow={(record: any) => ({
-          onClick: () => show("incident_logs", record.id),
-        })}
-        onChange={(pagination, filters, _sorter, extra) => {
-          tableProps.onChange?.(pagination, filters, [], extra);
-        }}
-      />
-    </Card>
-  );
+        <Table
+          {...tableProps}
+          rowKey="id"
+          columns={columns as any}
+          dataSource={data}
+          onChange={(pagination, filters, _sorter, extra) => {
+            tableProps.onChange?.(pagination, filters, [], extra);
+          }}
+        />
+      </Card>
+    );
+  };
 
   return (
     <List
@@ -200,7 +322,7 @@ export default function IncidentLogList() {
         title: (
           <Space direction="vertical" size={2}>
             <Title level={4} style={{ margin: 0 }}>
-              Incident logs
+              Incident Logs
             </Title>
             <Input.Search
               allowClear

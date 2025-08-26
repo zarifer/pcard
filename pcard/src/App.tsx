@@ -40,6 +40,7 @@ import {
   IncidentLogShow,
 } from "./pages/incident-logs";
 import KanbanList from "./pages/kanban/list";
+import LicenseExpiryList from "./pages/licenses/list";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
@@ -60,6 +61,8 @@ const LogoTitle = () => (
     />
   </a>
 );
+
+const APP_TITLE = "VirusBulletin";
 
 function App() {
   const authProvider: AuthBindings = {
@@ -155,6 +158,11 @@ function App() {
                       meta: { canDelete: true, label: "Companies" },
                     },
                     {
+                      name: "licenses",
+                      list: "/licenses",
+                      meta: { canDelete: true, label: "Licenses" },
+                    },
+                    {
                       name: "incident_logs",
                       list: "/incident-logs",
                       create: "/incident-logs/create",
@@ -227,6 +235,9 @@ function App() {
                       <Route path="/kanban">
                         <Route index element={<KanbanList />} />
                       </Route>
+                      <Route path="/licenses">
+                        <Route index element={<LicenseExpiryList />} />
+                      </Route>
                       <Route path="*" element={<ErrorComponent />} />
                     </Route>
                     <Route
@@ -243,7 +254,20 @@ function App() {
                     </Route>
                   </Routes>
                   <UnsavedChangesNotifier />
-                  <DocumentTitleHandler />
+                  <DocumentTitleHandler
+                    handler={({ resource, action }) => {
+                      const base =
+                        resource?.meta?.label ?? resource?.name ?? "Dashboard";
+                      const map: Record<string, string> = {
+                        list: base,
+                        create: `Create ${base}`,
+                        edit: `Edit ${base}`,
+                        show: `${base} Details`,
+                      };
+                      const page = action ? (map[action] ?? base) : base;
+                      return `${page} | ${APP_TITLE}`;
+                    }}
+                  />
                 </Refine>
                 <DevtoolsPanel />
               </DevtoolsProvider>

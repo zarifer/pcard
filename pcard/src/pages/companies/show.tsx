@@ -200,60 +200,69 @@ export default function CompanyShow() {
     created: 140,
     actions: 140,
   };
-// show.tsx (CompanyShow) – columns bővítés az Incidents tabhoz
-const columns = [
-  {
-    title: "Product ID",
-    dataIndex: "productId",
-    width: 140,
-    render: (_: any, rec: any) => company?.productId || "—",
-    onCell: () => ({ style: { whiteSpace: "nowrap" } }),
-  },
-  {
-    title: "Company",
-    dataIndex: ["company", "id"],
-    width: 220,
-    render: (_: any, rec: any) => company?.name || "—",
-    onCell: () => ({ style: { whiteSpace: "nowrap" } }),
-  },
-  {
-    title: "Detail",
-    dataIndex: "detail",
-    render: (v: any) =>
-      v ? String(v).slice(0, 60) + (String(v).length > 60 ? "…" : "") : "—",
-  },
-  {
-    title: "Incident type",
-    dataIndex: ["category", "id"],
-    width: COL_W.category,
-    render: (_: any, rec: any) =>
-      categoryTitle(rec?.category?.id) || rec?.category?.title || "—",
-    onCell: () => ({ style: { whiteSpace: "nowrap" } }),
-  },
-  {
-    title: "Created",
-    dataIndex: "createdAt",
-    width: COL_W.created,
-    render: (v: any, r: any) => {
-      const val = v ?? r?.CreatedAt ?? r?.createdAt;
-      return val ? <DateField value={val} format="DD/MM/YYYY" /> : "—";
+  // show.tsx (CompanyShow) – columns bővítés az Incidents tabhoz
+  const columns = [
+    {
+      title: "Product ID",
+      dataIndex: "productId",
+      width: 140,
+      render: (_: any, rec: any) => company?.productId || "—",
+      onCell: () => ({ style: { whiteSpace: "nowrap" } }),
     },
-  },
-  {
-    title: "Actions",
-    dataIndex: "actions",
-    width: COL_W.actions,
-    render: (_: any, r: any) => (
-      <span onClick={(e) => e.stopPropagation()}>
-        <Space size="small">
-          <EditButton hideText size="small" resource="incident_logs" recordItemId={r.id} />
-          <DeleteButton hideText size="small" resource="incident_logs" recordItemId={r.id} />
-        </Space>
-      </span>
-    ),
-  },
-];
-  
+    {
+      title: "Company",
+      dataIndex: ["company", "id"],
+      width: 220,
+      render: (_: any, rec: any) => company?.name || "—",
+      onCell: () => ({ style: { whiteSpace: "nowrap" } }),
+    },
+    {
+      title: "Detail",
+      dataIndex: "detail",
+      render: (v: any) =>
+        v ? String(v).slice(0, 60) + (String(v).length > 60 ? "…" : "") : "—",
+    },
+    {
+      title: "Incident type",
+      dataIndex: ["category", "id"],
+      width: COL_W.category,
+      render: (_: any, rec: any) =>
+        categoryTitle(rec?.category?.id) || rec?.category?.title || "—",
+      onCell: () => ({ style: { whiteSpace: "nowrap" } }),
+    },
+    {
+      title: "Created",
+      dataIndex: "createdAt",
+      width: COL_W.created,
+      render: (v: any, r: any) => {
+        const val = v ?? r?.CreatedAt ?? r?.createdAt;
+        return val ? <DateField value={val} format="DD/MM/YYYY" /> : "—";
+      },
+    },
+    {
+      title: "Actions",
+      dataIndex: "actions",
+      width: COL_W.actions,
+      render: (_: any, r: any) => (
+        <span onClick={(e) => e.stopPropagation()}>
+          <Space size="small">
+            <EditButton
+              hideText
+              size="small"
+              resource="incident_logs"
+              recordItemId={r.id}
+            />
+            <DeleteButton
+              hideText
+              size="small"
+              resource="incident_logs"
+              recordItemId={r.id}
+            />
+          </Space>
+        </span>
+      ),
+    },
+  ];
 
   if (isError) {
     return (

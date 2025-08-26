@@ -40,7 +40,7 @@
       "pctManuallyOff": false,
       "installProcedure": "Sok cicas kep",
       "versionCheckPath": "GUI -> ? -> About",
-      "licenseExpiry": "2025-08-02T22:00:00.000Z",
+      "licenseExpiry": "2025-08-04T22:00:00.000Z",
       "updateProcedure": "Leíras",
       "hasRT": false,
       "hasOD": false,
@@ -82,6 +82,22 @@
       "categoryId": "7a91",
       "createdAt": "2022-04-03T22:00:00.000Z",
       "updatedAt": "2025-08-20T00:13:19.480Z"
+    },
+    {
+      "id": "228b",
+      "productId": "CATO-AV",
+      "company": {
+        "id": "ff6d"
+      },
+      "category": {
+        "id": "32ee"
+      },
+      "detail": "ewfwef",
+      "status": "draft",
+      "companyId": "ff6d",
+      "categoryId": "32ee",
+      "createdAt": "2025-08-03T22:00:00.000Z",
+      "updatedAt": "2025-08-22T12:51:28.209Z"
     }
   ],
   "categories": [
@@ -106,7 +122,228 @@
       "title": "Unique Problem (See Details)"
     }
   ],
-  "calendar": [],
+  "calendar": [
+    {
+      "id": "9a0a",
+      "title": "rege",
+      "date": [
+        "2025-08-01T22:00:00.000Z",
+        "2025-08-01T22:00:00.000Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "6b33"
+    },
+    {
+      "id": "1f17",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-06T14:19:08.201Z",
+        "2025-09-06T14:19:08.201Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "854a"
+    },
+    {
+      "id": "d398",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-06T14:19:15.592Z",
+        "2025-09-06T14:19:15.592Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "e211"
+    },
+    {
+      "id": "6764",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-06T14:19:21.392Z",
+        "2025-09-06T14:19:21.392Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "89b6"
+    },
+    {
+      "id": "82af",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-06T15:07:54.656Z",
+        "2025-09-06T15:07:54.656Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "b5f5"
+    },
+    {
+      "id": "adea",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-06T15:10:34.601Z",
+        "2025-09-06T15:10:34.601Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "0531"
+    },
+    {
+      "id": "85f4",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-06T15:11:01.414Z",
+        "2025-09-06T15:11:01.414Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "d3bf"
+    },
+    {
+      "id": "f627",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-06T15:12:08.662Z",
+        "2025-09-06T15:12:08.662Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "6f79"
+    },
+    {
+      "id": "1fea",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-11T22:00:00.000Z",
+        "2025-09-11T22:00:00.000Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "ba41"
+    },
+    {
+      "id": "b6d0",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-06T15:13:23.434Z",
+        "2025-09-06T15:13:23.434Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "b383"
+    },
+    {
+      "id": "9d9b",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-06T16:05:47.788Z",
+        "2025-09-06T16:05:47.788Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "17da"
+    },
+    {
+      "id": "5673",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-06T16:05:47.788Z",
+        "2025-09-06T16:05:47.788Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "b093"
+    },
+    {
+      "id": "ee17",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-06T16:18:54.281Z",
+        "2025-09-06T16:18:54.281Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "69cb"
+    },
+    {
+      "id": "545c",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-06T16:18:54.281Z",
+        "2025-09-06T16:18:54.281Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "7644"
+    },
+    {
+      "id": "823a",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-10T10:58:00.317Z",
+        "2025-09-10T10:58:00.317Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "b07f"
+    },
+    {
+      "id": "e70e",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-10T10:58:00.317Z",
+        "2025-09-10T10:58:00.317Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "8ede"
+    },
+    {
+      "id": "38e6",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-10T11:09:44.941Z",
+        "2025-09-10T11:09:44.941Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "9881"
+    },
+    {
+      "id": "3b3e",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-10T15:22:11.262Z",
+        "2025-09-10T15:22:11.262Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "0b4b"
+    },
+    {
+      "id": "9956",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-10T15:22:11.262Z",
+        "2025-09-10T15:22:11.262Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "0011"
+    },
+    {
+      "id": "06d1",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-10T15:22:36.883Z",
+        "2025-09-10T15:22:36.883Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "5a37"
+    },
+    {
+      "id": "e48f",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-10T15:23:02.679Z",
+        "2025-09-10T15:23:02.679Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "96b5"
+    },
+    {
+      "id": "74bb",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-10T15:24:14.235Z",
+        "2025-09-10T15:24:14.235Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "765f"
+    }
+  ],
   "stages": [
     {
       "id": "s1",

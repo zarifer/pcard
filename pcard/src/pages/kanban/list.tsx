@@ -16,6 +16,9 @@ import {
   Typography,
   App,
   Checkbox,
+  Tabs,
+  Tag,
+  Table,
 } from "antd";
 import type { MenuProps } from "antd";
 import { useMemo, useState, useCallback } from "react";
@@ -23,12 +26,13 @@ import axios from "axios";
 import { useApiUrl } from "@refinedev/core";
 import "./index.css";
 import KanbanEdit from "./edit";
+import KanbanResults from "./results";
 
 type ColumnId = string;
 
 type KanbanItem = {
   id?: string;
-  title: string; // ← listnézetben csak ezt mutatjuk (Product ID)
+  title: string;
   description?: string;
   stage: ColumnId;
   checklist?: { id: string; text: string; done: boolean }[];
@@ -80,14 +84,12 @@ export default function KanbanList() {
   const API_URL = useApiUrl();
   const { message, modal } = App.useApp();
 
-  // CARDS
   const { data, isLoading } = useList<KanbanItem>({
     resource: "kanban",
     config: { pagination: { pageSize: 500 } },
   });
   const items = data?.data ?? [];
 
-  // STAGES
   const { data: stagesRes } = useList<Stage>({
     resource: "stages",
     config: { pagination: { pageSize: 100 } },
@@ -102,7 +104,6 @@ export default function KanbanList() {
     stages.find((s) => s.title.toLowerCase().startsWith("prepare"))?.key ??
     firstStageKey;
 
-  // GROUP
   const grouped = useMemo(() => {
     const map: Record<string, KanbanItem[]> = {};
     stages.forEach((s) => (map[s.key] = []));
@@ -113,21 +114,17 @@ export default function KanbanList() {
     return map;
   }, [items, stages]);
 
-  // MUTATIONS
   const invalidate = useInvalidate();
   const { mutate: createKanban, isPending: creating } = useCreate();
   const { mutate: updateKanban } = useUpdate();
   const { mutate: deleteStageMut } = useDelete();
 
-  // CREATE MODAL
   const [open, setOpen] = useState(false);
   const [targetStage, setTargetStage] = useState<ColumnId>(firstStageKey);
   const [form] = Form.useForm<KanbanItem>();
 
-  // EDIT DRAWER
   const [editId, setEditId] = useState<string | null>(null);
 
-  // DND
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<ColumnId | null>(null);
 
@@ -170,7 +167,24 @@ export default function KanbanList() {
     [draggingId, items, updateKanban, invalidate],
   );
 
-  // STAGE MODALS
+  const clearBoardNow = async () => {
+  const ids = items.map((i) => i.id).filter(Boolean) as string[];
+  if (!ids.length) return;
+  await Promise.all(ids.map((id) => axios.delete(`${API_URL}/kanban/${id}`)));
+  invalidate({ resource: "kanban", invalidates: ["list"] });
+};
+
+const onClearBoard = () =>
+  modal.confirm({
+    title: "Clear entire board?",
+    content: "This will permanently delete all cards.",
+    okText: "Clear Board",
+    okButtonProps: { danger: true },
+    cancelText: "Cancel",
+    onOk: clearBoardNow,
+  });
+
+
   const [stageForm] = Form.useForm<{ title: string }>();
   const [stageEditTarget, setStageEditTarget] = useState<Stage | null>(null);
   const [stageAddOpen, setStageAddOpen] = useState(false);
@@ -203,7 +217,6 @@ export default function KanbanList() {
       ),
     );
     invalidate({ resource: "kanban", invalidates: ["list"] });
-    message.success("ALL CARDS MOVED TO TODO.");
   };
   const onClearStage = (s: Stage) => {
     modal.confirm({
@@ -232,7 +245,7 @@ export default function KanbanList() {
           {
             onSuccess: () => {
               invalidate({ resource: "stages", invalidates: ["list"] });
-              message.success("STAGE DELETED.");
+        
             },
           },
         );
@@ -264,10 +277,8 @@ export default function KanbanList() {
     });
     setStageAddOpen(false);
     invalidate({ resource: "stages", invalidates: ["list"] });
-    message.success("STAGE CREATED.");
   };
 
-  // CREATE CARD (modal)
   function onOpenCreate(stage: ColumnId) {
     setTargetStage(stage);
     form.setFieldsValue({
@@ -320,7 +331,6 @@ export default function KanbanList() {
     });
   }
 
-  // IMPORT MODAL
   const { data: companiesRes } = useList<Company>({
     resource: "companies",
     config: { pagination: { pageSize: 1000 } },
@@ -331,17 +341,41 @@ export default function KanbanList() {
   const [selectedCompanyIds, setSelectedCompanyIds] = useState<string[]>([]);
   const [searchCompanies, setSearchCompanies] = useState("");
 
+  const normalizedTitles = useMemo(() => {
+    const set = new Set<string>();
+    for (const it of items) {
+      const t = (it.title || "").trim().toLowerCase();
+      if (t) set.add(t);
+    }
+    return set;
+  }, [items]);
+
+  const withFlags = useMemo(() => {
+    const list = companies.map((c) => {
+      const pid = (c.productId || "").trim().toLowerCase();
+      const imported = pid ? normalizedTitles.has(pid) : false;
+      return { company: c, imported };
+    });
+    return list;
+  }, [companies, normalizedTitles]);
+
   const filteredCompanies = useMemo(() => {
     const q = searchCompanies.trim().toLowerCase();
-    if (!q) return companies;
-    return companies.filter((c) =>
+    if (!q) return withFlags;
+    return withFlags.filter(({ company: c }) =>
       [c.productId, c.product, c.name]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
         .includes(q),
     );
-  }, [companies, searchCompanies]);
+  }, [withFlags, searchCompanies]);
+
+  const sortedCompanies = useMemo(() => {
+    const imported = filteredCompanies.filter((x) => x.imported);
+    const fresh = filteredCompanies.filter((x) => !x.imported);
+    return [...imported, ...fresh];
+  }, [filteredCompanies]);
 
   const handleImport = async () => {
     if (!selectedCompanyIds.length) return;
@@ -366,7 +400,6 @@ export default function KanbanList() {
       );
 
       for (const c of chosen) {
-        // TITLE = STRICTLY PRODUCT ID for list view
         const title = sanitize(c.productId || "(no Product ID)").slice(0, 120);
 
         const desc = [
@@ -411,7 +444,6 @@ export default function KanbanList() {
         }
       }
 
-      // nincs extra toast → csak zárunk és frissítünk
       setImportOpen(false);
       setSelectedCompanyIds([]);
       invalidate({ resource: "kanban", invalidates: ["list"] });
@@ -422,14 +454,18 @@ export default function KanbanList() {
 
   if (isLoading) return <div>Loading…</div>;
 
-  return (
+  const kanbanView = (
     <div className="kanban-page">
-      <div className="toolbar" style={{ marginTop: 8 }}>
-        <Button type="primary" onClick={() => setImportOpen(true)}>
-          Import Companies
-        </Button>
-        <div style={{ flex: 1 }} />
-      </div>
+     <div className="toolbar" style={{ marginTop: 8 }}>
+  <Button type="primary" onClick={() => setImportOpen(true)}>
+    Import Companies
+  </Button>
+  <Button danger style={{ marginLeft: 8 }} onClick={onClearBoard}>
+    Clear Board
+  </Button>
+  <div style={{ flex: 1 }} />
+</div>
+
 
       <div className="kanban-board">
         {stages.map((col) => {
@@ -464,8 +500,6 @@ export default function KanbanList() {
                 <Typography.Text className="stage-title" strong>
                   {col.title}
                 </Typography.Text>
-
-                {/* BAL OLDALT: + gomb, mellette a … menü */}
                 <div className="kanban-header-actions">
                   <button
                     className="kanban-add-btn"
@@ -505,7 +539,6 @@ export default function KanbanList() {
                     onDragEnd={handleDragEnd}
                     onClick={() => setEditId(card.id!.toString())}
                   >
-                    {/* LIST VIEW: csak Product ID (title) */}
                     <div className="kanban-card-title">{card.title}</div>
                   </div>
                 ))}
@@ -514,7 +547,6 @@ export default function KanbanList() {
           );
         })}
 
-        {/* JOBB SZÉL: új oszlop */}
         <div className="kanban-column add-stage-column">
           <Button
             type="dashed"
@@ -527,7 +559,6 @@ export default function KanbanList() {
         </div>
       </div>
 
-      {/* CREATE CARD */}
       <Modal
         open={open}
         title="Create card"
@@ -562,7 +593,6 @@ export default function KanbanList() {
         </Form>
       </Modal>
 
-      {/* ADD / RENAME STAGE */}
       <Modal
         open={stageAddOpen}
         title="Add Stage"
@@ -598,7 +628,6 @@ export default function KanbanList() {
         </Form>
       </Modal>
 
-      {/* EDIT DRAWER */}
       {editId && (
         <KanbanEdit
           visible={!!editId}
@@ -607,7 +636,6 @@ export default function KanbanList() {
         />
       )}
 
-      {/* IMPORT COMPANIES */}
       <Modal
         open={importOpen}
         title="Import Companies"
@@ -628,8 +656,8 @@ export default function KanbanList() {
           style={{ marginBottom: 12 }}
         />
         <div style={{ maxHeight: 360, overflow: "auto", paddingRight: 4 }}>
-          {filteredCompanies.map((c) => {
-            const label =
+          {sortedCompanies.map(({ company: c, imported }) => {
+            const labelText =
               sanitize(
                 [c.productId, c.product, c.name].filter(Boolean).join(" — "),
               ) || `Company #${c.id}`;
@@ -642,11 +670,14 @@ export default function KanbanList() {
                   alignItems: "center",
                   padding: "6px 0",
                   borderBottom: "1px solid rgba(0,0,0,0.03)",
+                  opacity: 1,
                 }}
               >
                 <Checkbox
                   checked={checked}
+                  disabled={imported}
                   onChange={(e) => {
+                    if (imported) return;
                     const val = String(c.id);
                     setSelectedCompanyIds((prev) =>
                       e.target.checked
@@ -655,12 +686,17 @@ export default function KanbanList() {
                     );
                   }}
                 >
-                  {label}
+                  <span>{labelText}</span>
                 </Checkbox>
+                {imported && (
+                  <Tag style={{ marginLeft: 8 }} color="purple">
+                    Imported
+                  </Tag>
+                )}
               </div>
             );
           })}
-          {!filteredCompanies.length && (
+          {!sortedCompanies.length && (
             <Typography.Text type="secondary">
               No companies found.
             </Typography.Text>
@@ -673,5 +709,25 @@ export default function KanbanList() {
         </div>
       </Modal>
     </div>
+  );
+
+  return (
+    <Tabs
+      defaultActiveKey="kanban"
+      items={[
+        { key: "kanban", label: "Kanban", children: kanbanView },
+        {
+          key: "results",
+          label: "Results",
+          children: (
+            <KanbanResults
+              items={items}
+              stages={stages}
+              companies={companies}
+            />
+          ),
+        },
+      ]}
+    />
   );
 }

@@ -28,17 +28,12 @@ export default function IncidentLogEdit() {
     pagination: { pageSize: 1000 },
   });
   const categories = catsRes?.data ?? [];
-useEffect(() => {
-  if (!record || !formProps.form) return;
-  const src =
-    record?.incidentDate ??
-    record?.createdAt ??
-    record?.CreatedAt ??
-    null;
-  if (src) formProps.form.setFieldsValue({ incidentDate: dayjs(src) });
-}, [record, formProps.form]);
-
-
+  useEffect(() => {
+    if (!record || !formProps.form) return;
+    const src =
+      record?.incidentDate ?? record?.createdAt ?? record?.CreatedAt ?? null;
+    if (src) formProps.form.setFieldsValue({ incidentDate: dayjs(src) });
+  }, [record, formProps.form]);
 
   const onChangeProductId = (pid?: string) => {
     if (!pid) return;
@@ -53,42 +48,45 @@ useEffect(() => {
 
   return (
     <Edit saveButtonProps={saveButtonProps}>
-<Form
-  layout="vertical"
-  {...formProps}
-  onFinish={async (values) => {
-    const v: any = { ...values };
+      <Form
+        layout="vertical"
+        {...formProps}
+        onFinish={async (values) => {
+          const v: any = { ...values };
 
-    const companyId =
-      v?.company?.id ?? v?.["company.id"] ?? v?.companyId ?? undefined;
-    if (companyId) {
-      v.company = { id: String(companyId) };
-      v.companyId = String(companyId);
-    }
+          const companyId =
+            v?.company?.id ?? v?.["company.id"] ?? v?.companyId ?? undefined;
+          if (companyId) {
+            v.company = { id: String(companyId) };
+            v.companyId = String(companyId);
+          }
 
-    const categoryId =
-      v?.category?.id ?? v?.["category.id"] ?? v?.categoryId ?? undefined;
-    if (categoryId) {
-      v.category = { id: String(categoryId) };
-      v.categoryId = String(categoryId);
-    }
+          const categoryId =
+            v?.category?.id ?? v?.["category.id"] ?? v?.categoryId ?? undefined;
+          if (categoryId) {
+            v.category = { id: String(categoryId) };
+            v.categoryId = String(categoryId);
+          }
 
-    const now = new Date().toISOString();
-    const incidentIso = v.incidentDate?.toISOString?.();
-    if (incidentIso) {
-      v.createdAt = incidentIso;
-    } else if (record?.createdAt || record?.CreatedAt || record?.incidentDate) {
-      v.createdAt =
-        record?.createdAt ?? record?.CreatedAt ?? record?.incidentDate;
-    }
-    v.updatedAt = now;
+          const now = new Date().toISOString();
+          const incidentIso = v.incidentDate?.toISOString?.();
+          if (incidentIso) {
+            v.createdAt = incidentIso;
+          } else if (
+            record?.createdAt ||
+            record?.CreatedAt ||
+            record?.incidentDate
+          ) {
+            v.createdAt =
+              record?.createdAt ?? record?.CreatedAt ?? record?.incidentDate;
+          }
+          v.updatedAt = now;
 
-    delete v.incidentDate;
+          delete v.incidentDate;
 
-    return formProps.onFinish?.(v);
-  }}
->
-
+          return formProps.onFinish?.(v);
+        }}
+      >
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
             <Form.Item

@@ -26,8 +26,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import axios from "axios";
 import { useApiUrl } from "@refinedev/core";
-
-/* MARKDOWN EDITOR (SAME UX AS INCIDENT LOG) */
+import { DeleteOutlined } from "@ant-design/icons";
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
 
@@ -170,7 +169,7 @@ export default function KanbanEdit({
       { resource: "kanban", id: item.id, values: { comments: next } },
       {
         onSuccess: () => setCommentText(""),
-        onError: () => message.error("FAILED TO ADD COMMENT."),
+        onError: () => message.error("Failed to add comment."),
       },
     );
   };
@@ -188,7 +187,7 @@ export default function KanbanEdit({
     const target = (item.comments || []).find((c) => c.id === cid);
     const me = identity?.email;
     if (!target || !me || target.authorEmail !== me) {
-      message.warning("YOU CAN ONLY DELETE YOUR OWN COMMENTS.");
+      message.warning("You can only delete your OWN comments.");
       return;
     }
     const next = (item.comments || []).filter((c) => c.id !== cid);
@@ -237,7 +236,7 @@ export default function KanbanEdit({
               }
             }
           } catch {
-            message.error("CALENDAR SYNC FAILED.");
+            message.error("Calendar sync failed.");
           }
         },
       },
@@ -276,7 +275,7 @@ export default function KanbanEdit({
     persistChecklist(next);
   };
 
-  /* DELETE CARD (BOTTOM POPCONFIRM) */
+  /* DELETE CARD */
   const doDelete = () =>
     deleteCard(
       { resource: "kanban", id: item.id },
@@ -284,7 +283,6 @@ export default function KanbanEdit({
         onSuccess: () => {
           invalidate({ resource: "kanban", invalidates: ["list"] });
           onClose();
-          message.success("CARD DELETED.");
         },
       },
     );
@@ -293,7 +291,7 @@ export default function KanbanEdit({
     <Drawer
       open={visible}
       onClose={onClose}
-      width={560} /* NARROWER FOR CLEANER LOOK */
+      width={560}
       bodyStyle={{ padding: 0, background: "var(--card-bg)" }}
       closable={false}
       title={
@@ -438,46 +436,35 @@ export default function KanbanEdit({
           </div>
 
           <div className="checklist-list">
-            {checklist.map((c) => (
-              <div
-                key={c.id}
-                className={`checklist-item ${c.done ? "done" : ""}`}
-              >
-                <Checkbox
-                  checked={c.done}
-                  onChange={(e) => toggleChecklistItem(c.id, e.target.checked)}
-                />
-                <Input
-                  value={c.text}
-                  onChange={(e) => renameChecklistItem(c.id, e.target.value)}
-                  placeholder="Checklist item…"
-                  style={
-                    c.done
-                      ? { textDecoration: "line-through", opacity: 0.65 }
-                      : undefined
-                  }
-                />
-                <Button
-                  danger
-                  type="text"
-                  onClick={() => deleteChecklistItem(c.id)}
-                >
-                  Delete
-                </Button>
-              </div>
-            ))}
+  {checklist.map((c) => (
+    <div key={c.id} className={`checklist-item ${c.done ? "done" : ""}`}>
+      <Checkbox
+        checked={c.done}
+        onChange={(e) => toggleChecklistItem(c.id, e.target.checked)}
+      />
+      <Input
+        className="checklist-input"
+        value={c.text}
+        onChange={(e) => renameChecklistItem(c.id, e.target.value)}
+        placeholder="Checklist item…"
+      />
+      <Button
+        className="icon-btn"
+        type="text"
+        danger
+        icon={<DeleteOutlined />}
+        onClick={() => deleteChecklistItem(c.id)}
+        aria-label="Delete"
+      />
+    </div>
+  ))}
+  <div className="checklist-add-row">
+    <Button block className="checklist-add-btn" onClick={addChecklistItem}>
+      + Add item
+    </Button>
+  </div>
+</div>
 
-            {/* ADD BUTTON STAYS AT THE BOTTOM AND SLIDES DOWN AS ITEMS GROW */}
-            <div className="checklist-add-row">
-              <Button
-                block
-                className="checklist-add-btn"
-                onClick={addChecklistItem}
-              >
-                + Add item
-              </Button>
-            </div>
-          </div>
         </section>
 
         <Divider style={{ margin: "8px 0 0" }} />

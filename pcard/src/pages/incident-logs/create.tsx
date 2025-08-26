@@ -15,34 +15,28 @@ export default function IncidentLogCreate() {
     resource: "incident_logs",
   });
 
-  // all companies for mapping ID <-> company
   const { data: companiesRes } = useList<Company>({
     resource: "companies",
     pagination: { pageSize: 1000 },
   });
   const companies = companiesRes?.data ?? [];
 
-  // categories (incident types)
   const { data: catsRes } = useList<any>({
     resource: "categories",
     pagination: { pageSize: 1000 },
   });
   const categories = catsRes?.data ?? [];
 
-  // prefill from query (?companyId=...&productId=...)
   const loc = useLocation();
   useEffect(() => {
     const sp = new URLSearchParams(loc.search);
     const companyId = sp.get("companyId") || undefined;
     const productId = sp.get("productId") || undefined;
     if (companyId) {
-      formProps.form?.setFieldsValue({
-        company: { id: companyId },
-      });
+      formProps.form?.setFieldsValue({ company: { id: companyId } });
       const c = companies.find((x) => String(x.id) === String(companyId));
-      if (c?.productId) {
+      if (c?.productId)
         formProps.form?.setFieldsValue({ productId: c.productId });
-      }
     }
     if (productId) {
       formProps.form?.setFieldsValue({ productId });
@@ -50,14 +44,13 @@ export default function IncidentLogCreate() {
       if (c) formProps.form?.setFieldsValue({ company: { id: c.id } });
     }
   }, [loc.search, companies, formProps.form]);
+
   useEffect(() => {
-  if (!formProps.form) return;
-  const cur = formProps.form.getFieldValue("status");
-  if (!cur) formProps.form.setFieldsValue({ status: "draft" });
-}, [formProps.form]);
+    if (!formProps.form) return;
+    const cur = formProps.form.getFieldValue("status");
+    if (!cur) formProps.form.setFieldsValue({ status: "draft" });
+  }, [formProps.form]);
 
-
-  // keep the two fields in sync
   const onChangeProductId = (pid?: string) => {
     if (!pid) return;
     const c = companies.find((x) => x.productId === pid);
@@ -75,35 +68,27 @@ export default function IncidentLogCreate() {
         {...formProps}
         layout="vertical"
         className="form-compact"
- // create.tsx – onFinish csere
-// a Form komponensen belül
-onFinish={async (values) => {
-  const v: any = { ...values };
-
-  const companyId =
-    v?.company?.id ?? v?.["company.id"] ?? v?.companyId ?? undefined;
-  if (companyId) {
-    v.company = { id: String(companyId) };
-    v.companyId = String(companyId);
-  }
-
-  const categoryId =
-    v?.category?.id ?? v?.["category.id"] ?? v?.categoryId ?? undefined;
-  if (categoryId) {
-    v.category = { id: String(categoryId) };
-    v.categoryId = String(categoryId);
-  }
-
-  const now = new Date().toISOString();
-  const incidentIso = v.incidentDate?.toISOString?.() ?? now;
-
-  v.createdAt = incidentIso;
-  v.updatedAt = now;
-  delete v.incidentDate;
-
-  return formProps.onFinish?.(v);
-}}
-
+        onFinish={async (values) => {
+          const v: any = { ...values };
+          const companyId =
+            v?.company?.id ?? v?.["company.id"] ?? v?.companyId ?? undefined;
+          if (companyId) {
+            v.company = { id: String(companyId) };
+            v.companyId = String(companyId);
+          }
+          const categoryId =
+            v?.category?.id ?? v?.["category.id"] ?? v?.categoryId ?? undefined;
+          if (categoryId) {
+            v.category = { id: String(categoryId) };
+            v.categoryId = String(categoryId);
+          }
+          const now = new Date().toISOString();
+          const incidentIso = v.incidentDate?.toISOString?.() ?? now;
+          v.createdAt = incidentIso;
+          v.updatedAt = now;
+          delete v.incidentDate;
+          return formProps.onFinish?.(v);
+        }}
       >
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
@@ -117,10 +102,7 @@ onFinish={async (values) => {
                 placeholder="Select Product ID"
                 options={companies
                   .filter((c) => !!c.productId)
-                  .map((c) => ({
-                    value: c.productId!,
-                    label: c.productId!,
-                  }))}
+                  .map((c) => ({ value: c.productId!, label: c.productId! }))}
                 onChange={onChangeProductId}
                 showSearch
                 optionFilterProp="label"
@@ -136,10 +118,7 @@ onFinish={async (values) => {
               <Select
                 allowClear
                 placeholder="Select company"
-                options={companies.map((c) => ({
-                  value: c.id,
-                  label: c.name,
-                }))}
+                options={companies.map((c) => ({ value: c.id, label: c.name }))}
                 onChange={(v) => onChangeCompany(String(v))}
                 showSearch
                 optionFilterProp="label"
