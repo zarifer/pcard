@@ -436,35 +436,41 @@ export default function KanbanEdit({
           </div>
 
           <div className="checklist-list">
-  {checklist.map((c) => (
-    <div key={c.id} className={`checklist-item ${c.done ? "done" : ""}`}>
-      <Checkbox
-        checked={c.done}
-        onChange={(e) => toggleChecklistItem(c.id, e.target.checked)}
-      />
-      <Input
-        className="checklist-input"
-        value={c.text}
-        onChange={(e) => renameChecklistItem(c.id, e.target.value)}
-        placeholder="Checklist item…"
-      />
-      <Button
-        className="icon-btn"
-        type="text"
-        danger
-        icon={<DeleteOutlined />}
-        onClick={() => deleteChecklistItem(c.id)}
-        aria-label="Delete"
-      />
-    </div>
-  ))}
-  <div className="checklist-add-row">
-    <Button block className="checklist-add-btn" onClick={addChecklistItem}>
-      + Add item
-    </Button>
-  </div>
-</div>
-
+            {checklist.map((c) => (
+              <div
+                key={c.id}
+                className={`checklist-item ${c.done ? "done" : ""}`}
+              >
+                <Checkbox
+                  checked={c.done}
+                  onChange={(e) => toggleChecklistItem(c.id, e.target.checked)}
+                />
+                <Input
+                  className="checklist-input"
+                  value={c.text}
+                  onChange={(e) => renameChecklistItem(c.id, e.target.value)}
+                  placeholder="Checklist item…"
+                />
+                <Button
+                  className="icon-btn"
+                  type="text"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => deleteChecklistItem(c.id)}
+                  aria-label="Delete"
+                />
+              </div>
+            ))}
+            <div className="checklist-add-row">
+              <Button
+                block
+                className="checklist-add-btn"
+                onClick={addChecklistItem}
+              >
+                + Add item
+              </Button>
+            </div>
+          </div>
         </section>
 
         <Divider style={{ margin: "8px 0 0" }} />

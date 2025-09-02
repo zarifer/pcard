@@ -1,10 +1,10 @@
 .kanban-board {
   display: flex;
   flex-wrap: nowrap;
-  gap: 16px;
-  padding: 20px;
+  gap: 12px;
+  padding: 16px;
   background: var(--background, #f5f5f5);
-  min-height: 80vh;
+  min-height: 72vh;
   align-items: stretch;
 }
 
@@ -33,17 +33,21 @@
 .add-stage-column {
   background: transparent;
   box-shadow: none;
-  border: 1px dashed #e0d9ff;
+  border: 1px dashed #e0e0e0;
   border-radius: 12px;
   align-items: center;
   justify-content: center;
-  padding: 12px;
+  padding: 10px;
   flex: 1 1 220px;
   min-width: 180px;
 }
 
+[data-theme="dark"] .add-stage-column {
+  border-color: #3a3a3a;
+}
+
 .kanban-column-header {
-  padding: 12px 16px;
+  padding: 10px 14px;
   font-weight: 700;
   font-size: 16px;
   border-bottom: 1px solid #e0e0e0;
@@ -98,11 +102,11 @@
 }
 
 .kanban-column-content {
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-height: 60vh;
+  gap: 10px;
+  min-height: 48vh;
 }
 
 .kanban-card {
@@ -161,6 +165,25 @@
   opacity: 0.6;
 }
 
+.add-stage-btn {
+  border-color: #dcdcdc !important;
+  color: #333 !important;
+}
+
+.add-stage-btn:hover {
+  border-color: #888 !important;
+}
+
+[data-theme="dark"] .add-stage-btn {
+  border-color: #555 !important;
+  color: #ddd !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .add-stage-btn:hover {
+  border-color: #888 !important;
+}
+
 /* Card tints driven by Results flags */
 .kanban-card.private {
   background: #f7f1ff;
@@ -177,35 +200,35 @@
   transform: none;
 }
 
-/* Results site */
-.ant-table-tbody > tr.results-row-private > td {
+/* Results row tints */
+.ant-table-tbody>tr.results-row-private>td {
   background: #f7f1ff;
   border-color: #e0d9ff;
 }
 
-[data-theme="dark"] .ant-table-tbody > tr.results-row-private > td {
+[data-theme="dark"] .ant-table-tbody>tr.results-row-private>td {
   background: #2b1f47;
 }
 
-.ant-table-tbody > tr.results-row-locked > td {
+.ant-table-tbody>tr.results-row-locked>td {
   background: #f3f3f3;
   color: #666;
 }
 
-[data-theme="dark"] .ant-table-tbody > tr.results-row-locked > td {
+[data-theme="dark"] .ant-table-tbody>tr.results-row-locked>td {
   background: #2a2a2a;
   color: #a8a8a8;
 }
 
-.ant-table-tbody > tr.results-row-snapshot > td {
+.ant-table-tbody>tr.results-row-snapshot>td {
   background: #fafafa;
 }
 
-[data-theme="dark"] .ant-table-tbody > tr.results-row-snapshot > td {
+[data-theme="dark"] .ant-table-tbody>tr.results-row-snapshot>td {
   background: #1e1a2b;
 }
-/* Checklist layout */ 
 
+/* Checklist */
 .checklist-list {
   display: grid;
   gap: 8px;
@@ -222,6 +245,13 @@
   min-width: 0;
 }
 
+/* strikethrough when checked */
+.checklist-item.done .checklist-input {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
+/* buttons in checklist */
 .icon-btn {
   border: 0;
   background: transparent;
@@ -238,7 +268,47 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-.checklist-item.done .checklist-input input {
+.checklist-item.done .ant-input {
   text-decoration: line-through;
   opacity: 0.65;
 }
+
+/* SimpleMDE / Markdown dark theme */
+.markdown-body {
+  background: #fff;
+  color: #222;
+  border-radius: 8px;
+}
+
+[data-theme="dark"] .markdown-body {
+  background: #1e1a2b;
+  color: #eaeaea;
+  border: 1px solid #3b3259;
+}
+
+[data-theme="dark"] .editor-toolbar {
+  background: #2a2440;
+  border-color: #3b3259;
+}
+
+[data-theme="dark"] .editor-toolbar a,
+[data-theme="dark"] .editor-toolbar button {
+  color: #ddd !important;
+}
+
+[data-theme="dark"] .cm-s-easymde .CodeMirror,
+[data-theme="dark"] .CodeMirror {
+  background: #1e1a2b;
+  color: #eaeaea;
+  border: 1px solid #3b3259;
+}
+
+[data-theme="dark"] .cm-s-easymde .CodeMirror-gutters {
+  background: #1e1a2b;
+  border-right: 1px solid #3b3259;
+}
+
+[data-theme="dark"] .editor-preview {
+  background: #1e1a2b;
+  color: #eaeaea;
+} 

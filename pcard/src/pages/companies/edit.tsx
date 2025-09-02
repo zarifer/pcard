@@ -257,7 +257,7 @@ export default function CompanyEdit() {
                   : undefined,
               activationFile:
                 values.activationType === "license_file"
-                  ? activationFile ?? record?.activationFile
+                  ? (activationFile ?? record?.activationFile)
                   : undefined,
               activationFileName:
                 values.activationType === "license_file"
@@ -275,7 +275,8 @@ export default function CompanyEdit() {
 
             if (
               (values.activationType === "license_file" && activationFile) ||
-              (values.activationType === "license_file" && record?.activationFile)
+              (values.activationType === "license_file" &&
+                record?.activationFile)
             ) {
               payload.activationFile = activationFile ?? record?.activationFile;
             }
@@ -407,9 +408,7 @@ export default function CompanyEdit() {
                             <p className="ant-upload-text">
                               Click or drag a logo image
                             </p>
-                            <p className="ant-upload-hint">
-                              PNG/JPG – 1 file
-                            </p>
+                            <p className="ant-upload-hint">PNG/JPG – 1 file</p>
                           </Dragger>
                         </Form.Item>
                       </Col>

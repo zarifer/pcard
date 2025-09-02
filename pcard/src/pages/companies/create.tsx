@@ -370,9 +370,7 @@ export default function CompanyCreate() {
                             <p className="ant-upload-text">
                               Click or drag a logo image
                             </p>
-                            <p className="ant-upload-hint">
-                              PNG/JPG – 1 file
-                            </p>
+                            <p className="ant-upload-hint">PNG/JPG – 1 file</p>
                           </Dragger>
                         </Form.Item>
                       </Col>

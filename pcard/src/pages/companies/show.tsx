@@ -386,9 +386,7 @@ export default function CompanyShow() {
                               </div>
                               <div>
                                 <strong>Password:</strong>{" "}
-                                {company.activationPassword
-                                  ? "••••••••"
-                                  : "—"}
+                                {company.activationPassword ? "••••••••" : "—"}
                               </div>
                             </>
                           )}
@@ -400,24 +398,22 @@ export default function CompanyShow() {
                           )}
                           <div>
                             <strong>License expiry:</strong>{" "}
-                            {company.licenseExpiryMode === "perpetual"
-                              ? "Perpetual"
-                              : company.licenseExpiryMode === "none"
-                                ? "No expiry"
-                                : company.licenseExpiry
-                                  ? (
-                                      <>
-                                        <DateField
-                                          value={company.licenseExpiry}
-                                        />
-                                        {isOverdue && (
-                                          <span className="status-badge status-badge--overdue">
-                                            Overdue
-                                          </span>
-                                        )}
-                                      </>
-                                    )
-                                  : "—"}
+                            {company.licenseExpiryMode === "perpetual" ? (
+                              "Perpetual"
+                            ) : company.licenseExpiryMode === "none" ? (
+                              "No expiry"
+                            ) : company.licenseExpiry ? (
+                              <>
+                                <DateField value={company.licenseExpiry} />
+                                {isOverdue && (
+                                  <span className="status-badge status-badge--overdue">
+                                    Overdue
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              "—"
+                            )}
                           </div>
                         </div>
 

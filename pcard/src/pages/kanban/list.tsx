@@ -18,7 +18,6 @@ import {
   Checkbox,
   Tabs,
   Tag,
-  Table,
 } from "antd";
 import type { MenuProps } from "antd";
 import { useMemo, useState, useCallback } from "react";
@@ -45,12 +44,13 @@ type KanbanItem = {
 type Stage = { id: string; key: string; title: string; order?: number };
 
 type Company = {
-  id: string;
+  id: string | number;
   name?: string;
   product?: string;
   productId?: string;
   licenseExpiry?: string;
   versionCheckPath?: string;
+  logPath?: string; /* NEW – used in description */
   wdManuallyOff?: boolean;
   pctManuallyOff?: boolean;
 };
@@ -168,22 +168,21 @@ export default function KanbanList() {
   );
 
   const clearBoardNow = async () => {
-  const ids = items.map((i) => i.id).filter(Boolean) as string[];
-  if (!ids.length) return;
-  await Promise.all(ids.map((id) => axios.delete(`${API_URL}/kanban/${id}`)));
-  invalidate({ resource: "kanban", invalidates: ["list"] });
-};
+    const ids = items.map((i) => i.id).filter(Boolean) as string[];
+    if (!ids.length) return;
+    await Promise.all(ids.map((id) => axios.delete(`${API_URL}/kanban/${id}`)));
+    invalidate({ resource: "kanban", invalidates: ["list"] });
+  };
 
-const onClearBoard = () =>
-  modal.confirm({
-    title: "Clear entire board?",
-    content: "This will permanently delete all cards.",
-    okText: "Clear Board",
-    okButtonProps: { danger: true },
-    cancelText: "Cancel",
-    onOk: clearBoardNow,
-  });
-
+  const onClearBoard = () =>
+    modal.confirm({
+      title: "Clear entire board?",
+      content: "This will permanently delete all cards.",
+      okText: "Clear Board",
+      okButtonProps: { danger: true },
+      cancelText: "Cancel",
+      onOk: clearBoardNow,
+    });
 
   const [stageForm] = Form.useForm<{ title: string }>();
   const [stageEditTarget, setStageEditTarget] = useState<Stage | null>(null);
@@ -245,7 +244,6 @@ const onClearBoard = () =>
           {
             onSuccess: () => {
               invalidate({ resource: "stages", invalidates: ["list"] });
-        
             },
           },
         );
@@ -403,12 +401,13 @@ const onClearBoard = () =>
         const title = sanitize(c.productId || "(no Product ID)").slice(0, 120);
 
         const desc = [
-          `Vendor: ${sanitize(c.name || "—")}`,
-          `Product: ${sanitize(c.product || "—")}`,
-          `License expiry: ${fmtDate(c.licenseExpiry)}`,
-          `Current version check: ${sanitize(c.versionCheckPath || "—")}`,
-          `Disable Windows Defender: ${yesno(c.wdManuallyOff)}`,
-          `Disable PCT: ${yesno(c.pctManuallyOff)}`,
+          `- Vendor: ${sanitize(c.name || "—")}`,
+          `- Product: ${sanitize(c.product || "—")}`,
+          `- License expiry: ${fmtDate(c.licenseExpiry)}`,
+          `- Log path: ${sanitize(c.logPath || "—")}`,
+          `- Current version check: ${sanitize(c.versionCheckPath || "—")}`,
+          `- Disable Windows Defender: ${yesno(c.wdManuallyOff)}`,
+          `- Disable PCT: ${yesno(c.pctManuallyOff)}`,
         ].join("\n");
 
         const checklist = checklistTexts.map((t, i) => ({
@@ -456,16 +455,15 @@ const onClearBoard = () =>
 
   const kanbanView = (
     <div className="kanban-page">
-     <div className="toolbar" style={{ marginTop: 8 }}>
-  <Button type="primary" onClick={() => setImportOpen(true)}>
-    Import Companies
-  </Button>
-  <Button danger style={{ marginLeft: 8 }} onClick={onClearBoard}>
-    Clear Board
-  </Button>
-  <div style={{ flex: 1 }} />
-</div>
-
+      <div className="toolbar" style={{ marginTop: 8 }}>
+        <Button type="primary" onClick={() => setImportOpen(true)}>
+          Import Companies
+        </Button>
+        <Button danger style={{ marginLeft: 8 }} onClick={onClearBoard}>
+          Clear Board
+        </Button>
+        <div style={{ flex: 1 }} />
+      </div>
 
       <div className="kanban-board">
         {stages.map((col) => {
@@ -720,11 +718,7 @@ const onClearBoard = () =>
           key: "results",
           label: "Results",
           children: (
-            <KanbanResults
-              items={items}
-              stages={stages}
-              companies={companies}
-            />
+            <KanbanResults items={items} stages={stages} companies={[]} />
           ),
         },
       ]}
