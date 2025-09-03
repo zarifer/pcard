@@ -75,7 +75,7 @@ export default function LicenseExpiryList() {
         const expiryEffective =
           c.licenseExpiryMode === "perpetual" || c.licenseExpiryMode === "none"
             ? dayjs("2099-12-31").toISOString()
-            : c.licenseExpiry ?? null;
+            : (c.licenseExpiry ?? null);
         const now = dayjs().startOf("day");
         const st = expiryEffective
           ? dayjs(expiryEffective).startOf("day").isBefore(now)
@@ -103,7 +103,9 @@ export default function LicenseExpiryList() {
     if (!range || (!range[0] && !range[1])) return filteredByTab;
     const [start, end] = range;
     return filteredByTab.filter((r: any) => {
-      const d = r._expiryEffective ? dayjs(r._expiryEffective).startOf("day") : null;
+      const d = r._expiryEffective
+        ? dayjs(r._expiryEffective).startOf("day")
+        : null;
       if (!d) return false;
       if (start && d.isBefore(start.startOf("day"))) return false;
       if (end && d.isAfter(end.endOf("day"))) return false;
@@ -132,7 +134,8 @@ export default function LicenseExpiryList() {
   const saveEdit = useCallback(async () => {
     if (!editRow) return;
     let licenseExpiry: string | null | undefined = undefined;
-    let licenseExpiryMode: "date" | "perpetual" | "none" | undefined = undefined;
+    let licenseExpiryMode: "date" | "perpetual" | "none" | undefined =
+      undefined;
 
     if (editNone) {
       licenseExpiry = dayjs("2099-12-31").toISOString();
@@ -221,7 +224,8 @@ export default function LicenseExpiryList() {
           : Infinity;
         return da - db;
       },
-      render: (v: any) => (v ? <DateField value={v} format="YYYY-MM-DD" /> : "—"),
+      render: (v: any) =>
+        v ? <DateField value={v} format="YYYY-MM-DD" /> : "—",
     },
     {
       title: "Status",
@@ -239,7 +243,11 @@ export default function LicenseExpiryList() {
       dataIndex: "actions",
       width: 80,
       render: (_: any, r: Company) => (
-        <Button type="text" icon={<EditOutlined />} onClick={() => openEdit(r)} />
+        <Button
+          type="text"
+          icon={<EditOutlined />}
+          onClick={() => openEdit(r)}
+        />
       ),
     },
   ];
@@ -255,7 +263,12 @@ export default function LicenseExpiryList() {
     <List title="License Expiry">
       <Card className="panel-card">
         <div
-          style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}
+          style={{
+            display: "flex",
+            gap: 8,
+            flexWrap: "wrap",
+            marginBottom: 12,
+          }}
         >
           <RangePicker
             value={range ?? [null, null]}

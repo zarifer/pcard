@@ -188,7 +188,7 @@ export default function IncidentLogList() {
         v ? String(v).slice(0, 80) + (String(v).length > 80 ? "…" : "") : "—",
     },
     {
-      title: "Incident type",
+      title: "Incident Type",
       dataIndex: ["category", "id"],
       width: 240,
 

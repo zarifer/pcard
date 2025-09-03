@@ -50,7 +50,7 @@ type Company = {
   productId?: string;
   licenseExpiry?: string;
   versionCheckPath?: string;
-  logPath?: string; /* NEW – used in description */
+  logPath?: string /* NEW – used in description */;
   wdManuallyOff?: boolean;
   pctManuallyOff?: boolean;
 };
@@ -403,9 +403,9 @@ export default function KanbanList() {
         const desc = [
           `- Vendor: ${sanitize(c.name || "—")}`,
           `- Product: ${sanitize(c.product || "—")}`,
-          `- License expiry: ${fmtDate(c.licenseExpiry)}`,
-          `- Log path: ${sanitize(c.logPath || "—")}`,
-          `- Current version check: ${sanitize(c.versionCheckPath || "—")}`,
+          `- License Expiry: ${fmtDate(c.licenseExpiry)}`,
+          `- Log Path: ${sanitize(c.logPath || "—")}`,
+          `- Current Version Check: ${sanitize(c.versionCheckPath || "—")}`,
           `- Disable Windows Defender: ${yesno(c.wdManuallyOff)}`,
           `- Disable PCT: ${yesno(c.pctManuallyOff)}`,
         ].join("\n");
@@ -585,7 +585,7 @@ export default function KanbanList() {
           <Form.Item label="Description" name="description">
             <Input.TextArea rows={4} />
           </Form.Item>
-          <Form.Item label="Due date" name="dueDate">
+          <Form.Item label="Due Date" name="dueDate">
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
         </Form>
@@ -617,7 +617,7 @@ export default function KanbanList() {
       >
         <Form form={stageForm} layout="vertical">
           <Form.Item
-            label="Stage title"
+            label="Stage Title"
             name="title"
             rules={[{ required: true, message: "Title is required" }]}
           >

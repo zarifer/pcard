@@ -1,19 +1,19 @@
-.ant-table-tbody>tr.license-row-soon>td {
+.ant-table-tbody > tr.license-row-soon > td {
   background: rgba(250, 173, 20, 0.22) !important;
   border-left: 3px solid rgba(250, 173, 20, 0.9) !important;
 }
 
-[data-theme="dark"] .ant-table-tbody>tr.license-row-soon>td {
+[data-theme="dark"] .ant-table-tbody > tr.license-row-soon > td {
   background: rgba(250, 173, 20, 0.32) !important;
   border-left: 3px solid rgba(250, 173, 20, 0.95) !important;
 }
 
-.ant-table-tbody>tr.license-row-expired>td {
+.ant-table-tbody > tr.license-row-expired > td {
   background: rgba(255, 77, 79, 0.22) !important;
   border-left: 3px solid rgba(255, 77, 79, 0.9) !important;
 }
 
-[data-theme="dark"] .ant-table-tbody>tr.license-row-expired>td {
+[data-theme="dark"] .ant-table-tbody > tr.license-row-expired > td {
   background: rgba(255, 77, 79, 0.36) !important;
   border-left: 3px solid rgba(255, 77, 79, 0.95) !important;
 }
