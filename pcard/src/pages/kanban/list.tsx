@@ -401,13 +401,13 @@ export default function KanbanList() {
         const title = sanitize(c.productId || "(no Product ID)").slice(0, 120);
 
         const desc = [
-          `- Vendor: ${sanitize(c.name || "—")}`,
-          `- Product: ${sanitize(c.product || "—")}`,
-          `- License Expiry: ${fmtDate(c.licenseExpiry)}`,
-          `- Log Path: ${sanitize(c.logPath || "—")}`,
-          `- Current Version Check: ${sanitize(c.versionCheckPath || "—")}`,
-          `- Disable Windows Defender: ${yesno(c.wdManuallyOff)}`,
-          `- Disable PCT: ${yesno(c.pctManuallyOff)}`,
+          `- **Vendor**: ${sanitize(c.name || "—")}`,
+          `- **Product**: ${sanitize(c.product || "—")}`,
+          `- **License Expiry**: ${fmtDate(c.licenseExpiry)}`,
+          `- **Log Path**: ${sanitize(c.logPath || "—")}`,
+          `- **Current Version Check**: ${sanitize(c.versionCheckPath || "—")}`,
+          `- **Disable Windows Defender**: ${yesno(c.wdManuallyOff)}`,
+          `- **Disable PCT**: ${yesno(c.pctManuallyOff)}`,
         ].join("\n");
 
         const checklist = checklistTexts.map((t, i) => ({

@@ -2,8 +2,8 @@ import {
   useShow,
   useUpdate,
   useGetIdentity,
-  useDelete /* ENABLE DELETE CARD */,
-  useInvalidate /* TO REFRESH LIST AFTER DELETE */,
+  useDelete,
+  useInvalidate,
 } from "@refinedev/core";
 import {
   Drawer,
@@ -18,7 +18,7 @@ import {
   Tag,
   message,
   Checkbox,
-  Popconfirm /* CONFIRM UI FOR DELETE CARD */,
+  Popconfirm,
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState, useMemo } from "react";
@@ -30,8 +30,6 @@ import { DeleteOutlined } from "@ant-design/icons";
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
 
-/* ALL COMMENTS IN ENGLISH AND CAPS LOCK AS REQUESTED */
-
 type ColumnId = "todo" | "in-progress" | "review" | "waiting-vendor" | "done";
 
 type KanbanItem = {
@@ -39,21 +37,20 @@ type KanbanItem = {
   title: string;
   description?: string;
   stage: ColumnId;
-  dueDate?: string | null /* ISO */;
-  calendarId?: string | null /* LINKED CALENDAR ENTRY */;
+  dueDate?: string | null;
+  calendarId?: string | null;
   checklist?: Array<{ id: string; text: string; done: boolean }>;
   comments?: Array<{
     id: string;
-    text: string /* MARKDOWN OR PLAIN */;
-    at: string /* ISO DATE */;
+    text: string;
+    at: string;
     authorName?: string;
     authorEmail?: string;
     authorAvatar?: string;
-    pinned?: boolean /* PINNED COMMENTS FLOAT TO TOP */;
+    pinned?: boolean;
   }>;
 };
 
-/* UTILS */
 const sanitize = (s: string) => s.replace(/<[^>]*>/g, "").trim();
 const rid = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -66,44 +63,34 @@ export default function KanbanEdit({
   onClose: () => void;
   cardId: string;
 }) {
-  /* API BASE URL FOR CALENDAR SYNC */
   const API_URL = useApiUrl();
 
-  /* LOAD CARD */
   const { queryResult } = useShow<KanbanItem>({
     resource: "kanban",
     id: cardId,
   });
   const item = queryResult?.data?.data;
 
-  /* MUTATIONS */
   const { mutate: updateCard } = useUpdate();
   const { mutate: deleteCard } = useDelete();
   const invalidate = useInvalidate();
 
-  /* USER IDENTITY FOR COMMENTS (TO ALLOW DELETING OWN COMMENTS) */
   const { data: identity } = useGetIdentity<any>();
 
-  /* TITLE STATE */
   const [title, setTitle] = useState("");
   const [titleEditing, setTitleEditing] = useState(false);
 
-  /* DESCRIPTION STATE (MARKDOWN EDITOR) */
   const [descEdit, setDescEdit] = useState(false);
   const [desc, setDesc] = useState("");
 
-  /* COMMENTS STATE */
   const [commentText, setCommentText] = useState("");
 
-  /* DUE DATE STATE */
   const [due, setDue] = useState<Dayjs | null>(null);
 
-  /* CHECKLIST STATE */
   const [checklist, setChecklist] = useState<
     Array<{ id: string; text: string; done: boolean }>
   >([]);
 
-  /* INIT STATE FROM ITEM */
   useEffect(() => {
     if (!item) return;
     setTitle(item.title || "");
@@ -112,13 +99,11 @@ export default function KanbanEdit({
     setChecklist(item.checklist || []);
   }, [item?.id]);
 
-  /* OVERDUE FLAG (USED NEAR THE DUE DATE TITLE) */
   const isOverdue = useMemo(
     () => !!item?.dueDate && dayjs(item.dueDate).isBefore(dayjs(), "day"),
     [item?.dueDate],
   );
 
-  /* SORT COMMENTS: PINNED FIRST, THEN NEWEST FIRST */
   const sortedComments = useMemo(() => {
     const arr = [...(item?.comments || [])];
     return arr.sort((a, b) => {
@@ -130,7 +115,6 @@ export default function KanbanEdit({
 
   if (!visible || !item) return null;
 
-  /* QUICK SAVE TITLE */
   const saveTitle = () => {
     const clean = sanitize(title).slice(0, 160);
     if (!clean || clean === item.title) return setTitleEditing(false);
@@ -140,7 +124,6 @@ export default function KanbanEdit({
     );
   };
 
-  /* SAVE DESCRIPTION (MARKDOWN TEXT) */
   const saveDescription = () => {
     const clean = sanitize(desc);
     updateCard(
@@ -149,7 +132,6 @@ export default function KanbanEdit({
     );
   };
 
-  /* ADD COMMENT */
   const addComment = () => {
     const text = sanitize(commentText);
     if (!text) return;
@@ -174,7 +156,6 @@ export default function KanbanEdit({
     );
   };
 
-  /* PIN / UNPIN COMMENT */
   const togglePin = (cid: string) => {
     const next = (item.comments || []).map((c) =>
       c.id === cid ? { ...c, pinned: !c.pinned } : c,
@@ -182,7 +163,6 @@ export default function KanbanEdit({
     updateCard({ resource: "kanban", id: item.id, values: { comments: next } });
   };
 
-  /* DELETE OWN COMMENT ONLY */
   const deleteOwnComment = (cid: string) => {
     const target = (item.comments || []).find((c) => c.id === cid);
     const me = identity?.email;
@@ -194,7 +174,6 @@ export default function KanbanEdit({
     updateCard({ resource: "kanban", id: item.id, values: { comments: next } });
   };
 
-  /* SYNC DUE DATE WITH CALENDAR (SILENT CALENDAR CALLS) */
   const syncDueDate = async (value: Dayjs | null) => {
     const nextIso = value ? value.toDate().toISOString() : null;
 
@@ -243,7 +222,6 @@ export default function KanbanEdit({
     );
   };
 
-  /* CHECKLIST HELPERS */
   const persistChecklist = (next: KanbanItem["checklist"]) => {
     setChecklist(next || []);
     updateCard({
@@ -275,7 +253,6 @@ export default function KanbanEdit({
     persistChecklist(next);
   };
 
-  /* DELETE CARD */
   const doDelete = () =>
     deleteCard(
       { resource: "kanban", id: item.id },
@@ -295,33 +272,55 @@ export default function KanbanEdit({
       bodyStyle={{ padding: 0, background: "var(--card-bg)" }}
       closable={false}
       title={
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {titleEditing ? (
-            <Input
-              autoFocus
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onPressEnter={saveTitle}
-              onBlur={saveTitle}
-              onKeyDown={(e) => e.key === "Escape" && setTitleEditing(false)}
-              style={{ fontWeight: 700 }}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {titleEditing ? (
+              <Input
+                autoFocus
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onPressEnter={saveTitle}
+                onBlur={saveTitle}
+                onKeyDown={(e) => e.key === "Escape" && setTitleEditing(false)}
+                style={{ fontWeight: 700 }}
+              />
+            ) : (
+              <>
+                <Typography.Text strong style={{ fontSize: 16 }}>
+                  {item.title}
+                </Typography.Text>
+                <Button type="link" onClick={() => setTitleEditing(true)}>
+                  ✎
+                </Button>
+              </>
+            )}
+          </div>
+          <Space size={8}>
+            {isOverdue && <Tag color="error">Overdue</Tag>}
+            <DatePicker
+              value={due}
+              onChange={(d) => {
+                setDue(d);
+                syncDueDate(d || null);
+              }}
+              placeholder="Due date"
+              allowClear
             />
-          ) : (
-            <>
-              <Typography.Text strong style={{ fontSize: 16 }}>
-                {item.title}
-              </Typography.Text>
-              <Button type="link" onClick={() => setTitleEditing(true)}>
-                ✎
-              </Button>
-            </>
-          )}
-          {/* NOTE: DUE DATE LIVES IN ITS OWN SECTION BELOW DESCRIPTION */}
+          </Space>
+        </div>
+      }
+      footer={
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Popconfirm title="Are you sure?" okText="Delete" okButtonProps={{ danger: true }} onConfirm={doDelete}>
+            <Button danger>Delete card</Button>
+          </Popconfirm>
+          <Space>
+            <Button onClick={onClose}>Cancel</Button>
+          </Space>
         </div>
       }
     >
       <div style={{ padding: 20, display: "grid", gap: 16 }}>
-        {/* DESCRIPTION – VIEW TO EDIT (MARKDOWN) */}
         <section>
           <Typography.Title level={5} style={{ marginTop: 0 }}>
             Description
@@ -403,31 +402,6 @@ export default function KanbanEdit({
 
         <Divider style={{ margin: "8px 0 0" }} />
 
-        {/* DUE DATE SECTION WITH INLINE OVERDUE BADGE */}
-        <section>
-          <Typography.Title level={5} className="section-title-row">
-            <span>Due date</span>
-            {isOverdue && (
-              <Tag color="error" className="overdue-tag">
-                Overdue
-              </Tag>
-            )}
-          </Typography.Title>
-
-          <DatePicker
-            value={due}
-            onChange={(d) => {
-              setDue(d);
-              syncDueDate(d || null);
-            }}
-            placeholder="Pick a due date"
-            style={{ width: "100%" }}
-          />
-        </section>
-
-        <Divider style={{ margin: "8px 0 0" }} />
-
-        {/* CHECKLIST – ADD AT BOTTOM, ITEMS FADE/STRIKETHROUGH WHEN DONE */}
         <section>
           <div className="checklist-header">
             <Typography.Title level={5} style={{ margin: 0 }}>
@@ -475,7 +449,6 @@ export default function KanbanEdit({
 
         <Divider style={{ margin: "8px 0 0" }} />
 
-        {/* COMMENTS WITH PIN & DELETE-OWN */}
         <section>
           <Typography.Title level={5}>Comments</Typography.Title>
           <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
@@ -558,18 +531,6 @@ export default function KanbanEdit({
             }}
           />
         </section>
-
-        {/* BOTTOM ACTIONS – DELETE CARD WITH POPCONFIRM */}
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Popconfirm
-            title="Are you sure?"
-            okText="Delete"
-            okButtonProps={{ danger: true }}
-            onConfirm={doDelete}
-          >
-            <Button danger>Delete card</Button>
-          </Popconfirm>
-        </div>
       </div>
     </Drawer>
   );
