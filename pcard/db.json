@@ -359,6 +359,26 @@
       ],
       "type": "Kanban",
       "refKanbanId": "5a08"
+    },
+    {
+      "id": "48e2",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-19T07:58:06.468Z",
+        "2025-09-19T07:58:06.468Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "b335"
+    },
+    {
+      "id": "b7ed",
+      "title": "SONIC-ES",
+      "date": [
+        "2025-09-19T07:58:06.468Z",
+        "2025-09-19T07:58:06.468Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "9400"
     }
   ],
   "stages": [

@@ -242,15 +242,14 @@ export default function LicenseExpiryList() {
       title: "Actions",
       dataIndex: "actions",
       width: 80,
-render: (_: any, r: Company) => (
-  <Button
-    size="small"
-    type="default"
-    icon={<EditOutlined />}
-    onClick={() => openEdit(r)}
-  />
-),
-
+      render: (_: any, r: Company) => (
+        <Button
+          size="small"
+          type="default"
+          icon={<EditOutlined />}
+          onClick={() => openEdit(r)}
+        />
+      ),
     },
   ];
 
@@ -262,48 +261,48 @@ render: (_: any, r: Company) => (
         : "";
 
   return (
-<List title="Licenses">
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 12,
-      flexWrap: "wrap",
-      marginBottom: 8,
-    }}
-  >
-    <Tabs
-      className="tabs-default"
-      activeKey={active}
-      onChange={(k) => setActive(k as TabKey)}
-      items={[
-        { key: "all", label: "All", children: null },
-        { key: "soon", label: "Expiring Soon", children: null },
-        { key: "expired", label: "Expired", children: null },
-      ]}
-      tabBarStyle={{ margin: 0 }}
-    />
+    <List title="Licenses">
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          flexWrap: "wrap",
+          marginBottom: 8,
+        }}
+      >
+        <Tabs
+          className="tabs-default"
+          activeKey={active}
+          onChange={(k) => setActive(k as TabKey)}
+          items={[
+            { key: "all", label: "All", children: null },
+            { key: "soon", label: "Expiring Soon", children: null },
+            { key: "expired", label: "Expired", children: null },
+          ]}
+          tabBarStyle={{ margin: 0 }}
+        />
 
-    <RangePicker
-      size="small"
-      value={range ?? [null, null]}
-      onChange={(v) => setRange(v as any)}
-      allowEmpty={[true, true]}
-    />
-  </div>
+        <RangePicker
+          size="small"
+          value={range ?? [null, null]}
+          onChange={(v) => setRange(v as any)}
+          allowEmpty={[true, true]}
+        />
+      </div>
 
-  <Card className="panel-card">
-    <Table
-      loading={isLoading}
-      rowKey="id"
-      dataSource={filtered}
-      columns={columns}
-      pagination={{ pageSize: 10, showSizeChanger: false }}
-      rowClassName={rowClassName}
-      scroll={{ x: 1200 }}
-    />
-  </Card>
+      <Card className="panel-card">
+        <Table
+          loading={isLoading}
+          rowKey="id"
+          dataSource={filtered}
+          columns={columns}
+          pagination={{ pageSize: 10, showSizeChanger: false }}
+          rowClassName={rowClassName}
+          scroll={{ x: 1200 }}
+        />
+      </Card>
 
       <Modal
         open={editOpen}

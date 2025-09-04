@@ -1,152 +1,124 @@
-import { HttpError, CrudFilters, BaseRecord } from "@refinedev/core";
-import {
-  useTable,
-  DeleteButton,
-  useModalForm,
-  CreateButton,
-} from "@refinedev/antd";
-import {
-  Button,
-  Modal,
-  Form,
-  Input,
-  Space,
-  Table,
-  Card,
-  Typography,
-} from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { Card, Table, Space, Button, Modal, Form, Input, message } from "antd";
 import { EditOutlined } from "@ant-design/icons";
+import { DeleteButton } from "@refinedev/antd";
+import { useApiUrl } from "@refinedev/core";
+import axios from "axios";
 
-const { Title } = Typography;
+type Category = { id: string; title: string };
+type Props = { onReady?: (api: { openCreate: () => void }) => void };
 
-type Category = {
-  id: number | string;
-  title: string;
-};
+export default function CategoriesBox({ onReady }: Props) {
+  const API_URL = useApiUrl();
+  const [data, setData] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
 
-export default function CategoriesBox() {
-  const {
-    tableProps,
-    tableQueryResult: { refetch },
-  } = useTable<Category, HttpError, CrudFilters>({
-    resource: "categories",
-    syncWithLocation: false,
-    pagination: { pageSize: 10 },
-  });
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Category | null>(null);
 
-  const {
-    modalProps: createModalProps,
-    formProps: createFormProps,
-    show: showCreate,
-  } = useModalForm<Category>({
-    resource: "categories",
-    action: "create",
-    defaultVisible: false,
-    autoSubmitClose: true,
-    onMutationSuccess: () => refetch(),
-  });
+  const [createForm] = Form.useForm<{ title: string }>();
+  const [editForm] = Form.useForm<{ title: string }>();
 
-  const {
-    modalProps: editModalProps,
-    formProps: editFormProps,
-    show: showEdit,
-  } = useModalForm<Category>({
-    resource: "categories",
-    action: "edit",
-    defaultVisible: false,
-    autoSubmitClose: true,
-    onMutationSuccess: () => refetch(),
-  });
+  const fetchAll = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get<Category[]>(`${API_URL}/categories`);
+      setData(res.data || []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAll();
+  }, []);
+
+  const showCreate = () => {
+    createForm.resetFields();
+    setCreateOpen(true);
+  };
+
+  const showEdit = (id: string) => {
+    const item = data.find((x) => String(x.id) === String(id));
+    if (!item) return;
+    setEditTarget(item);
+    editForm.setFieldsValue({ title: item.title });
+    setEditOpen(true);
+  };
+
+  useEffect(() => {
+    onReady?.({ openCreate: showCreate });
+  }, [onReady]);
+
+  const createSubmit = async () => {
+    const vals = await createForm.validateFields();
+    try {
+      await axios.post(`${API_URL}/categories`, { id: `${Date.now()}`, title: vals.title.trim() });
+      setCreateOpen(false);
+      await fetchAll();
+      message.success("Category created");
+    } catch {
+      message.error("Create failed");
+    }
+  };
+
+  const editSubmit = async () => {
+    const vals = await editForm.validateFields();
+    if (!editTarget) return;
+    try {
+      await axios.patch(`${API_URL}/categories/${editTarget.id}`, { title: vals.title.trim() });
+      setEditOpen(false);
+      setEditTarget(null);
+      await fetchAll();
+      message.success("Category updated");
+    } catch {
+      message.error("Update failed");
+    }
+  };
+
+  const columns = useMemo(
+    () => [
+      { title: "Title", dataIndex: "title" },
+      {
+        title: "Actions",
+        dataIndex: "actions",
+        width: 120,
+        render: (_: any, record: Category) => (
+          <Space onClick={(e) => e.stopPropagation()}>
+            <Button size="small" className="ant-btn-icon-only" icon={<EditOutlined />} onClick={() => showEdit(record.id)} aria-label="Edit" />
+            <DeleteButton
+              hideText
+              size="small"
+              resource="categories"
+              recordItemId={record.id}
+              onSuccess={fetchAll}
+              confirmTitle="Delete category?"
+              confirmOkText="Delete"
+            />
+          </Space>
+        ),
+      },
+    ],
+    [data],
+  );
 
   return (
     <Card className="panel-card categories-card">
-      <div className="panel-header">
-        <Title level={5} className="panel-title">
-          Categories
-        </Title>
-        <div className="panel-actions">
-          <CreateButton
-            resource="categories"
-            onClick={(e) => {
-              e.preventDefault();
-              showCreate();
-            }}
-          >
-            Add Category
-          </CreateButton>
-        </div>
-      </div>
+      <Table<Category> rowKey="id" size="middle" className="categories-table" loading={loading} dataSource={data} columns={columns as any} />
 
-      <Table<Category>
-        {...tableProps}
-        rowKey="id"
-        size="middle"
-        className="categories-table"
-      >
-        <Table.Column<Category> dataIndex="title" title="Title" />
-        <Table.Column<Category>
-          title="Actions"
-          dataIndex="actions"
-          width={120}
-          render={(_, record: BaseRecord) => (
-            <Space onClick={(e) => e.stopPropagation()}>
-              <Button
-                size="small"
-                className="ant-btn-icon-only"
-                icon={<EditOutlined />}
-                onClick={() => showEdit(record.id)}
-                aria-label="Edit"
-              />
-              <DeleteButton
-                hideText
-                size="small"
-                resource="categories"
-                recordItemId={record.id}
-                onSuccess={() => refetch()}
-                confirmTitle="Delete category?"
-                confirmOkText="Delete"
-              />
-            </Space>
-          )}
-        />
-      </Table>
-
-      <Modal
-        {...createModalProps}
-        title="Create Category"
-        okText="Save"
-        destroyOnClose
-        centered
-        width={420}
-        className="category-modal-small"
-      >
-        <Form {...createFormProps} layout="vertical">
-          <Form.Item
-            label="Title"
-            name={["title"]}
-            rules={[{ required: true, message: "Title is required" }]}
-          >
-            <Input placeholder="e.g. Networking" maxLength={60} />
+      <Modal open={createOpen} onCancel={() => setCreateOpen(false)} onOk={createSubmit} title="Add Category" okText="Create" destroyOnClose>
+        <Form form={createForm} layout="vertical">
+          <Form.Item name="title" label="Title" rules={[{ required: true, message: "Please enter a title" }]}>
+            <Input placeholder="Category title" maxLength={80} />
           </Form.Item>
         </Form>
       </Modal>
 
-      <Modal
-        {...editModalProps}
-        title="Edit Category"
-        okText="Save"
-        destroyOnClose
-        centered
-        width={420}
-        className="category-modal-small"
-      >
-        <Form {...editFormProps} layout="vertical">
-          <Form.Item
-            label="Title"
-            name={["title"]}
-            rules={[{ required: true, message: "Title is required" }]}
-          >
-            <Input maxLength={60} />
+      <Modal open={editOpen} onCancel={() => { setEditOpen(false); setEditTarget(null); }} onOk={editSubmit} title="Edit Category" okText="Save" destroyOnClose>
+        <Form form={editForm} layout="vertical">
+          <Form.Item name="title" label="Title" rules={[{ required: true, message: "Please enter a title" }]}>
+            <Input placeholder="Category title" maxLength={80} />
           </Form.Item>
         </Form>
       </Modal>

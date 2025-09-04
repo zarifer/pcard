@@ -272,7 +272,14 @@ export default function KanbanEdit({
       bodyStyle={{ padding: 0, background: "var(--card-bg)" }}
       closable={false}
       title={
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {titleEditing ? (
               <Input
@@ -310,8 +317,19 @@ export default function KanbanEdit({
         </div>
       }
       footer={
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Popconfirm title="Are you sure?" okText="Delete" okButtonProps={{ danger: true }} onConfirm={doDelete}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Popconfirm
+            title="Are you sure?"
+            okText="Delete"
+            okButtonProps={{ danger: true }}
+            onConfirm={doDelete}
+          >
             <Button danger>Delete card</Button>
           </Popconfirm>
           <Space>
