@@ -24,7 +24,7 @@ import { Helmet } from "react-helmet";
 import { CredentialResponse } from "./interfaces/google";
 import { parseJwt } from "./utils/parse-jwt";
 
-//Own imports
+//My imports
 import { Login } from "./pages/login";
 import { CalendarList, CalendarCreate, CalendarEdit } from "./pages/calendar";
 import {

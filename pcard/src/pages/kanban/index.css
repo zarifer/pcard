@@ -317,3 +317,8 @@
   box-shadow: inset 0 0 0 2px #b599ff;
   border-radius: 8px;
 }
+
+.kanban-topbar {
+  margin: 8px 0 12px;
+}
+

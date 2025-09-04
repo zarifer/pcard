@@ -359,62 +359,6 @@ export default function CompanyShow() {
                                 ))
                               : "—"}
                           </div>
-                          <div>
-                            <strong>Interface:</strong> {appearanceLabel}
-                          </div>
-                          <div>
-                            <strong>Activation:</strong>{" "}
-                            {activationTypeLabel(company?.activationType)}
-                          </div>
-                          {company?.activationType === "serial" && (
-                            <div>
-                              <strong>Serial key:</strong>{" "}
-                              {company.activationSerial || "—"}
-                            </div>
-                          )}
-                          {company?.activationType === "license_file" && (
-                            <div>
-                              <strong>License file:</strong>{" "}
-                              {company.activationFileName || "Attached"}
-                            </div>
-                          )}
-                          {company?.activationType === "vendor_account" && (
-                            <>
-                              <div>
-                                <strong>Vendor e-mail:</strong>{" "}
-                                {company.activationEmail || "—"}
-                              </div>
-                              <div>
-                                <strong>Password:</strong>{" "}
-                                {company.activationPassword ? "••••••••" : "—"}
-                              </div>
-                            </>
-                          )}
-                          {company?.activationType === "email_based" && (
-                            <div>
-                              <strong>Activation e-mail:</strong>{" "}
-                              {company.activationEmail || "—"}
-                            </div>
-                          )}
-                          <div>
-                            <strong>License expiry:</strong>{" "}
-                            {company.licenseExpiryMode === "perpetual" ? (
-                              "Perpetual"
-                            ) : company.licenseExpiryMode === "none" ? (
-                              "No expiry"
-                            ) : company.licenseExpiry ? (
-                              <>
-                                <DateField value={company.licenseExpiry} />
-                                {isOverdue && (
-                                  <span className="status-badge status-badge--overdue">
-                                    Overdue
-                                  </span>
-                                )}
-                              </>
-                            ) : (
-                              "—"
-                            )}
-                          </div>
                         </div>
 
                         <div className="product-summary__tz">
@@ -526,6 +470,62 @@ export default function CompanyShow() {
                       title="Updates"
                       bordered={false}
                     >
+                                                <div>
+                            <strong>Interface:</strong> {appearanceLabel}
+                          </div>
+                          <div>
+                            <strong>Activation:</strong>{" "}
+                            {activationTypeLabel(company?.activationType)}
+                          </div>
+                          {company?.activationType === "serial" && (
+                            <div>
+                              <strong>Serial key:</strong>{" "}
+                              {company.activationSerial || "—"}
+                            </div>
+                          )}
+                          {company?.activationType === "license_file" && (
+                            <div>
+                              <strong>License file:</strong>{" "}
+                              {company.activationFileName || "Attached"}
+                            </div>
+                          )}
+                          {company?.activationType === "vendor_account" && (
+                            <>
+                              <div>
+                                <strong>Vendor e-mail:</strong>{" "}
+                                {company.activationEmail || "—"}
+                              </div>
+                              <div>
+                                <strong>Password:</strong>{" "}
+                                {company.activationPassword ? " " : "—"}
+                              </div>
+                            </>
+                          )}
+                          {company?.activationType === "email_based" && (
+                            <div>
+                              <strong>Activation e-mail:</strong>{" "}
+                              {company.activationEmail || "—"}
+                            </div>
+                          )}
+                          <div>
+                            <strong>License expiry:</strong>{" "}
+                            {company.licenseExpiryMode === "perpetual" ? (
+                              "Perpetual"
+                            ) : company.licenseExpiryMode === "none" ? (
+                              "No expiry"
+                            ) : company.licenseExpiry ? (
+                              <>
+                                <DateField value={company.licenseExpiry} />
+                                {isOverdue && (
+                                  <span className="status-badge status-badge--overdue">
+                                    Overdue
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              "—"
+                            )}
+                          </div>
                       <div className="kv">
                         <span>Current version check:</span>
                         <span>{company.versionCheckPath || "—"}</span>
@@ -590,13 +590,6 @@ export default function CompanyShow() {
                   className="panel-header"
                   style={{ display: "flex", alignItems: "center", gap: 8 }}
                 >
-                  <Typography.Title
-                    level={5}
-                    className="panel-title"
-                    style={{ margin: 0 }}
-                  >
-                    Incident Logs
-                  </Typography.Title>
                   <CreateButton
                     resource="incident_logs"
                     size="small"

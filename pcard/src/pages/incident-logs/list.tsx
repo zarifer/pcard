@@ -90,7 +90,7 @@ export default function IncidentLogList() {
         activeKey={activeTab}
         onChange={(k) => setActiveTab(k)}
 tabBarExtraContent={
-  <Space>
+  <Space> 
     <Input.Search
       allowClear
       placeholder="Search Company or Product ID…"

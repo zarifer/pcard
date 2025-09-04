@@ -379,6 +379,226 @@
       ],
       "type": "Kanban",
       "refKanbanId": "9400"
+    },
+    {
+      "id": "51c0",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-19T19:01:12.481Z",
+        "2025-09-19T19:01:12.481Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "a8fe"
+    },
+    {
+      "id": "3e81",
+      "title": "SONIC-ES",
+      "date": [
+        "2025-09-19T19:01:12.481Z",
+        "2025-09-19T19:01:12.481Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "0928"
+    },
+    {
+      "id": "a7f5",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-19T19:04:14.163Z",
+        "2025-09-19T19:04:14.163Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "7c65"
+    },
+    {
+      "id": "b383",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-19T19:04:20.344Z",
+        "2025-09-19T19:04:20.344Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "6d7d"
+    },
+    {
+      "id": "8e52",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-19T19:04:32.692Z",
+        "2025-09-19T19:04:32.692Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "2ed6"
+    },
+    {
+      "id": "1384",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-19T19:04:55.098Z",
+        "2025-09-19T19:04:55.098Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "6be5"
+    },
+    {
+      "id": "a8f2",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-19T19:04:55.098Z",
+        "2025-09-19T19:04:55.098Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "26a0"
+    },
+    {
+      "id": "5806",
+      "title": "SONIC-ES",
+      "date": [
+        "2025-09-19T19:04:59.761Z",
+        "2025-09-19T19:04:59.761Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "5089"
+    },
+    {
+      "id": "fcab",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-19T19:06:01.662Z",
+        "2025-09-19T19:06:01.662Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "6914"
+    },
+    {
+      "id": "85b3",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-19T19:06:01.662Z",
+        "2025-09-19T19:06:01.662Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "ac8f"
+    },
+    {
+      "id": "e4c5",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-19T19:06:56.154Z",
+        "2025-09-19T19:06:56.154Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "ce9f"
+    },
+    {
+      "id": "276c",
+      "title": "SONIC-ES",
+      "date": [
+        "2025-09-19T19:06:56.154Z",
+        "2025-09-19T19:06:56.154Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "fb46"
+    },
+    {
+      "id": "bdfc",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-19T19:08:37.042Z",
+        "2025-09-19T19:08:37.042Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "fb75"
+    },
+    {
+      "id": "2bf3",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-19T19:08:37.042Z",
+        "2025-09-19T19:08:37.042Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "07ae"
+    },
+    {
+      "id": "6368",
+      "title": "SONIC-ES",
+      "date": [
+        "2025-09-19T19:43:56.193Z",
+        "2025-09-19T19:43:56.193Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "365e"
+    },
+    {
+      "id": "304e",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-19T19:45:12.545Z",
+        "2025-09-19T19:45:12.545Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "2993"
+    },
+    {
+      "id": "a3cb",
+      "title": "SONIC-ES",
+      "date": [
+        "2025-09-19T19:45:12.545Z",
+        "2025-09-19T19:45:12.545Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "0ca8"
+    },
+    {
+      "id": "5bc3",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-19T19:47:37.499Z",
+        "2025-09-19T19:47:37.499Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "e2f2"
+    },
+    {
+      "id": "a957",
+      "title": "AHN-IS",
+      "date": [
+        "2025-09-19T19:47:46.827Z",
+        "2025-09-19T19:47:46.827Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "0a16"
+    },
+    {
+      "id": "fe34",
+      "title": "SONIC-ES",
+      "date": [
+        "2025-09-19T19:47:46.827Z",
+        "2025-09-19T19:47:46.827Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "9959"
+    },
+    {
+      "id": "366e",
+      "title": "CATO-AV",
+      "date": [
+        "2025-09-19T19:51:38.681Z",
+        "2025-09-19T19:51:38.681Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "b390"
+    },
+    {
+      "id": "48b7",
+      "title": "SONIC-ES",
+      "date": [
+        "2025-09-19T19:51:38.681Z",
+        "2025-09-19T19:51:38.681Z"
+      ],
+      "type": "Kanban",
+      "refKanbanId": "9079"
     }
   ],
   "stages": [
@@ -413,7 +633,88 @@
       "order": 5
     }
   ],
-  "kanban": [],
+  "kanban": [
+    {
+      "id": "b390",
+      "title": "CATO-AV",
+      "description": "- **Vendor**: Cato Networks\n- **Product**: Cato EPP\n- **License Expiry**: 31/12/2099\n- **Current Version Check**: GUI -> ? -> About\n- **Disable Windows Defender**: No\n- **Disable PCT**: No\n- **Log Path**: C:\\ProgramData\\CatoEndpointProtection\\logs, C:\\Program Files\\Cato Networks\\CatoEndPointProtection\\bin\\logs, C:\\ProgramData\\CatoEndpointProtection\\core_dumps",
+      "stage": "todo",
+      "checklist": [
+        {
+          "id": "1757015498682-0-frzdsv",
+          "text": "Windows Update",
+          "done": false
+        },
+        {
+          "id": "1757015498682-1-vv8uk9",
+          "text": "Product Update",
+          "done": false
+        },
+        {
+          "id": "1757015498682-2-0fjmmx",
+          "text": "Bootstrap Check",
+          "done": false
+        },
+        {
+          "id": "1757015498682-3-imdw79",
+          "text": "WD Check",
+          "done": false
+        },
+        {
+          "id": "1757015498682-4-4y1q6p",
+          "text": "Config File Update",
+          "done": false
+        },
+        {
+          "id": "1757015498682-5-j3jhto",
+          "text": "Snapshot Created",
+          "done": false
+        }
+      ],
+      "dueDate": "2025-09-19T19:51:38.681Z",
+      "calendarId": "366e"
+    },
+    {
+      "id": "9079",
+      "title": "SONIC-ES",
+      "description": "- **Vendor**: SonicWall\n- **Product**: SonicWall Endpoint Security\n- **License Expiry**: 31/12/2099\n- **Current Version Check**: Windows Tray -> Click on Client -> Upper header\n- **Disable Windows Defender**: Yes\n- **Disable PCT**: Yes\n- **Log Path**: C:\\Program Files\\SonicWall\\Endpoint_Security\\logs",
+      "stage": "todo",
+      "checklist": [
+        {
+          "id": "1757015498824-0-f1fgdt",
+          "text": "Windows Update",
+          "done": false
+        },
+        {
+          "id": "1757015498824-1-6mr9js",
+          "text": "Product Update",
+          "done": false
+        },
+        {
+          "id": "1757015498824-2-oab8zm",
+          "text": "Bootstrap Check",
+          "done": false
+        },
+        {
+          "id": "1757015498824-3-l1p5yt",
+          "text": "WD Check",
+          "done": false
+        },
+        {
+          "id": "1757015498824-4-9noxqa",
+          "text": "Config File Update",
+          "done": false
+        },
+        {
+          "id": "1757015498824-5-2rjngl",
+          "text": "Snapshot Created",
+          "done": false
+        }
+      ],
+      "dueDate": "2025-09-19T19:51:38.681Z",
+      "calendarId": "48b7"
+    }
+  ],
   "resultsRows": [
     {
       "id": "2025-9-ahn-is",

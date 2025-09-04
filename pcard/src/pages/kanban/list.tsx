@@ -50,7 +50,7 @@ type Company = {
   productId?: string;
   licenseExpiry?: string;
   versionCheckPath?: string;
-  logPath?: string /* NEW – used in description */;
+  log?: string;
   wdManuallyOff?: boolean;
   pctManuallyOff?: boolean;
 };
@@ -404,10 +404,10 @@ export default function KanbanList() {
           `- **Vendor**: ${sanitize(c.name || "—")}`,
           `- **Product**: ${sanitize(c.product || "—")}`,
           `- **License Expiry**: ${fmtDate(c.licenseExpiry)}`,
-          `- **Log Path**: ${sanitize(c.logPath || "—")}`,
           `- **Current Version Check**: ${sanitize(c.versionCheckPath || "—")}`,
           `- **Disable Windows Defender**: ${yesno(c.wdManuallyOff)}`,
           `- **Disable PCT**: ${yesno(c.pctManuallyOff)}`,
+         `- **Log Path**: ${sanitize(c.log || "—")}`,
         ].join("\n");
 
         const checklist = checklistTexts.map((t, i) => ({
@@ -455,15 +455,6 @@ export default function KanbanList() {
 
   const kanbanView = (
     <div className="kanban-page">
-      <div className="toolbar" style={{ marginTop: 8 }}>
-        <Button type="primary" onClick={() => setImportOpen(true)}>
-          Import Companies
-        </Button>
-        <Button danger style={{ marginLeft: 8 }} onClick={onClearBoard}>
-          Clear Board
-        </Button>
-        <div style={{ flex: 1 }} />
-      </div>
 
       <div className="kanban-board">
         {stages.map((col) => {
@@ -494,6 +485,7 @@ export default function KanbanList() {
               onDragEnter={(e) => handleDragOverCol(col.key, e)}
               onDrop={() => handleDropOnCol(col.key)}
             >
+              
               <div className="kanban-column-header">
                 <Typography.Text className="stage-title" strong>
                   {col.title}
@@ -710,18 +702,34 @@ export default function KanbanList() {
   );
 
   return (
-    <Tabs
-      defaultActiveKey="kanban"
-      items={[
-        { key: "kanban", label: "Kanban", children: kanbanView },
-        {
-          key: "results",
-          label: "Results",
-          children: (
-            <KanbanResults items={items} stages={stages} companies={[]} />
-          ),
-        },
-      ]}
-    />
+    <>
+      <Typography.Title level={4} style={{ margin: 0, marginBottom: 12 }}>
+        Kanban Board
+      </Typography.Title>
+
+      <Tabs
+        defaultActiveKey="kanban"
+        tabBarExtraContent={
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button type="primary" onClick={() => setImportOpen(true)}>
+              Import Companies
+            </Button>
+            <Button danger onClick={onClearBoard}>
+              Clear Board
+            </Button>
+          </div>
+        }
+        items={[
+          { key: "kanban", label: "Kanban", children: kanbanView },
+          {
+            key: "results",
+            label: "Results",
+            children: (
+              <KanbanResults items={items} stages={stages} companies={[]} />
+            ),
+          },
+        ]}
+      />
+    </>
   );
 }

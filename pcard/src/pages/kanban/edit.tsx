@@ -1,11 +1,4 @@
 import {
-  useShow,
-  useUpdate,
-  useGetIdentity,
-  useDelete,
-  useInvalidate,
-} from "@refinedev/core";
-import {
   Drawer,
   Typography,
   Input,
@@ -20,6 +13,7 @@ import {
   Checkbox,
   Popconfirm,
 } from "antd";
+import { useUpdate, useDelete, useInvalidate, useGetIdentity } from "@refinedev/core";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
@@ -65,12 +59,6 @@ export default function KanbanEdit({
 }) {
   const API_URL = useApiUrl();
 
-  const { queryResult } = useShow<KanbanItem>({
-    resource: "kanban",
-    id: cardId,
-  });
-  const item = queryResult?.data?.data;
-
   const { mutate: updateCard } = useUpdate();
   const { mutate: deleteCard } = useDelete();
   const invalidate = useInvalidate();
@@ -91,13 +79,22 @@ export default function KanbanEdit({
     Array<{ id: string; text: string; done: boolean }>
   >([]);
 
+  const [comments, setComments] = useState<KanbanItem["comments"]>([]);
+
+  const [item, setItem] = useState<KanbanItem | null>(null);
+
   useEffect(() => {
-    if (!item) return;
-    setTitle(item.title || "");
-    setDesc(item.description || "");
-    setDue(item.dueDate ? dayjs(item.dueDate) : null);
-    setChecklist(item.checklist || []);
-  }, [item?.id]);
+    if (!cardId) return;
+    axios.get(`${API_URL}/kanban/${cardId}`).then((r) => {
+      const c = r.data as KanbanItem;
+      setItem(c);
+      setTitle(c.title || "");
+      setDesc(c.description || "");
+      setDue(c.dueDate ? dayjs(c.dueDate) : null);
+      setChecklist(c.checklist || []);
+      setComments(c.comments || []);
+    });
+  }, [cardId, API_URL]);
 
   const isOverdue = useMemo(
     () => !!item?.dueDate && dayjs(item.dueDate).isBefore(dayjs(), "day"),
@@ -105,13 +102,13 @@ export default function KanbanEdit({
   );
 
   const sortedComments = useMemo(() => {
-    const arr = [...(item?.comments || [])];
+    const arr = [...(comments || [])];
     return arr.sort((a, b) => {
       if (!!a.pinned && !b.pinned) return -1;
       if (!a.pinned && !!b.pinned) return 1;
       return new Date(b.at).getTime() - new Date(a.at).getTime();
     });
-  }, [item?.comments]);
+  }, [comments]);
 
   if (!visible || !item) return null;
 
@@ -145,81 +142,37 @@ export default function KanbanEdit({
       authorAvatar: identity?.avatar || identity?.picture,
       pinned: false,
     };
-    const next = [...(item.comments || []), newComment];
-
+    const next = [...(comments || []), newComment];
     updateCard(
       { resource: "kanban", id: item.id, values: { comments: next } },
       {
-        onSuccess: () => setCommentText(""),
+        onSuccess: () => {
+          setCommentText("");
+          setComments(next);
+        },
         onError: () => message.error("Failed to add comment."),
       },
     );
   };
 
   const togglePin = (cid: string) => {
-    const next = (item.comments || []).map((c) =>
+    const next = (comments || []).map((c) =>
       c.id === cid ? { ...c, pinned: !c.pinned } : c,
     );
+    setComments(next);
     updateCard({ resource: "kanban", id: item.id, values: { comments: next } });
   };
 
   const deleteOwnComment = (cid: string) => {
-    const target = (item.comments || []).find((c) => c.id === cid);
+    const target = (comments || []).find((c) => c.id === cid);
     const me = identity?.email;
     if (!target || !me || target.authorEmail !== me) {
       message.warning("You can only delete your OWN comments.");
       return;
     }
-    const next = (item.comments || []).filter((c) => c.id !== cid);
+    const next = (comments || []).filter((c) => c.id !== cid);
+    setComments(next);
     updateCard({ resource: "kanban", id: item.id, values: { comments: next } });
-  };
-
-  const syncDueDate = async (value: Dayjs | null) => {
-    const nextIso = value ? value.toDate().toISOString() : null;
-
-    updateCard(
-      { resource: "kanban", id: item.id, values: { dueDate: nextIso } },
-      {
-        onSuccess: async () => {
-          try {
-            if (!nextIso) {
-              if (item.calendarId) {
-                await axios.delete(`${API_URL}/calendar/${item.calendarId}`);
-                await axios.patch(`${API_URL}/kanban/${item.id}`, {
-                  calendarId: null,
-                });
-              }
-              return;
-            }
-
-            const dateRange = [nextIso, nextIso];
-
-            if (item.calendarId) {
-              await axios.patch(`${API_URL}/calendar/${item.calendarId}`, {
-                title: sanitize(title || item.title),
-                date: dateRange,
-                type: "Kanban",
-              });
-            } else {
-              const cres = await axios.post(`${API_URL}/calendar`, {
-                title: sanitize(title || item.title),
-                date: dateRange,
-                type: "Kanban",
-                refKanbanId: item.id,
-              });
-              const calId = cres.data?.id;
-              if (calId) {
-                await axios.patch(`${API_URL}/kanban/${item.id}`, {
-                  calendarId: calId,
-                });
-              }
-            }
-          } catch {
-            message.error("Calendar sync failed.");
-          }
-        },
-      },
-    );
   };
 
   const persistChecklist = (next: KanbanItem["checklist"]) => {
@@ -288,7 +241,9 @@ export default function KanbanEdit({
                 onChange={(e) => setTitle(e.target.value)}
                 onPressEnter={saveTitle}
                 onBlur={saveTitle}
-                onKeyDown={(e) => e.key === "Escape" && setTitleEditing(false)}
+                onKeyDown={(e) =>
+                  e.key === "Escape" && setTitleEditing(false)
+                }
                 style={{ fontWeight: 700 }}
               />
             ) : (
@@ -304,11 +259,17 @@ export default function KanbanEdit({
           </div>
           <Space size={8}>
             {isOverdue && <Tag color="error">Overdue</Tag>}
+            <Typography.Text type="secondary">Due Date</Typography.Text>
             <DatePicker
               value={due}
               onChange={(d) => {
                 setDue(d);
-                syncDueDate(d || null);
+                const iso = d ? d.toDate().toISOString() : null;
+                updateCard({
+                  resource: "kanban",
+                  id: item.id,
+                  values: { dueDate: iso },
+                });
               }}
               placeholder="Due date"
               allowClear
@@ -429,10 +390,7 @@ export default function KanbanEdit({
 
           <div className="checklist-list">
             {checklist.map((c) => (
-              <div
-                key={c.id}
-                className={`checklist-item ${c.done ? "done" : ""}`}
-              >
+              <div key={c.id} className={`checklist-item ${c.done ? "done" : ""}`}>
                 <Checkbox
                   checked={c.done}
                   onChange={(e) => toggleChecklistItem(c.id, e.target.checked)}
@@ -454,11 +412,7 @@ export default function KanbanEdit({
               </div>
             ))}
             <div className="checklist-add-row">
-              <Button
-                block
-                className="checklist-add-btn"
-                onClick={addChecklistItem}
-              >
+              <Button block className="checklist-add-btn" onClick={addChecklistItem}>
                 + Add item
               </Button>
             </div>
@@ -491,9 +445,7 @@ export default function KanbanEdit({
               const mine =
                 !!identity?.email && c.authorEmail === identity.email;
               return (
-                <List.Item
-                  className={`comment-item ${c.pinned ? "pinned" : ""}`}
-                >
+                <List.Item className={`comment-item ${c.pinned ? "pinned" : ""}`}>
                   <List.Item.Meta
                     avatar={
                       <Avatar src={c.authorAvatar}>
@@ -503,10 +455,7 @@ export default function KanbanEdit({
                     title={
                       <Space
                         size={8}
-                        style={{
-                          width: "100%",
-                          justifyContent: "space-between",
-                        }}
+                        style={{ width: "100%", justifyContent: "space-between" }}
                       >
                         <span style={{ fontWeight: 600 }}>
                           {c.authorName || "User"}{" "}

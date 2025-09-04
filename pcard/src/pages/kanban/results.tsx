@@ -781,9 +781,6 @@ export default function Results({
           marginBottom: 12,
         }}
       >
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          Results
-        </Typography.Title>
         <Space>
           <Button onClick={exportCsv}>Export to CSV</Button>
           <Button onClick={onOpenConfig}>Info / Settings</Button>
