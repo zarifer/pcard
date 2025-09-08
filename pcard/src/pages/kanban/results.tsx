@@ -52,6 +52,13 @@ type Config = {
   preview?: number;
 };
 
+type PrimaryAction = { label: string; onClick: () => void };
+export type ResultsApi = {
+  exportCsv: () => void;
+  openConfig: () => void;
+  getPrimaryAction: () => PrimaryAction | null;
+};
+
 const API_URL =
   (import.meta as any).env?.VITE_API_URL || "http://localhost:3001";
 const MONTHS = [
@@ -101,10 +108,12 @@ export default function Results({
   items,
   stages,
   companies,
+  onReady,
 }: {
   items: KanbanItem[];
   stages: Stage[];
   companies: Company[];
+  onReady?: (api: ResultsApi) => void;
 }) {
   const now = new Date();
   const nowYear = now.getFullYear();
@@ -518,7 +527,7 @@ export default function Results({
     if (next.length) resolveMissingNames(next, year, monthIdx + 1);
   }, [items, companies, stages, reconcileRows, effectiveLocked]);
 
-  const onOpenConfig = () => {
+  const onOpenConfig = useCallback(() => {
     cfgForm.setFieldsValue({
       testSetName: config.testSetName ?? "testset-2025",
       cleanSampleSize: config.cleanSampleSize ?? 100000,
@@ -526,7 +535,7 @@ export default function Results({
       preview: config.preview,
     });
     setCfgOpen(true);
-  };
+  }, [cfgForm, config]);
 
   const onSaveConfig = async () => {
     const vals = await cfgForm.validateFields();
@@ -543,7 +552,7 @@ export default function Results({
     setCfgOpen(false);
   };
 
-  const exportCsv = () => {
+  const exportCsv = useCallback(() => {
     const meta = [
       ["test-set name", config.testSetName ?? ""],
       ["clean sample size", String(config.cleanSampleSize ?? "")],
@@ -576,21 +585,19 @@ export default function Results({
       r.privateFlag ? "TRUE" : "FALSE",
       r.invResFlag ? "TRUE" : "FALSE",
     ]);
-    const serialize = (arr: string[][]) =>
-      arr
-        .map((line) =>
-          line.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(","),
-        )
-        .join("\n");
-    const monthName = MONTHS[monthIdx];
-    const content = [
-      serialize(meta),
-      "",
-      header.join(","),
-      ...data.map((d) =>
-        d.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(","),
-      ),
-    ].join("\n");
+const serialize = (arr: string[][]) =>
+  arr
+    .map((line) => line.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
+const monthName = MONTHS[monthIdx];
+const content = [
+  serialize(meta),
+  "",
+  header.join(","),
+  ...data.map((d) => d.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(",")),
+].join("\n");
+
     const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -600,9 +607,9 @@ export default function Results({
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-  };
+  }, [rows, config, gradeFromCertMiss, year, monthIdx]);
 
-  const onLockSnapshot = () => {
+  const onLockSnapshot = useCallback(() => {
     if (effectiveLocked) return;
     Modal.confirm({
       title: "Lock this month?",
@@ -614,7 +621,7 @@ export default function Results({
         takeSnapshot();
       },
     });
-  };
+  }, [effectiveLocked, takeSnapshot]);
 
   const onUnlockConfirm = async () => {
     const allowed = isPast(year, monthIdx) || snapshotLocked;
@@ -771,40 +778,40 @@ export default function Results({
     [effectiveLocked, gradeFromCertMiss],
   );
 
+  // ---- Biztonságos API a Tabs fejlécnek (nincs több DOM-mókolás) ----
+  useEffect(() => {
+    const getPrimaryAction = (): PrimaryAction | null => {
+      const past = isPast(year, monthIdx);
+      const shouldUnlock = past ? !overrideUnlocked : snapshotLocked;
+      if (shouldUnlock)
+        return { label: "Unlock", onClick: () => setUnlockOpen(true) };
+      if (!past && !snapshotLocked)
+        return { label: "Take Snapshot", onClick: onLockSnapshot };
+      return null;
+    };
+    onReady?.({
+      exportCsv,
+      openConfig: onOpenConfig,
+      getPrimaryAction,
+    });
+ }, [
+    onReady,
+    exportCsv,
+    onOpenConfig,
+    isPast,
+    year,
+    monthIdx,
+    overrideUnlocked,
+    snapshotLocked,
+    onLockSnapshot,
+  ]);
+
   return (
-    <div style={{ padding: 16 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 12,
-        }}
-      >
-        <Space>
-          <Button onClick={exportCsv}>Export to CSV</Button>
-          <Button onClick={onOpenConfig}>Info / Settings</Button>
-          {isPast(year, monthIdx) ? (
-            overrideUnlocked ? (
-              <Button type="primary" onClick={onLockSnapshot}>
-                Take Snapshot
-              </Button>
-            ) : (
-              <Button type="primary" onClick={() => setUnlockOpen(true)}>
-                Unlock
-              </Button>
-            )
-          ) : snapshotLocked ? (
-            <Button type="primary" onClick={() => setUnlockOpen(true)}>
-              Unlock
-            </Button>
-          ) : (
-            <Button type="primary" onClick={onLockSnapshot}>
-              Take Snapshot
-            </Button>
-          )}
-        </Space>
-      </div>
+  <div
+    style={{
+      padding: 16,
+    }}
+>
 
       <Space
         direction="vertical"
@@ -830,7 +837,7 @@ export default function Results({
           <Segmented
             value={monthIdx}
             onChange={(v) => setMonthIdx(Number(v))}
-            options={monthOptions}
+            options={MONTHS.map((m, i) => ({ label: m.slice(0, 3), value: i }))}
           />
           <Space>
             <Tag color="processing">
@@ -876,6 +883,7 @@ export default function Results({
         onOk={onSaveConfig}
         title="Settings"
         okText="Save"
+
         okButtonProps={{ disabled: effectiveLocked }}
       >
         <Form

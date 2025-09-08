@@ -13,7 +13,12 @@ import {
   Checkbox,
   Popconfirm,
 } from "antd";
-import { useUpdate, useDelete, useInvalidate, useGetIdentity } from "@refinedev/core";
+import {
+  useUpdate,
+  useDelete,
+  useInvalidate,
+  useGetIdentity,
+} from "@refinedev/core";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
@@ -241,9 +246,7 @@ export default function KanbanEdit({
                 onChange={(e) => setTitle(e.target.value)}
                 onPressEnter={saveTitle}
                 onBlur={saveTitle}
-                onKeyDown={(e) =>
-                  e.key === "Escape" && setTitleEditing(false)
-                }
+                onKeyDown={(e) => e.key === "Escape" && setTitleEditing(false)}
                 style={{ fontWeight: 700 }}
               />
             ) : (
@@ -390,7 +393,10 @@ export default function KanbanEdit({
 
           <div className="checklist-list">
             {checklist.map((c) => (
-              <div key={c.id} className={`checklist-item ${c.done ? "done" : ""}`}>
+              <div
+                key={c.id}
+                className={`checklist-item ${c.done ? "done" : ""}`}
+              >
                 <Checkbox
                   checked={c.done}
                   onChange={(e) => toggleChecklistItem(c.id, e.target.checked)}
@@ -412,7 +418,11 @@ export default function KanbanEdit({
               </div>
             ))}
             <div className="checklist-add-row">
-              <Button block className="checklist-add-btn" onClick={addChecklistItem}>
+              <Button
+                block
+                className="checklist-add-btn"
+                onClick={addChecklistItem}
+              >
                 + Add item
               </Button>
             </div>
@@ -445,7 +455,9 @@ export default function KanbanEdit({
               const mine =
                 !!identity?.email && c.authorEmail === identity.email;
               return (
-                <List.Item className={`comment-item ${c.pinned ? "pinned" : ""}`}>
+                <List.Item
+                  className={`comment-item ${c.pinned ? "pinned" : ""}`}
+                >
                   <List.Item.Meta
                     avatar={
                       <Avatar src={c.authorAvatar}>
@@ -455,7 +467,10 @@ export default function KanbanEdit({
                     title={
                       <Space
                         size={8}
-                        style={{ width: "100%", justifyContent: "space-between" }}
+                        style={{
+                          width: "100%",
+                          justifyContent: "space-between",
+                        }}
                       >
                         <span style={{ fontWeight: 600 }}>
                           {c.authorName || "User"}{" "}

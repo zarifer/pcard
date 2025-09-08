@@ -54,7 +54,10 @@ export default function CategoriesBox({ onReady }: Props) {
   const createSubmit = async () => {
     const vals = await createForm.validateFields();
     try {
-      await axios.post(`${API_URL}/categories`, { id: `${Date.now()}`, title: vals.title.trim() });
+      await axios.post(`${API_URL}/categories`, {
+        id: `${Date.now()}`,
+        title: vals.title.trim(),
+      });
       setCreateOpen(false);
       await fetchAll();
       message.success("Category created");
@@ -67,7 +70,9 @@ export default function CategoriesBox({ onReady }: Props) {
     const vals = await editForm.validateFields();
     if (!editTarget) return;
     try {
-      await axios.patch(`${API_URL}/categories/${editTarget.id}`, { title: vals.title.trim() });
+      await axios.patch(`${API_URL}/categories/${editTarget.id}`, {
+        title: vals.title.trim(),
+      });
       setEditOpen(false);
       setEditTarget(null);
       await fetchAll();
@@ -86,7 +91,13 @@ export default function CategoriesBox({ onReady }: Props) {
         width: 120,
         render: (_: any, record: Category) => (
           <Space onClick={(e) => e.stopPropagation()}>
-            <Button size="small" className="ant-btn-icon-only" icon={<EditOutlined />} onClick={() => showEdit(record.id)} aria-label="Edit" />
+            <Button
+              size="small"
+              className="ant-btn-icon-only"
+              icon={<EditOutlined />}
+              onClick={() => showEdit(record.id)}
+              aria-label="Edit"
+            />
             <DeleteButton
               hideText
               size="small"
@@ -105,19 +116,51 @@ export default function CategoriesBox({ onReady }: Props) {
 
   return (
     <Card className="panel-card categories-card">
-      <Table<Category> rowKey="id" size="middle" className="categories-table" loading={loading} dataSource={data} columns={columns as any} />
+      <Table<Category>
+        rowKey="id"
+        size="middle"
+        className="categories-table"
+        loading={loading}
+        dataSource={data}
+        columns={columns as any}
+      />
 
-      <Modal open={createOpen} onCancel={() => setCreateOpen(false)} onOk={createSubmit} title="Add Category" okText="Create" destroyOnClose>
+      <Modal
+        open={createOpen}
+        onCancel={() => setCreateOpen(false)}
+        onOk={createSubmit}
+        title="Add Category"
+        okText="Create"
+        destroyOnClose
+      >
         <Form form={createForm} layout="vertical">
-          <Form.Item name="title" label="Title" rules={[{ required: true, message: "Please enter a title" }]}>
+          <Form.Item
+            name="title"
+            label="Title"
+            rules={[{ required: true, message: "Please enter a title" }]}
+          >
             <Input placeholder="Category title" maxLength={80} />
           </Form.Item>
         </Form>
       </Modal>
 
-      <Modal open={editOpen} onCancel={() => { setEditOpen(false); setEditTarget(null); }} onOk={editSubmit} title="Edit Category" okText="Save" destroyOnClose>
+      <Modal
+        open={editOpen}
+        onCancel={() => {
+          setEditOpen(false);
+          setEditTarget(null);
+        }}
+        onOk={editSubmit}
+        title="Edit Category"
+        okText="Save"
+        destroyOnClose
+      >
         <Form form={editForm} layout="vertical">
-          <Form.Item name="title" label="Title" rules={[{ required: true, message: "Please enter a title" }]}>
+          <Form.Item
+            name="title"
+            label="Title"
+            rules={[{ required: true, message: "Please enter a title" }]}
+          >
             <Input placeholder="Category title" maxLength={80} />
           </Form.Item>
         </Form>

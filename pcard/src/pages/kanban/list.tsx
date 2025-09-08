@@ -26,6 +26,7 @@ import { useApiUrl } from "@refinedev/core";
 import "./index.css";
 import KanbanEdit from "./edit";
 import KanbanResults from "./results";
+import type { ResultsApi } from "./results";
 
 type ColumnId = string;
 
@@ -166,6 +167,21 @@ export default function KanbanList() {
     },
     [draggingId, items, updateKanban, invalidate],
   );
+
+const [activeTab, setActiveTab] = useState("kanban");
+ const [resultsExtraContent, setResultsExtraContent] = useState<React.ReactNode>(null);
+  const onResultsReady = useCallback((api: ResultsApi) => {
+    const act = api.getPrimaryAction?.();
+    setResultsExtraContent(
+      <div style={{ display: "flex", gap: 8 }}>
+        {act ? (
+          <Button type="primary" onClick={act.onClick}>{act.label}</Button>
+        ) : null}
+        <Button onClick={() => api.openConfig?.()}>Settings</Button>
+        <Button onClick={() => api.exportCsv?.()}>Export CSV</Button>
+      </div>
+    );
+  }, []);
 
   const clearBoardNow = async () => {
     const ids = items.map((i) => i.id).filter(Boolean) as string[];
@@ -407,7 +423,7 @@ export default function KanbanList() {
           `- **Current Version Check**: ${sanitize(c.versionCheckPath || "—")}`,
           `- **Disable Windows Defender**: ${yesno(c.wdManuallyOff)}`,
           `- **Disable PCT**: ${yesno(c.pctManuallyOff)}`,
-         `- **Log Path**: ${sanitize(c.log || "—")}`,
+          `- **Log Path**: ${sanitize(c.log || "—")}`,
         ].join("\n");
 
         const checklist = checklistTexts.map((t, i) => ({
@@ -455,7 +471,6 @@ export default function KanbanList() {
 
   const kanbanView = (
     <div className="kanban-page">
-
       <div className="kanban-board">
         {stages.map((col) => {
           const menuItems: MenuProps["items"] = [
@@ -485,7 +500,6 @@ export default function KanbanList() {
               onDragEnter={(e) => handleDragOverCol(col.key, e)}
               onDrop={() => handleDropOnCol(col.key)}
             >
-              
               <div className="kanban-column-header">
                 <Typography.Text className="stage-title" strong>
                   {col.title}
@@ -536,6 +550,7 @@ export default function KanbanList() {
             </div>
           );
         })}
+        
 
         <div className="kanban-column add-stage-column">
           <Button
@@ -707,29 +722,47 @@ export default function KanbanList() {
         Kanban Board
       </Typography.Title>
 
-      <Tabs
-        defaultActiveKey="kanban"
-        tabBarExtraContent={
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button type="primary" onClick={() => setImportOpen(true)}>
-              Import Companies
-            </Button>
-            <Button danger onClick={onClearBoard}>
-              Clear Board
-            </Button>
-          </div>
+
+
+<Tabs
+destroyInactiveTabPane
+  activeKey={activeTab}
+  onChange={(k) => setActiveTab(k)}
+tabBarExtraContent={
+          activeTab === "kanban" ? (
+            <div style={{ display: "flex", gap: 8 }}>
+              <Button type="primary" onClick={() => setImportOpen(true)}>
+                Import Companies
+              </Button>
+              <Button danger onClick={onClearBoard}>
+                Clear Board
+              </Button>
+            </div>
+          ) : activeTab === "results" ? (
+            resultsExtraContent
+          ) : null
         }
-        items={[
-          { key: "kanban", label: "Kanban", children: kanbanView },
-          {
-            key: "results",
-            label: "Results",
-            children: (
-              <KanbanResults items={items} stages={stages} companies={[]} />
-            ),
-          },
-        ]}
-      />
+
+
+  items={[
+    { key: "kanban", label: "Kanban", children: kanbanView },
+    {
+      key: "results",
+      label: "Results",
+      children: (
+<KanbanResults
+  items={items}
+  stages={stages}
+  companies={companies}
+  onReady={onResultsReady}
+/>
+
+
+      ),
+    },
+  ]}
+/>
+
     </>
   );
 }

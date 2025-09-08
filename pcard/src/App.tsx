@@ -1,5 +1,4 @@
 import { Refine, Authenticated, AuthBindings } from "@refinedev/core";
-import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbarProvider } from "@refinedev/kbar";
 import {
   ErrorComponent,
@@ -19,7 +18,6 @@ import routerBindings, {
 } from "@refinedev/react-router";
 import axios from "axios";
 import { ColorModeContextProvider } from "./contexts/color-mode";
-import { Header } from "./components/header";
 import { Helmet } from "react-helmet";
 import { CredentialResponse } from "./interfaces/google";
 import { parseJwt } from "./utils/parse-jwt";
@@ -142,10 +140,9 @@ function App() {
         <RefineKbarProvider>
           <ColorModeContextProvider>
             <AntdApp>
-              <DevtoolsProvider>
                 <Refine
                   dataProvider={dataProvider("http://localhost:3001")}
-                  notificationProvider={useNotificationProvider}
+                  notificationProvider={useNotificationProvider()}
                   routerProvider={routerBindings}
                   authProvider={authProvider}
                   resources={[
@@ -199,9 +196,9 @@ function App() {
                         >
                           <ThemedLayoutV2
                             Title={LogoTitle}
-                            Header={Header}
+                         
                             Sider={(props) => (
-                              <ThemedSiderV2 {...props} fixed />
+                              <ThemedSiderV2 {...props} />
                             )}
                           >
                             <Outlet />
@@ -269,8 +266,6 @@ function App() {
                     }}
                   />
                 </Refine>
-                <DevtoolsPanel />
-              </DevtoolsProvider>
             </AntdApp>
           </ColorModeContextProvider>
         </RefineKbarProvider>

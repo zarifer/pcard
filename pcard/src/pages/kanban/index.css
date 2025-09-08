@@ -184,7 +184,6 @@
   border-color: #888 !important;
 }
 
-/* Card tints driven by Results flags */
 .kanban-card.private {
   background: #f7f1ff;
   border-color: #e0d9ff;
@@ -200,7 +199,6 @@
   transform: none;
 }
 
-/* Results row tints */
 .ant-table-tbody > tr.results-row-private > td {
   background: #f7f1ff;
   border-color: #e0d9ff;
@@ -228,7 +226,6 @@
   background: #1e1a2b;
 }
 
-/* Checklist */
 .checklist-list {
   display: grid;
   gap: 8px;
@@ -245,13 +242,11 @@
   min-width: 0;
 }
 
-/* strikethrough when checked */
 .checklist-item.done .checklist-input {
   text-decoration: line-through;
   opacity: 0.65;
 }
 
-/* buttons in checklist */
 .icon-btn {
   border: 0;
   background: transparent;
@@ -273,7 +268,6 @@
   opacity: 0.65;
 }
 
-/* SimpleMDE / Markdown dark theme */
 .markdown-body {
   background: #fff;
   color: #222;
@@ -321,4 +315,6 @@
 .kanban-topbar {
   margin: 8px 0 12px;
 }
-
+.ant-layout .ant-layout-content {
+  isolation: isolate;
+}
