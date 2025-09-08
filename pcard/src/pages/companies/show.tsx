@@ -390,26 +390,15 @@ export default function CompanyShow() {
                         <div style={{ position: "relative" }}>
                           <Button
                             shape="circle"
-                            style={{
-                              position: "absolute",
-                              left: 8,
-                              top: "50%",
-                              transform: "translateY(-50%)",
-                              zIndex: 3,
-                            }}
+                            className="carousel-nav prev"
                             icon={<LeftOutlined />}
                             onClick={() => carouselRef.current?.prev()}
                             aria-label="Previous image"
                           />
+
                           <Button
                             shape="circle"
-                            style={{
-                              position: "absolute",
-                              right: 8,
-                              top: "50%",
-                              transform: "translateY(-50%)",
-                              zIndex: 3,
-                            }}
+                            className="carousel-nav next"
                             icon={<RightOutlined />}
                             onClick={() => carouselRef.current?.next()}
                             aria-label="Next image"

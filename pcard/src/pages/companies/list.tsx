@@ -75,7 +75,7 @@ export default function CompanyList() {
           onChange={(e) => setSearch(e.target.value)}
           onSearch={(v) => setSearch(v)}
           allowClear
-          enterButton={<Button type="primary" icon={<SearchOutlined />} />}
+          enterButton={<Button icon={<SearchOutlined />} />}
         />
         <CreateButton resource="companies">Add Company</CreateButton>
       </div>

@@ -168,18 +168,21 @@ export default function KanbanList() {
     [draggingId, items, updateKanban, invalidate],
   );
 
-const [activeTab, setActiveTab] = useState("kanban");
- const [resultsExtraContent, setResultsExtraContent] = useState<React.ReactNode>(null);
+  const [activeTab, setActiveTab] = useState("kanban");
+  const [resultsExtraContent, setResultsExtraContent] =
+    useState<React.ReactNode>(null);
   const onResultsReady = useCallback((api: ResultsApi) => {
     const act = api.getPrimaryAction?.();
     setResultsExtraContent(
       <div style={{ display: "flex", gap: 8 }}>
         {act ? (
-          <Button type="primary" onClick={act.onClick}>{act.label}</Button>
+          <Button type="primary" onClick={act.onClick}>
+            {act.label}
+          </Button>
         ) : null}
         <Button onClick={() => api.openConfig?.()}>Settings</Button>
         <Button onClick={() => api.exportCsv?.()}>Export CSV</Button>
-      </div>
+      </div>,
     );
   }, []);
 
@@ -550,7 +553,6 @@ const [activeTab, setActiveTab] = useState("kanban");
             </div>
           );
         })}
-        
 
         <div className="kanban-column add-stage-column">
           <Button
@@ -722,13 +724,11 @@ const [activeTab, setActiveTab] = useState("kanban");
         Kanban Board
       </Typography.Title>
 
-
-
-<Tabs
-destroyInactiveTabPane
-  activeKey={activeTab}
-  onChange={(k) => setActiveTab(k)}
-tabBarExtraContent={
+      <Tabs
+        destroyInactiveTabPane
+        activeKey={activeTab}
+        onChange={(k) => setActiveTab(k)}
+        tabBarExtraContent={
           activeTab === "kanban" ? (
             <div style={{ display: "flex", gap: 8 }}>
               <Button type="primary" onClick={() => setImportOpen(true)}>
@@ -742,27 +742,22 @@ tabBarExtraContent={
             resultsExtraContent
           ) : null
         }
-
-
-  items={[
-    { key: "kanban", label: "Kanban", children: kanbanView },
-    {
-      key: "results",
-      label: "Results",
-      children: (
-<KanbanResults
-  items={items}
-  stages={stages}
-  companies={companies}
-  onReady={onResultsReady}
-/>
-
-
-      ),
-    },
-  ]}
-/>
-
+        items={[
+          { key: "kanban", label: "Kanban", children: kanbanView },
+          {
+            key: "results",
+            label: "Results",
+            children: (
+              <KanbanResults
+                items={items}
+                stages={stages}
+                companies={companies}
+                onReady={onResultsReady}
+              />
+            ),
+          },
+        ]}
+      />
     </>
   );
 }

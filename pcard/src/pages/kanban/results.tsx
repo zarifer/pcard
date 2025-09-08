@@ -309,6 +309,8 @@ export default function Results({
       vals: Partial<{
         testSetName?: string;
         cleanSampleSize?: number;
+        certificationSet?: number;
+        preview?: number;
         locked?: boolean;
         lastSnapshotAt?: string;
         lastUnlockAt?: string;
@@ -321,23 +323,33 @@ export default function Results({
         `${API_URL}/resultsMeta?year=${y}&month=${m}`,
       );
       const cur = existing[0] || { id: `${y}-${m}`, year: y, month: m };
+      const base = cur ?? { id: `${y}-${m}`, year: y, month: m };
       const next = {
         ...cur,
+        ...base,
         year: y,
         month: m,
         ...vals,
         eventLog: appendEvent
-          ? [...(cur.eventLog || []), appendEvent]
-          : cur.eventLog || [],
+          ? [...(cur?.eventLog || []), appendEvent]
+          : cur?.eventLog || [],
       };
-      if (cur.id) await patchJson(`${API_URL}/resultsMeta/${cur.id}`, next);
-      else await postJson(`${API_URL}/resultsMeta`, next);
+      if (cur.id) {
+        await patchJson(`${API_URL}/resultsMeta/${cur.id}`, next);
+      } else {
+        await postJson(`${API_URL}/resultsMeta`, next);
+      }
     },
     [year, monthIdx],
   );
 
   const saveMeta = useCallback(
-    async (vals: { testSetName?: string; cleanSampleSize?: number }) => {
+    async (vals: {
+      testSetName?: string;
+      cleanSampleSize?: number;
+      certificationSet?: number;
+      preview?: number;
+    }) => {
       try {
         await upsertMeta({
           testSetName: vals.testSetName,
@@ -345,6 +357,11 @@ export default function Results({
             typeof vals.cleanSampleSize === "number"
               ? vals.cleanSampleSize
               : undefined,
+          certificationSet:
+            typeof vals.certificationSet === "number"
+              ? vals.certificationSet
+              : undefined,
+          preview: typeof vals.preview === "number" ? vals.preview : undefined,
         });
       } catch (e: any) {
         message.error(e?.message || "Meta save failed");
@@ -478,6 +495,8 @@ export default function Results({
         testSetName: meta?.testSetName ?? prev.testSetName ?? "testset-2025",
         cleanSampleSize:
           meta?.cleanSampleSize ?? prev.cleanSampleSize ?? 100000,
+        certificationSet: meta?.certificationSet ?? prev.certificationSet,
+        preview: meta?.preview ?? prev.preview,
       }));
 
       const dedupRows = Array.isArray(rowsArr)
@@ -521,11 +540,21 @@ export default function Results({
   }, [loadMonth]);
 
   useEffect(() => {
-    if (effectiveLocked) return;
+    const pastView = isPast(year, monthIdx);
+    if (effectiveLocked || pastView) return;
     const next = reconcileRows(rows);
     setRows(next);
     if (next.length) resolveMissingNames(next, year, monthIdx + 1);
-  }, [items, companies, stages, reconcileRows, effectiveLocked]);
+  }, [
+    items,
+    companies,
+    stages,
+    reconcileRows,
+    effectiveLocked,
+    isPast,
+    year,
+    monthIdx,
+  ]);
 
   const onOpenConfig = useCallback(() => {
     cfgForm.setFieldsValue({
@@ -548,6 +577,8 @@ export default function Results({
     await saveMeta({
       testSetName: vals.testSetName || "testset-2025",
       cleanSampleSize: vals.cleanSampleSize ?? 100000,
+      certificationSet: vals.certificationSet ?? undefined,
+      preview: vals.preview ?? undefined,
     });
     setCfgOpen(false);
   };
@@ -585,18 +616,22 @@ export default function Results({
       r.privateFlag ? "TRUE" : "FALSE",
       r.invResFlag ? "TRUE" : "FALSE",
     ]);
-const serialize = (arr: string[][]) =>
-  arr
-    .map((line) => line.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(","))
-    .join("\n");
+    const serialize = (arr: string[][]) =>
+      arr
+        .map((line) =>
+          line.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(","),
+        )
+        .join("\n");
 
-const monthName = MONTHS[monthIdx];
-const content = [
-  serialize(meta),
-  "",
-  header.join(","),
-  ...data.map((d) => d.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(",")),
-].join("\n");
+    const monthName = MONTHS[monthIdx];
+    const content = [
+      serialize(meta),
+      "",
+      header.join(","),
+      ...data.map((d) =>
+        d.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(","),
+      ),
+    ].join("\n");
 
     const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -778,23 +813,24 @@ const content = [
     [effectiveLocked, gradeFromCertMiss],
   );
 
-  // ---- Biztonságos API a Tabs fejlécnek (nincs több DOM-mókolás) ----
   useEffect(() => {
     const getPrimaryAction = (): PrimaryAction | null => {
       const past = isPast(year, monthIdx);
-      const shouldUnlock = past ? !overrideUnlocked : snapshotLocked;
-      if (shouldUnlock)
+      if (past) {
+        return !overrideUnlocked
+          ? { label: "Unlock", onClick: () => setUnlockOpen(true) }
+          : { label: "Lock", onClick: onLockSnapshot };
+      }
+      if (snapshotLocked)
         return { label: "Unlock", onClick: () => setUnlockOpen(true) };
-      if (!past && !snapshotLocked)
-        return { label: "Take Snapshot", onClick: onLockSnapshot };
-      return null;
+      return { label: "Take Snapshot", onClick: onLockSnapshot };
     };
     onReady?.({
       exportCsv,
       openConfig: onOpenConfig,
       getPrimaryAction,
     });
- }, [
+  }, [
     onReady,
     exportCsv,
     onOpenConfig,
@@ -807,12 +843,11 @@ const content = [
   ]);
 
   return (
-  <div
-    style={{
-      padding: 16,
-    }}
->
-
+    <div
+      style={{
+        padding: 16,
+      }}
+    >
       <Space
         direction="vertical"
         size={8}
@@ -883,7 +918,6 @@ const content = [
         onOk={onSaveConfig}
         title="Settings"
         okText="Save"
-
         okButtonProps={{ disabled: effectiveLocked }}
       >
         <Form
@@ -921,11 +955,31 @@ const content = [
             <InputNumber min={0} precision={0} style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item name="certificationSet" label="Certification Set">
-            <InputNumber min={0} precision={0} style={{ width: "100%" }} />
+            <InputNumber<number>
+              min={0}
+              precision={0}
+              style={{ width: "100%" }}
+              formatter={(v) => `${v ?? ""}`}
+              parser={(v) => {
+                const s = (v ?? "").replace(/\D/g, "");
+                return s ? Number(s) : 0;
+              }}
+            />
           </Form.Item>
+
           <Form.Item name="preview" label="Preview">
-            <InputNumber min={0} precision={0} style={{ width: "100%" }} />
+            <InputNumber<number>
+              min={0}
+              precision={0}
+              style={{ width: "100%" }}
+              formatter={(v) => `${v ?? ""}`}
+              parser={(v) => {
+                const s = (v ?? "").replace(/\D/g, "");
+                return s ? Number(s) : 0;
+              }}
+            />
           </Form.Item>
+
           <Typography.Text strong style={{ display: "block", marginTop: 12 }}>
             Evaluation Buckets
           </Typography.Text>

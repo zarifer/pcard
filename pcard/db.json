@@ -553,6 +553,69 @@
       "date": ["2025-09-20T19:06:14.002Z", "2025-09-20T19:06:14.002Z"],
       "type": "Kanban",
       "refKanbanId": "16ad"
+    },
+    {
+      "id": "30b6",
+      "title": "AHN-IS",
+      "date": ["2025-09-23T16:36:38.208Z", "2025-09-23T16:36:38.208Z"],
+      "type": "Kanban",
+      "refKanbanId": "378e"
+    },
+    {
+      "id": "cbed",
+      "title": "SONIC-ES",
+      "date": ["2025-09-23T16:36:38.208Z", "2025-09-23T16:36:38.208Z"],
+      "type": "Kanban",
+      "refKanbanId": "6ed2"
+    },
+    {
+      "id": "b974",
+      "title": "AHN-IS",
+      "date": ["2025-09-23T16:39:02.250Z", "2025-09-23T16:39:02.250Z"],
+      "type": "Kanban",
+      "refKanbanId": "7a30"
+    },
+    {
+      "id": "b9d4",
+      "title": "CATO-AV",
+      "date": ["2025-09-23T16:39:02.250Z", "2025-09-23T16:39:02.250Z"],
+      "type": "Kanban",
+      "refKanbanId": "e194"
+    },
+    {
+      "id": "1c5d",
+      "title": "AHN-IS",
+      "date": ["2025-09-23T16:43:16.689Z", "2025-09-23T16:43:16.689Z"],
+      "type": "Kanban",
+      "refKanbanId": "2b36"
+    },
+    {
+      "id": "4d23",
+      "title": "CATO-AV",
+      "date": ["2025-09-23T16:43:16.689Z", "2025-09-23T16:43:16.689Z"],
+      "type": "Kanban",
+      "refKanbanId": "2c32"
+    },
+    {
+      "id": "1a40",
+      "title": "SONIC-ES",
+      "date": ["2025-09-23T16:43:16.689Z", "2025-09-23T16:43:16.689Z"],
+      "type": "Kanban",
+      "refKanbanId": "33dd"
+    },
+    {
+      "id": "11e5",
+      "title": "CATO-AV",
+      "date": ["2025-09-23T16:43:34.404Z", "2025-09-23T16:43:34.404Z"],
+      "type": "Kanban",
+      "refKanbanId": "3059"
+    },
+    {
+      "id": "d20e",
+      "title": "SONIC-ES",
+      "date": ["2025-09-23T16:44:04.826Z", "2025-09-23T16:44:04.826Z"],
+      "type": "Kanban",
+      "refKanbanId": "563a"
     }
   ],
   "stages": [
@@ -587,88 +650,7 @@
       "order": 5
     }
   ],
-  "kanban": [
-    {
-      "id": "000d",
-      "title": "AHN-IS",
-      "description": "- **Vendor**: AhnLab, Inc.\n- **Product**: AhnLab V3 Endpoint Security\n- **License Expiry**: 01/07/2030\n- **Current Version Check**: GUI -> ? -> About\n- **Disable Windows Defender**: No\n- **Disable PCT**: No\n- **Log Path**: Collect the log/data from test environment the product installed on following this instructions: 1) Run AhnReport (Windows Search > AhnReport > Run) 2) check options (AhnReport > Tools > AhnLab V3 Endpoint Security Debug Tracing, AhnLab ASD Engine debug tracing, and AhnLab Driver Debug Tracing), 3) Collect log/data (AhnReport > Report Product Error > Save)",
-      "stage": "todo",
-      "checklist": [
-        {
-          "id": "1757098088644-0-r1tnai",
-          "text": "Windows Update",
-          "done": false
-        },
-        {
-          "id": "1757098088644-1-pq5tpa",
-          "text": "Product Update",
-          "done": false
-        },
-        {
-          "id": "1757098088644-2-0v72ad",
-          "text": "Bootstrap Check",
-          "done": false
-        },
-        {
-          "id": "1757098088644-3-ss3as5",
-          "text": "WD Check",
-          "done": false
-        },
-        {
-          "id": "1757098088644-4-atavrb",
-          "text": "Config File Update",
-          "done": false
-        },
-        {
-          "id": "1757098088644-5-tt9j35",
-          "text": "Snapshot Created",
-          "done": false
-        }
-      ],
-      "dueDate": "2025-09-20T18:48:08.644Z",
-      "calendarId": "29d4"
-    },
-    {
-      "id": "16ad",
-      "title": "CATO-AV",
-      "description": "- **Vendor**: Cato Networks\n- **Product**: Cato EPP\n- **License Expiry**: 31/12/2099\n- **Current Version Check**: GUI -> ? -> About\n- **Disable Windows Defender**: No\n- **Disable PCT**: No\n- **Log Path**: C:\\ProgramData\\CatoEndpointProtection\\logs, C:\\Program Files\\Cato Networks\\CatoEndPointProtection\\bin\\logs, C:\\ProgramData\\CatoEndpointProtection\\core_dumps",
-      "stage": "todo",
-      "checklist": [
-        {
-          "id": "1757099174004-0-dyytj0",
-          "text": "Windows Update",
-          "done": false
-        },
-        {
-          "id": "1757099174004-1-elf076",
-          "text": "Product Update",
-          "done": false
-        },
-        {
-          "id": "1757099174004-2-yqt84y",
-          "text": "Bootstrap Check",
-          "done": false
-        },
-        {
-          "id": "1757099174004-3-0621rm",
-          "text": "WD Check",
-          "done": false
-        },
-        {
-          "id": "1757099174004-4-4inxql",
-          "text": "Config File Update",
-          "done": false
-        },
-        {
-          "id": "1757099174004-5-j3pmdl",
-          "text": "Snapshot Created",
-          "done": false
-        }
-      ],
-      "dueDate": "2025-09-20T19:06:14.002Z",
-      "calendarId": "c6ae"
-    }
-  ],
+  "kanban": [],
   "resultsRows": [
     {
       "id": "2025-9-ahn-is",
@@ -707,11 +689,11 @@
       "productId": "AHN-IS",
       "productName": "AhnLab V3 Endpoint Security",
       "vmName": "W11-AHN-IS",
-      "stage": "Waiting For Vendor...",
-      "certMiss": "",
-      "fps": "",
-      "cfnPreview": "",
-      "cfnFinal": "",
+      "stage": "Prepare For Testing",
+      "certMiss": 232,
+      "fps": 244,
+      "cfnPreview": 232,
+      "cfnFinal": 323,
       "privateFlag": false,
       "invResFlag": false
     },
@@ -723,10 +705,10 @@
       "productName": "Cato EPP",
       "vmName": "W11-CATO-AV",
       "stage": "Prepare For Testing",
-      "certMiss": "",
-      "fps": "",
-      "cfnPreview": "",
-      "cfnFinal": "",
+      "certMiss": 323,
+      "fps": 2424,
+      "cfnPreview": 23,
+      "cfnFinal": 23,
       "privateFlag": false,
       "invResFlag": false
     },
@@ -768,9 +750,9 @@
       "month": 9,
       "testSetName": "testset-20250831-asmara",
       "cleanSampleSize": 100000,
-      "locked": true,
+      "locked": false,
       "snapshotAt": "2025-09-03T15:28:25.691Z",
-      "lastUnlockAt": "2025-09-05T18:45:32.351Z",
+      "lastUnlockAt": "2025-09-08T16:44:15.129Z",
       "eventLog": [
         {
           "action": "unlock",
@@ -803,9 +785,39 @@
         {
           "action": "snapshot",
           "at": "2025-09-05T19:06:18.795Z"
+        },
+        {
+          "action": "unlock",
+          "at": "2025-09-08T15:58:57.849Z"
+        },
+        {
+          "action": "snapshot",
+          "at": "2025-09-08T16:21:36.531Z"
+        },
+        {
+          "action": "unlock",
+          "at": "2025-09-08T16:22:43.014Z"
+        },
+        {
+          "action": "snapshot",
+          "at": "2025-09-08T16:28:49.666Z"
+        },
+        {
+          "action": "unlock",
+          "at": "2025-09-08T16:34:45.159Z"
+        },
+        {
+          "action": "snapshot",
+          "at": "2025-09-08T16:43:45.221Z"
+        },
+        {
+          "action": "unlock",
+          "at": "2025-09-08T16:44:15.129Z"
         }
       ],
-      "lastSnapshotAt": "2025-09-05T19:06:18.795Z"
+      "lastSnapshotAt": "2025-09-08T16:43:45.221Z",
+      "certificationSet": 2309,
+      "preview": 2100
     }
   ]
 }

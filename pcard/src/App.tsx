@@ -8,6 +8,7 @@ import {
 } from "@refinedev/antd";
 import "@refinedev/antd/dist/reset.css";
 import dataProvider from "@refinedev/simple-rest";
+import { Header } from "./components/header";
 import { App as AntdApp } from "antd";
 import { BrowserRouter, Route, Routes, Outlet } from "react-router-dom";
 import routerBindings, {
@@ -140,132 +141,128 @@ function App() {
         <RefineKbarProvider>
           <ColorModeContextProvider>
             <AntdApp>
-                <Refine
-                  dataProvider={dataProvider("http://localhost:3001")}
-                  notificationProvider={useNotificationProvider()}
-                  routerProvider={routerBindings}
-                  authProvider={authProvider}
-                  resources={[
-                    {
-                      name: "companies",
-                      list: "/companies",
-                      create: "/companies/create",
-                      edit: "/companies/edit/:id",
-                      show: "/companies/show/:id",
-                      meta: { canDelete: true, label: "Companies" },
-                    },
-                    {
-                      name: "licenses",
-                      list: "/licenses",
-                      meta: { canDelete: true, label: "Licenses" },
-                    },
-                    {
-                      name: "incident_logs",
-                      list: "/incident-logs",
-                      create: "/incident-logs/create",
-                      edit: "/incident-logs/edit/:id",
-                      show: "/incident-logs/show/:id",
-                      meta: { canDelete: true, label: "Incident Logs" },
-                    },
-                    {
-                      name: "kanban",
-                      list: "/kanban",
-                      meta: { canDelete: true, label: "Kanban Board" },
-                    },
-                    {
-                      name: "calendar",
-                      list: "/calendar",
-                      create: "/calendar/create",
-                      edit: "/calendar/edit/:id",
-                      meta: { canDelete: true, label: "Calendar" },
-                    },
-                  ]}
-                  options={{
-                    syncWithLocation: true,
-                    warnWhenUnsavedChanges: true,
-                    useNewQueryKeys: true,
-                    projectId: "5zfHVV-J9HiD2-0sf6xU",
+              <Refine
+                dataProvider={dataProvider("http://localhost:3001")}
+                notificationProvider={useNotificationProvider()}
+                routerProvider={routerBindings}
+                authProvider={authProvider}
+                resources={[
+                  {
+                    name: "companies",
+                    list: "/companies",
+                    create: "/companies/create",
+                    edit: "/companies/edit/:id",
+                    show: "/companies/show/:id",
+                    meta: { canDelete: true, label: "Companies" },
+                  },
+                  {
+                    name: "licenses",
+                    list: "/licenses",
+                    meta: { canDelete: true, label: "Licenses" },
+                  },
+                  {
+                    name: "incident_logs",
+                    list: "/incident-logs",
+                    create: "/incident-logs/create",
+                    edit: "/incident-logs/edit/:id",
+                    show: "/incident-logs/show/:id",
+                    meta: { canDelete: true, label: "Incident Logs" },
+                  },
+                  {
+                    name: "kanban",
+                    list: "/kanban",
+                    meta: { canDelete: true, label: "Kanban Board" },
+                  },
+                  {
+                    name: "calendar",
+                    list: "/calendar",
+                    create: "/calendar/create",
+                    edit: "/calendar/edit/:id",
+                    meta: { canDelete: true, label: "Calendar" },
+                  },
+                ]}
+                options={{
+                  syncWithLocation: true,
+                  warnWhenUnsavedChanges: true,
+                  useNewQueryKeys: true,
+                  projectId: "5zfHVV-J9HiD2-0sf6xU",
+                }}
+              >
+                <Routes>
+                  <Route
+                    element={
+                      <Authenticated
+                        key="authenticated-inner"
+                        fallback={<CatchAllNavigate to="/login" />}
+                      >
+                        <ThemedLayoutV2
+                          Title={LogoTitle}
+                          Header={Header}
+                          Sider={(props) => <ThemedSiderV2 {...props} />}
+                        >
+                          <Outlet />
+                        </ThemedLayoutV2>
+                      </Authenticated>
+                    }
+                  >
+                    <Route
+                      index
+                      element={<NavigateToResource resource="incident_logs" />}
+                    />
+                    <Route path="/calendar">
+                      <Route index element={<CalendarList />} />
+                      <Route path="create" element={<CalendarCreate />} />
+                      <Route path="edit/:id" element={<CalendarEdit />} />
+                    </Route>
+                    <Route path="/companies">
+                      <Route index element={<CompanyList />} />
+                      <Route path="create" element={<CompanyCreate />} />
+                      <Route path="edit/:id" element={<CompanyEdit />} />
+                      <Route path="show/:id" element={<CompanyShow />} />
+                    </Route>
+                    <Route path="/incident-logs">
+                      <Route index element={<IncidentLogList />} />
+                      <Route path="create" element={<IncidentLogCreate />} />
+                      <Route path="edit/:id" element={<IncidentLogEdit />} />
+                      <Route path="show/:id" element={<IncidentLogShow />} />
+                    </Route>
+                    <Route path="/kanban">
+                      <Route index element={<KanbanList />} />
+                    </Route>
+                    <Route path="/licenses">
+                      <Route index element={<LicenseExpiryList />} />
+                    </Route>
+                    <Route path="*" element={<ErrorComponent />} />
+                  </Route>
+                  <Route
+                    element={
+                      <Authenticated
+                        key="authenticated-outer"
+                        fallback={<Outlet />}
+                      >
+                        <NavigateToResource />
+                      </Authenticated>
+                    }
+                  >
+                    <Route path="/login" element={<Login />} />
+                  </Route>
+                </Routes>
+                <UnsavedChangesNotifier />
+                <DocumentTitleHandler
+                  handler={({ resource, action }) => {
+                    const base =
+                      resource?.meta?.label ?? resource?.name ?? "Dashboard";
+                    const map: Record<string, string> = {
+                      list: base,
+                      create: `Create ${base}`,
+                      edit: `Edit ${base}`,
+                      show: `${base} Details`,
+                    };
+                    const page = action ? (map[action] ?? base) : base;
+                    return `${page} | ${APP_TITLE}`;
                   }}
-                >
-                  <Routes>
-                    <Route
-                      element={
-                        <Authenticated
-                          key="authenticated-inner"
-                          fallback={<CatchAllNavigate to="/login" />}
-                        >
-                          <ThemedLayoutV2
-                            Title={LogoTitle}
-                         
-                            Sider={(props) => (
-                              <ThemedSiderV2 {...props} />
-                            )}
-                          >
-                            <Outlet />
-                          </ThemedLayoutV2>
-                        </Authenticated>
-                      }
-                    >
-                      <Route
-                        index
-                        element={
-                          <NavigateToResource resource="incident_logs" />
-                        }
-                      />
-                      <Route path="/calendar">
-                        <Route index element={<CalendarList />} />
-                        <Route path="create" element={<CalendarCreate />} />
-                        <Route path="edit/:id" element={<CalendarEdit />} />
-                      </Route>
-                      <Route path="/companies">
-                        <Route index element={<CompanyList />} />
-                        <Route path="create" element={<CompanyCreate />} />
-                        <Route path="edit/:id" element={<CompanyEdit />} />
-                        <Route path="show/:id" element={<CompanyShow />} />
-                      </Route>
-                      <Route path="/incident-logs">
-                        <Route index element={<IncidentLogList />} />
-                        <Route path="create" element={<IncidentLogCreate />} />
-                        <Route path="edit/:id" element={<IncidentLogEdit />} />
-                        <Route path="show/:id" element={<IncidentLogShow />} />
-                      </Route>
-                      <Route path="/kanban">
-                        <Route index element={<KanbanList />} />
-                      </Route>
-                      <Route path="/licenses">
-                        <Route index element={<LicenseExpiryList />} />
-                      </Route>
-                      <Route path="*" element={<ErrorComponent />} />
-                    </Route>
-                    <Route
-                      element={
-                        <Authenticated
-                          key="authenticated-outer"
-                          fallback={<Outlet />}
-                        >
-                          <NavigateToResource />
-                        </Authenticated>
-                      }
-                    >
-                      <Route path="/login" element={<Login />} />
-                    </Route>
-                  </Routes>
-                  <UnsavedChangesNotifier />
-                  <DocumentTitleHandler
-                    handler={({ resource, action }) => {
-                      const base =
-                        resource?.meta?.label ?? resource?.name ?? "Dashboard";
-                      const map: Record<string, string> = {
-                        list: base,
-                        create: `Create ${base}`,
-                        edit: `Edit ${base}`,
-                        show: `${base} Details`,
-                      };
-                      const page = action ? (map[action] ?? base) : base;
-                      return `${page} | ${APP_TITLE}`;
-                    }}
-                  />
-                </Refine>
+                />
+              </Refine>
             </AntdApp>
           </ColorModeContextProvider>
         </RefineKbarProvider>
