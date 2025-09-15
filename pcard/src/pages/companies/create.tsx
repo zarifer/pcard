@@ -59,17 +59,10 @@ export default function CompanyCreate() {
   const { formProps, saveButtonProps } = useForm({ resource: "companies" });
   const { goBack } = useNavigation();
   const { mode } = useContext(ColorModeContext);
+
   const TAB_KEYS = ["primary", "ui", "installer", "updates", "rtod"] as const;
   const [activeKey, setActiveKey] =
     useState<(typeof TAB_KEYS)[number]>("primary");
-  const TAB_LABELS = {
-    primary: "Primary Info",
-    ui: "Interface",
-    installer: "Installation",
-    updates: "Updates",
-    rtod: "RT & OD",
-  } as const;
-  const tabHeaders = TAB_KEYS.map((k) => ({ key: k, label: TAB_LABELS[k] }));
 
   const idx = TAB_KEYS.indexOf(activeKey);
   const goPrev = () => setActiveKey(TAB_KEYS[Math.max(0, idx - 1)]);
@@ -107,13 +100,20 @@ export default function CompanyCreate() {
     <Create
       breadcrumb={false}
       title="Add Company"
-      headerButtons={() => null}
-      footerButtons={() => null}
+      headerButtons={null}
+      footerButtons={null}
     >
       <Tabs
+        className="page-tabs"
         activeKey={activeKey}
         onChange={(k) => setActiveKey(k as any)}
-        items={tabHeaders}
+        items={[
+          { key: "primary", label: "Primary Info" },
+          { key: "ui", label: "Interface" },
+          { key: "installer", label: "Installation" },
+          { key: "updates", label: "Updates" },
+          { key: "rtod", label: "RT & OD" },
+        ]}
         tabBarExtraContent={
           <div style={{ display: "flex", gap: 8 }}>
             <Button onClick={() => goBack()}>Cancel</Button>
@@ -218,8 +218,8 @@ export default function CompanyCreate() {
                 values.interfaceType === "gui"
                   ? "GUI"
                   : values.interfaceType === "other"
-                    ? values.interfaceOther
-                    : undefined,
+                  ? values.interfaceOther
+                  : undefined,
               hasRT: !!values.hasRT,
               hasOD: !!values.hasOD,
               customScan: values.hasOD
@@ -300,10 +300,7 @@ export default function CompanyCreate() {
                           label="Vendor Name"
                           name="name"
                           rules={[
-                            {
-                              required: true,
-                              message: "Vendor name is required",
-                            },
+                            { required: true, message: "Vendor name is required" },
                           ]}
                         >
                           <Input />
@@ -314,10 +311,7 @@ export default function CompanyCreate() {
                           label="Product Name"
                           name="product"
                           rules={[
-                            {
-                              required: true,
-                              message: "Product name is required",
-                            },
+                            { required: true, message: "Product name is required" },
                           ]}
                         >
                           <Input />
@@ -359,10 +353,7 @@ export default function CompanyCreate() {
                           label="Product ID"
                           name="productId"
                           rules={[
-                            {
-                              required: true,
-                              message: "Product ID is required",
-                            },
+                            { required: true, message: "Product ID is required" },
                           ]}
                         >
                           <Input placeholder="e.g. XY-AV" />
@@ -382,10 +373,7 @@ export default function CompanyCreate() {
                             beforeUpload={validateImage}
                             onChange={({ file }) => {
                               if (file.status === "removed") return;
-                              if (
-                                file.type &&
-                                !file.type.startsWith("image/")
-                              ) {
+                              if (file.type && !file.type.startsWith("image/")) {
                                 message.error("Only images are allowed");
                               }
                             }}
@@ -758,10 +746,7 @@ export default function CompanyCreate() {
                           <>
                             <Row gutter={[16, 8]}>
                               <Col xs={24} md={16}>
-                                <Form.Item
-                                  name="scanType"
-                                  initialValue="context_menu"
-                                >
+                                <Form.Item name="scanType" initialValue="context_menu">
                                   <Radio.Group
                                     disabled={!odEnabled}
                                     optionType="button"
@@ -786,16 +771,11 @@ export default function CompanyCreate() {
                                   <Form.Item
                                     name="customScanPath"
                                     rules={[
-                                      {
-                                        required: true,
-                                        message: "Path is required for Unique",
-                                      },
+                                      { required: true, message: "Path is required for Unique" },
                                     ]}
                                   >
                                     <AutoComplete
-                                      options={UNIQUE_PATH_SUGGESTIONS.map(
-                                        (v) => ({ value: v }),
-                                      )}
+                                      options={UNIQUE_PATH_SUGGESTIONS.map((v) => ({ value: v }))}
                                       filterOption={(input, option) =>
                                         (option?.value ?? "")
                                           .toLowerCase()
@@ -827,10 +807,7 @@ export default function CompanyCreate() {
             ]}
           />
 
-          <div
-            className="wizard-footer"
-            style={{ justifyContent: "flex-end", gap: 8 }}
-          >
+          <div className="wizard-footer" style={{ justifyContent: "flex-end", gap: 8 }}>
             <Button onClick={goPrev} disabled={idx === 0}>
               <LeftOutlined /> Prev
             </Button>

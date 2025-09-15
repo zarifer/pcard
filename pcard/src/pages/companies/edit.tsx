@@ -141,6 +141,27 @@ export default function CompanyEdit() {
       headerButtons={() => null}
       footerButtons={() => null}
     >
+      <Tabs
+        className="page-tabs"
+        activeKey={activeKey}
+        onChange={(k) => setActiveKey(k as any)}
+        items={tabHeaders}
+        tabBarExtraContent={
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button onClick={() => goBack()}>Cancel</Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              form="company-edit-form"
+              loading={saveButtonProps.loading}
+              disabled={saveButtonProps.disabled}
+            >
+              Save
+            </Button>
+          </div>
+        }
+      />
+
       <Card className="wizard-card">
         <Button
           shape="circle"
@@ -304,559 +325,487 @@ export default function CompanyEdit() {
             );
           }}
         >
-          <Tabs
-            activeKey={activeKey}
-            onChange={(k) => setActiveKey(k as any)}
-            renderTabBar={() => <></>}
-            items={[
-              {
-                key: "primary",
-                label: "Primary Info",
-                children: (
-                  <>
+          {activeKey === "primary" && (
+            <>
+              <Row gutter={[16, 8]}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Vendor Name"
+                    name="name"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vendor name is required",
+                      },
+                    ]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Product Name"
+                    name="product"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Product name is required",
+                      },
+                    ]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Title level={5} style={{ marginTop: 8 }}>
+                Contact email(s)
+              </Title>
+              <Row gutter={[16, 8]}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="emailPrimary"
+                    rules={[
+                      {
+                        required: true,
+                        type: "email",
+                        message: "Valid email required",
+                      },
+                    ]}
+                  >
+                    <Input placeholder="primary@company.com" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="emailSecondary"
+                    rules={[{ type: "email", message: "Invalid email" }]}
+                  >
+                    <Input placeholder="optional@company.com (optional)" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={[16, 8]}>
+                <Col xs={24} md={8}>
+                  <Form.Item
+                    label="Product ID"
+                    name="productId"
+                    rules={[
+                      { required: true, message: "Product ID is required" },
+                    ]}
+                  >
+                    <Input placeholder="e.g. XY-AV" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={16}>
+                  <Form.Item
+                    name="logoUpload"
+                    valuePropName="fileList"
+                    getValueFromEvent={(e) => e?.fileList}
+                  >
+                    <Dragger
+                      accept={acceptImages}
+                      multiple={false}
+                      maxCount={1}
+                      listType="picture"
+                      beforeUpload={validateImage}
+                      onChange={({ file }) => {
+                        if (file.status === "removed") return;
+                        if (file.type && !file.type.startsWith("image/")) {
+                          toast.error("Only images are allowed");
+                        }
+                      }}
+                    >
+                      <p className="ant-upload-drag-icon">
+                        <InboxOutlined />
+                      </p>
+                      <p className="ant-upload-text">Click or drag a logo image</p>
+                      <p className="ant-upload-hint">PNG/JPG – 1 file</p>
+                    </Dragger>
+                  </Form.Item>
+                </Col>
+              </Row>
+            </>
+          )}
+
+          {activeKey === "ui" && (
+            <>
+              <Row gutter={[16, 8]}>
+                <Col xs={24} md={12}>
+                  <Form.Item name="interfaceType">
+                    <Radio.Group optionType="button" buttonStyle="solid">
+                      <Radio value="cli">CLI-Only</Radio>
+                      <Radio value="gui">GUI Client</Radio>
+                      <Radio value="web">Headless</Radio>
+                      <Radio value="other">Other</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Form.Item noStyle shouldUpdate>
+                {({ getFieldValue }) =>
+                  getFieldValue("interfaceType") === "other" ? (
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={12}>
                         <Form.Item
-                          label="Vendor Name"
-                          name="name"
+                          name="interfaceOther"
+                          label="Specify interface"
                           rules={[
                             {
                               required: true,
-                              message: "Vendor name is required",
+                              message: "Please specify the interface",
                             },
                           ]}
                         >
-                          <Input />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} md={12}>
-                        <Form.Item
-                          label="Product Name"
-                          name="product"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Product name is required",
-                            },
-                          ]}
-                        >
-                          <Input />
+                          <Input placeholder="e.g. Hybrid / Web-only / Plug-in" />
                         </Form.Item>
                       </Col>
                     </Row>
+                  ) : null
+                }
+              </Form.Item>
 
-                    <Title level={5} style={{ marginTop: 8 }}>
-                      Contact email(s)
-                    </Title>
-                    <Row gutter={[16, 8]}>
-                      <Col xs={24} md={12}>
-                        <Form.Item
-                          name="emailPrimary"
-                          rules={[
-                            {
-                              required: true,
-                              type: "email",
-                              message: "Valid email required",
-                            },
-                          ]}
-                        >
-                          <Input placeholder="primary@company.com" />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} md={12}>
-                        <Form.Item
-                          name="emailSecondary"
-                          rules={[{ type: "email", message: "Invalid email" }]}
-                        >
-                          <Input placeholder="optional@company.com (optional)" />
-                        </Form.Item>
-                      </Col>
-                    </Row>
+              <Row gutter={[16, 8]} align="middle">
+                <Col xs={24} md={12}>
+                  <Form.Item name="timeZone" style={{ marginBottom: 0 }}>
+                    <Select
+                      options={AV_TIMEZONES}
+                      value={tz}
+                      onChange={(v) => setTz(v)}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col
+                  xs={24}
+                  md={12}
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  <AnalogClock tz={tz} size={96} mode={mode as "light" | "dark"} />
+                </Col>
+              </Row>
+            </>
+          )}
 
-                    <Row gutter={[16, 8]}>
-                      <Col xs={24} md={8}>
-                        <Form.Item
-                          label="Product ID"
-                          name="productId"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Product ID is required",
-                            },
-                          ]}
-                        >
-                          <Input placeholder="e.g. XY-AV" />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} md={16}>
-                        <Form.Item
-                          name="logoUpload"
-                          valuePropName="fileList"
-                          getValueFromEvent={(e) => e?.fileList}
-                        >
-                          <Dragger
-                            accept={acceptImages}
-                            multiple={false}
-                            maxCount={1}
-                            listType="picture"
-                            beforeUpload={validateImage}
-                            onChange={({ file }) => {
-                              if (file.status === "removed") return;
-                              if (
-                                file.type &&
-                                !file.type.startsWith("image/")
-                              ) {
-                                toast.error("Only images are allowed");
-                              }
+          {activeKey === "installer" && (
+            <>
+              <Row gutter={[16, 8]}>
+                <Col xs={24} md={8}>
+                  <Form.Item
+                    label="Need To Manually Disable Windows Defender?"
+                    name="wdManuallyOff"
+                    rules={[{ required: true, message: "Select Yes or No" }]}
+                  >
+                    <Radio.Group optionType="button" buttonStyle="solid">
+                      <Radio value={true}>Yes</Radio>
+                      <Radio value={false}>No</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={8}>
+                  <Form.Item
+                    label="Need To Manually Disable Process Creation Trigger?"
+                    name="pctManuallyOff"
+                    rules={[{ required: true, message: "Select Yes or No" }]}
+                  >
+                    <Radio.Group optionType="button" buttonStyle="solid">
+                      <Radio value={true}>Yes</Radio>
+                      <Radio value={false}>No</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Form.Item
+                name="installerImages"
+                valuePropName="fileList"
+                getValueFromEvent={(e) => e?.fileList}
+              >
+                <Dragger
+                  accept={acceptImages}
+                  multiple
+                  listType="picture"
+                  beforeUpload={validateImage}
+                  onChange={({ file }) => {
+                    if (file.status === "removed") return;
+                    if (file.type && !file.type.startsWith("image/")) {
+                      toast.error("Only images are allowed");
+                    }
+                  }}
+                >
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                  </p>
+                  <p className="ant-upload-text">Click or Drag & Drop Images Here</p>
+                  <p className="ant-upload-hint">
+                    PNG/JPG only. Files are stored client-side until save.
+                  </p>
+                </Dragger>
+              </Form.Item>
+
+              <Form.Item name="installProcedure">
+                <MDEditor data-color-mode={mode as "light" | "dark"} />
+              </Form.Item>
+            </>
+          )}
+
+          {activeKey === "updates" && (
+            <>
+              <Row gutter={[16, 8]}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Current Version Check" name="versionCheckPath">
+                    <Input placeholder="e.g. Help → About • or URL/KB" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={[16, 8]}>
+                <Col xs={24}>
+                  <Form.Item name="activationType">
+                    <Radio.Group buttonStyle="solid">
+                      <Radio value="oem">OEM</Radio>
+                      <Radio value="floating">Floating</Radio>
+                      <Radio value="trial">Trial</Radio>
+                      <Radio value="none">No Activation</Radio>
+                      <Radio value="serial">Serial Key</Radio>
+                      <Radio value="license_file">License File</Radio>
+                      <Radio value="vendor_account">Vendor Account</Radio>
+                      <Radio value="email_based">E-mail Based</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Form.Item noStyle shouldUpdate>
+                {({ getFieldValue, setFieldsValue }) => {
+                  const t = getFieldValue("activationType");
+                  const showAct =
+                    t === "serial" ||
+                    t === "license_file" ||
+                    t === "vendor_account" ||
+                    t === "email_based";
+                  return showAct ? (
+                    <>
+                      <Row gutter={[16, 8]}>
+                        <Col xs={24} md={12}>
+                          <Form.Item label="License Expiry Date" name="licenseExpiry">
+                            <DatePicker style={{ width: "100%" }} />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={12}>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 12,
+                              alignItems: "center",
+                              height: "100%",
                             }}
                           >
-                            <p className="ant-upload-drag-icon">
-                              <InboxOutlined />
-                            </p>
-                            <p className="ant-upload-text">
-                              Click or drag a logo image
-                            </p>
-                            <p className="ant-upload-hint">PNG/JPG – 1 file</p>
-                          </Dragger>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </>
-                ),
-              },
-              {
-                key: "ui",
-                label: "Interface",
-                children: (
-                  <>
-                    <Row gutter={[16, 8]}>
-                      <Col xs={24} md={12}>
-                        <Form.Item name="interfaceType">
-                          <Radio.Group optionType="button" buttonStyle="solid">
-                            <Radio value="cli">CLI-Only</Radio>
-                            <Radio value="gui">GUI Client</Radio>
-                            <Radio value="web">Headless</Radio>
-                            <Radio value="other">Other</Radio>
-                          </Radio.Group>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-
-                    <Form.Item noStyle shouldUpdate>
-                      {({ getFieldValue }) =>
-                        getFieldValue("interfaceType") === "other" ? (
-                          <Row gutter={[16, 8]}>
-                            <Col xs={24} md={12}>
-                              <Form.Item
-                                name="interfaceOther"
-                                label="Specify interface"
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: "Please specify the interface",
-                                  },
-                                ]}
-                              >
-                                <Input placeholder="e.g. Hybrid / Web-only / Plug-in" />
-                              </Form.Item>
-                            </Col>
-                          </Row>
-                        ) : null
-                      }
-                    </Form.Item>
-
-                    <Row gutter={[16, 8]} align="middle">
-                      <Col xs={24} md={12}>
-                        <Form.Item name="timeZone" style={{ marginBottom: 0 }}>
-                          <Select
-                            options={AV_TIMEZONES}
-                            value={tz}
-                            onChange={(v) => setTz(v)}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col
-                        xs={24}
-                        md={12}
-                        style={{ display: "flex", justifyContent: "center" }}
-                      >
-                        <AnalogClock
-                          tz={tz}
-                          size={96}
-                          mode={mode as "light" | "dark"}
-                        />
-                      </Col>
-                    </Row>
-                  </>
-                ),
-              },
-              {
-                key: "installer",
-                label: "Installation",
-                children: (
-                  <>
-                    <Row gutter={[16, 8]}>
-                      <Col xs={24} md={8}>
-                        <Form.Item
-                          label="Need To Manually Disable Windows Defender?"
-                          name="wdManuallyOff"
-                          rules={[
-                            { required: true, message: "Select Yes or No" },
-                          ]}
-                        >
-                          <Radio.Group optionType="button" buttonStyle="solid">
-                            <Radio value={true}>Yes</Radio>
-                            <Radio value={false}>No</Radio>
-                          </Radio.Group>
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} md={8}>
-                        <Form.Item
-                          label="Need To Manually Disable Process Creation Trigger?"
-                          name="pctManuallyOff"
-                          rules={[
-                            { required: true, message: "Select Yes or No" },
-                          ]}
-                        >
-                          <Radio.Group optionType="button" buttonStyle="solid">
-                            <Radio value={true}>Yes</Radio>
-                            <Radio value={false}>No</Radio>
-                          </Radio.Group>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                    <Form.Item
-                      name="installerImages"
-                      valuePropName="fileList"
-                      getValueFromEvent={(e) => e?.fileList}
-                    >
-                      <Dragger
-                        accept={acceptImages}
-                        multiple
-                        listType="picture"
-                        beforeUpload={validateImage}
-                        onChange={({ file }) => {
-                          if (file.status === "removed") return;
-                          if (file.type && !file.type.startsWith("image/")) {
-                            toast.error("Only images are allowed");
-                          }
-                        }}
-                      >
-                        <p className="ant-upload-drag-icon">
-                          <InboxOutlined />
-                        </p>
-                        <p className="ant-upload-text">
-                          Click or Drag & Drop Images Here
-                        </p>
-                        <p className="ant-upload-hint">
-                          PNG/JPG only. Files are stored client-side until save.
-                        </p>
-                      </Dragger>
-                    </Form.Item>
-
-                    <Form.Item name="installProcedure">
-                      <MDEditor data-color-mode={mode as "light" | "dark"} />
-                    </Form.Item>
-                  </>
-                ),
-              },
-              {
-                key: "updates",
-                label: "Updates",
-                children: (
-                  <>
-                    <Row gutter={[16, 8]}>
-                      <Col xs={24} md={12}>
-                        <Form.Item
-                          label="Current Version Check"
-                          name="versionCheckPath"
-                        >
-                          <Input placeholder="e.g. Help → About • or URL/KB" />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-
-                    <Row gutter={[16, 8]}>
-                      <Col xs={24}>
-                        <Form.Item name="activationType">
-                          <Radio.Group buttonStyle="solid">
-                            <Radio value="oem">OEM</Radio>
-                            <Radio value="floating">Floating</Radio>
-                            <Radio value="trial">Trial</Radio>
-                            <Radio value="none">No Activation</Radio>
-                            <Radio value="serial">Serial Key</Radio>
-                            <Radio value="license_file">License File</Radio>
-                            <Radio value="vendor_account">Vendor Account</Radio>
-                            <Radio value="email_based">E-mail Based</Radio>
-                          </Radio.Group>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-
-                    <Form.Item noStyle shouldUpdate>
-                      {({ getFieldValue, setFieldsValue }) => {
-                        const t = getFieldValue("activationType");
-                        const showAct =
-                          t === "serial" ||
-                          t === "license_file" ||
-                          t === "vendor_account" ||
-                          t === "email_based";
-                        return showAct ? (
-                          <>
-                            <Row gutter={[16, 8]}>
-                              <Col xs={24} md={12}>
-                                <Form.Item
-                                  label="License Expiry Date"
-                                  name="licenseExpiry"
-                                >
-                                  <DatePicker style={{ width: "100%" }} />
-                                </Form.Item>
-                              </Col>
-                              <Col xs={24} md={12}>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    gap: 12,
-                                    alignItems: "center",
-                                    height: "100%",
-                                  }}
-                                >
-                                  <Form.Item
-                                    name="expiryPerpetual"
-                                    valuePropName="checked"
-                                    style={{ margin: 0 }}
-                                  >
-                                    <Checkbox
-                                      onChange={(e) => {
-                                        if (e.target.checked) {
-                                          setFieldsValue({
-                                            expiryNone: false,
-                                            licenseExpiry: dayjs("2099-12-31"),
-                                          });
-                                        }
-                                      }}
-                                    >
-                                      Perpetual license
-                                    </Checkbox>
-                                  </Form.Item>
-                                  <Form.Item
-                                    name="expiryNone"
-                                    valuePropName="checked"
-                                    style={{ margin: 0 }}
-                                  >
-                                    <Checkbox
-                                      onChange={(e) => {
-                                        if (e.target.checked) {
-                                          setFieldsValue({
-                                            expiryPerpetual: false,
-                                            licenseExpiry: null,
-                                          });
-                                        }
-                                      }}
-                                    >
-                                      No expiry
-                                    </Checkbox>
-                                  </Form.Item>
-                                </div>
-                              </Col>
-                            </Row>
-
-                            {t === "serial" && (
-                              <Row gutter={[16, 8]}>
-                                <Col xs={24} md={12}>
-                                  <Form.Item
-                                    label="Serial key"
-                                    name="activationSerial"
-                                  >
-                                    <Input placeholder="XXXX-XXXX-XXXX-XXXX" />
-                                  </Form.Item>
-                                </Col>
-                              </Row>
-                            )}
-
-                            {t === "license_file" && (
-                              <Row gutter={[16, 8]}>
-                                <Col xs={24} md={12}>
-                                  <Form.Item
-                                    label="License file"
-                                    name="activationFile"
-                                    valuePropName="fileList"
-                                    getValueFromEvent={(e) => e?.fileList}
-                                  >
-                                    <Dragger
-                                      accept=".lic,.dat,.bin"
-                                      maxCount={1}
-                                      beforeUpload={validateLicenseFile}
-                                    >
-                                      <p className="ant-upload-drag-icon">
-                                        <InboxOutlined />
-                                      </p>
-                                      <p className="ant-upload-text">
-                                        Click or drag .lic/.dat/.bin
-                                      </p>
-                                    </Dragger>
-                                  </Form.Item>
-                                </Col>
-                              </Row>
-                            )}
-
-                            {t === "vendor_account" && (
-                              <Row gutter={[16, 8]}>
-                                <Col xs={24} md={12}>
-                                  <Form.Item
-                                    label="Vendor account e-mail"
-                                    name="activationEmail"
-                                    rules={[{ type: "email" }]}
-                                  >
-                                    <Input placeholder="email@vendor.com" />
-                                  </Form.Item>
-                                </Col>
-                                <Col xs={24} md={12}>
-                                  <Form.Item
-                                    label="Vendor account password"
-                                    name="activationPassword"
-                                  >
-                                    <Input.Password placeholder="Password" />
-                                  </Form.Item>
-                                </Col>
-                              </Row>
-                            )}
-
-                            {t === "email_based" && (
-                              <Row gutter={[16, 8]}>
-                                <Col xs={24} md={12}>
-                                  <Form.Item
-                                    label="Activation e-mail"
-                                    name="activationEmail"
-                                    rules={[{ type: "email" }]}
-                                  >
-                                    <Input placeholder="email@vendor.com" />
-                                  </Form.Item>
-                                </Col>
-                              </Row>
-                            )}
-                          </>
-                        ) : null;
-                      }}
-                    </Form.Item>
-
-                    <Form.Item name="updateProcedure">
-                      <MDEditor data-color-mode={mode as "light" | "dark"} />
-                    </Form.Item>
-                  </>
-                ),
-              },
-              {
-                key: "rtod",
-                label: "RT & OD",
-                children: (
-                  <>
-                    <Row gutter={[16, 8]}>
-                      <Col xs={24} md={12}>
-                        <Form.Item
-                          name="hasRT"
-                          valuePropName="checked"
-                          initialValue={record?.hasRT ?? true}
-                        >
-                          <Checkbox>Real-Time Scan Available</Checkbox>
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} md={12}>
-                        <Form.Item
-                          name="hasOD"
-                          valuePropName="checked"
-                          initialValue={record?.hasOD ?? true}
-                        >
-                          <Checkbox>Custom Scan Available</Checkbox>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                    <Form.Item noStyle shouldUpdate>
-                      {({ getFieldValue }) => {
-                        const odEnabled = !!getFieldValue("hasOD");
-                        const st =
-                          getFieldValue("scanType") ||
-                          record?.customScan?.type ||
-                          "context_menu";
-                        return (
-                          <>
-                            <Row gutter={[16, 8]}>
-                              <Col xs={24} md={16}>
-                                <Form.Item
-                                  name="scanType"
-                                  initialValue={
-                                    record?.customScan?.type || "context_menu"
+                            <Form.Item
+                              name="expiryPerpetual"
+                              valuePropName="checked"
+                              style={{ margin: 0 }}
+                            >
+                              <Checkbox
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFieldsValue({
+                                      expiryNone: false,
+                                      licenseExpiry: dayjs("2099-12-31"),
+                                    });
                                   }
-                                >
-                                  <Radio.Group
-                                    disabled={!odEnabled}
-                                    optionType="button"
-                                    buttonStyle="solid"
-                                  >
-                                    <Radio value="context_menu">
-                                      Right-Click Context Menu
-                                    </Radio>
-                                    <Radio value="gui_custom_scan">
-                                      GUI → Custom Scan
-                                    </Radio>
-                                    <Radio value="unique">
-                                      Unique (specify path)
-                                    </Radio>
-                                  </Radio.Group>
-                                </Form.Item>
-                              </Col>
-                            </Row>
-                            {st === "unique" && (
-                              <Row gutter={[16, 8]}>
-                                <Col xs={24} md={16}>
-                                  <Form.Item
-                                    name="customScanPath"
-                                    initialValue={record?.customScan?.path}
-                                    rules={[
-                                      {
-                                        required: true,
-                                        message: "Path is required for Unique",
-                                      },
-                                    ]}
-                                  >
-                                    <AutoComplete
-                                      options={UNIQUE_PATH_SUGGESTIONS.map(
-                                        (v) => ({ value: v }),
-                                      )}
-                                      filterOption={(input, option) =>
-                                        (option?.value ?? "")
-                                          .toLowerCase()
-                                          .includes(input.toLowerCase())
-                                      }
-                                      disabled={!odEnabled}
-                                    >
-                                      <Input placeholder="e.g. C:\ProgramData\Vendor\Product\Logs" />
-                                    </AutoComplete>
-                                  </Form.Item>
-                                </Col>
-                              </Row>
-                            )}
-                          </>
-                        );
-                      }}
-                    </Form.Item>
-                    <Row gutter={[16, 8]}>
-                      <Col span={24}>
-                        <Form.Item label="Path To Collect Logs" name="log">
-                          <Input placeholder="e.g. C:\ProgramData\Vendor\Product\Logs" />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </>
-                ),
-              },
-            ]}
-          />
+                                }}
+                              >
+                                Perpetual license
+                              </Checkbox>
+                            </Form.Item>
+                            <Form.Item
+                              name="expiryNone"
+                              valuePropName="checked"
+                              style={{ margin: 0 }}
+                            >
+                              <Checkbox
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFieldsValue({
+                                      expiryPerpetual: false,
+                                      licenseExpiry: null,
+                                    });
+                                  }
+                                }}
+                              >
+                                No expiry
+                              </Checkbox>
+                            </Form.Item>
+                          </div>
+                        </Col>
+                      </Row>
 
-          <div
-            className="wizard-footer"
-            style={{ justifyContent: "flex-end", gap: 8 }}
-          >
+                      {t === "serial" && (
+                        <Row gutter={[16, 8]}>
+                          <Col xs={24} md={12}>
+                            <Form.Item label="Serial key" name="activationSerial">
+                              <Input placeholder="XXXX-XXXX-XXXX-XXXX" />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+
+                      {t === "license_file" && (
+                        <Row gutter={[16, 8]}>
+                          <Col xs={24} md={12}>
+                            <Form.Item
+                              label="License file"
+                              name="activationFile"
+                              valuePropName="fileList"
+                              getValueFromEvent={(e) => e?.fileList}
+                            >
+                              <Dragger accept=".lic,.dat,.bin" maxCount={1} beforeUpload={validateLicenseFile}>
+                                <p className="ant-upload-drag-icon">
+                                  <InboxOutlined />
+                                </p>
+                                <p className="ant-upload-text">Click or drag .lic/.dat/.bin</p>
+                              </Dragger>
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+
+                      {t === "vendor_account" && (
+                        <Row gutter={[16, 8]}>
+                          <Col xs={24} md={12}>
+                            <Form.Item
+                              label="Vendor account e-mail"
+                              name="activationEmail"
+                              rules={[{ type: "email" }]}
+                            >
+                              <Input placeholder="email@vendor.com" />
+                            </Form.Item>
+                          </Col>
+                          <Col xs={24} md={12}>
+                            <Form.Item
+                              label="Vendor account password"
+                              name="activationPassword"
+                            >
+                              <Input.Password placeholder="Password" />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+
+                      {t === "email_based" && (
+                        <Row gutter={[16, 8]}>
+                          <Col xs={24} md={12}>
+                            <Form.Item
+                              label="Activation e-mail"
+                              name="activationEmail"
+                              rules={[{ type: "email" }]}
+                            >
+                              <Input placeholder="email@vendor.com" />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+                    </>
+                  ) : null;
+                }}
+              </Form.Item>
+
+              <Form.Item name="updateProcedure">
+                <MDEditor data-color-mode={mode as "light" | "dark"} />
+              </Form.Item>
+            </>
+          )}
+
+          {activeKey === "rtod" && (
+            <>
+              <Row gutter={[16, 8]}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="hasRT"
+                    valuePropName="checked"
+                    initialValue={record?.hasRT ?? true}
+                  >
+                    <Checkbox>Real-Time Scan Available</Checkbox>
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="hasOD"
+                    valuePropName="checked"
+                    initialValue={record?.hasOD ?? true}
+                  >
+                    <Checkbox>Custom Scan Available</Checkbox>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Form.Item noStyle shouldUpdate>
+                {({ getFieldValue }) => {
+                  const odEnabled = !!getFieldValue("hasOD");
+                  const st =
+                    getFieldValue("scanType") ||
+                    record?.customScan?.type ||
+                    "context_menu";
+                  return (
+                    <>
+                      <Row gutter={[16, 8]}>
+                        <Col xs={24} md={16}>
+                          <Form.Item
+                            name="scanType"
+                            initialValue={record?.customScan?.type || "context_menu"}
+                          >
+                            <Radio.Group
+                              disabled={!odEnabled}
+                              optionType="button"
+                              buttonStyle="solid"
+                            >
+                              <Radio value="context_menu">Right-Click Context Menu</Radio>
+                              <Radio value="gui_custom_scan">GUI → Custom Scan</Radio>
+                              <Radio value="unique">Unique (specify path)</Radio>
+                            </Radio.Group>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      {st === "unique" && (
+                        <Row gutter={[16, 8]}>
+                          <Col xs={24} md={16}>
+                            <Form.Item
+                              name="customScanPath"
+                              initialValue={record?.customScan?.path}
+                              rules={[
+                                { required: true, message: "Path is required for Unique" },
+                              ]}
+                            >
+                              <AutoComplete
+                                options={UNIQUE_PATH_SUGGESTIONS.map((v) => ({ value: v }))}
+                                filterOption={(input, option) =>
+                                  (option?.value ?? "")
+                                    .toLowerCase()
+                                    .includes(input.toLowerCase())
+                                }
+                                disabled={!odEnabled}
+                              >
+                                <Input placeholder="e.g. C:\ProgramData\Vendor\Product\Logs" />
+                              </AutoComplete>
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+                    </>
+                  );
+                }}
+              </Form.Item>
+              <Row gutter={[16, 8]}>
+                <Col span={24}>
+                  <Form.Item label="Path To Collect Logs" name="log">
+                    <Input placeholder="e.g. C:\ProgramData\Vendor\Product\Logs" />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </>
+          )}
+
+          <div className="wizard-footer" style={{ justifyContent: "flex-end", gap: 8 }}>
             <Button onClick={goPrev} disabled={idx === 0}>
               <LeftOutlined /> Prev
             </Button>

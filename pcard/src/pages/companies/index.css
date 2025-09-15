@@ -440,3 +440,33 @@ note-card {
 .panel-header .ant-btn-primary {
   box-shadow: var(--shadow-2);
 }
+
+.wizard-card {
+  position: relative;
+  margin-top: 8px
+}
+
+.wizard-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2
+}
+
+.wizard-arrow-left {
+  left: -12px
+}
+
+.wizard-arrow-right {
+  right: -12px
+}
+
+.wizard-footer {
+  display: flex;
+  align-items: center
+}
+
+.ant-card:has(#company-create-form)>.ant-card-actions,
+.ant-card:has(#company-edit-form)>.ant-card-actions {
+  display: none !important
+}
