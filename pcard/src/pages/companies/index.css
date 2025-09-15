@@ -365,7 +365,6 @@ note-card {
   right: 8px;
 }
 
-/* OverDue badge */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -384,7 +383,6 @@ note-card {
   color: #e02424;
 }
 
-/* Product summary merged layout */
 .product-summary {
   display: flex;
   align-items: flex-start;
@@ -414,7 +412,6 @@ note-card {
   margin-top: 6px;
 }
 
-/* Responsive stacking */
 @media (max-width: 992px) {
   .product-summary {
     flex-direction: column;
@@ -430,4 +427,16 @@ note-card {
     order: -1;
     justify-content: center;
   }
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.panel-header .ant-btn-primary {
+  box-shadow: var(--shadow-2);
 }

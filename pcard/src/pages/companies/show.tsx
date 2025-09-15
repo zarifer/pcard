@@ -32,6 +32,7 @@ import {
   PictureOutlined,
   LeftOutlined,
   RightOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import { useEffect, useMemo, useState, useRef, useContext } from "react";
 import { useParams, useLocation } from "react-router-dom";
@@ -58,6 +59,7 @@ export default function CompanyShow() {
   const location = useLocation();
   const initialTab =
     new URLSearchParams(location.search).get("tab") || "overview";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -184,54 +186,48 @@ export default function CompanyShow() {
     queryOptions: { enabled: !!companyId },
   });
 
-  const categoryIds = useMemo(() => {
-    const set = new Set<string>();
-    for (const arr of [
+  const { data: categoriesResolved } = useMany({
+    resource: "categories",
+    ids: useMemo(() => {
+      const set = new Set<string>();
+      for (const arr of [
+        draftTbl.tableProps.dataSource,
+        openTbl.tableProps.dataSource,
+        closedTbl.tableProps.dataSource,
+        allTbl.tableProps.dataSource,
+      ] as ReadonlyArray<readonly any[] | undefined>) {
+        for (const r of arr ?? []) {
+          const id = r?.category?.id;
+          if (id) set.add(id);
+        }
+      }
+      return Array.from(set);
+    }, [
       draftTbl.tableProps.dataSource,
       openTbl.tableProps.dataSource,
       closedTbl.tableProps.dataSource,
       allTbl.tableProps.dataSource,
-    ] as ReadonlyArray<readonly any[] | undefined>) {
-      for (const r of arr ?? []) {
-        const id = r?.category?.id;
-        if (id) set.add(id);
-      }
-    }
-    return Array.from(set);
-  }, [
-    draftTbl.tableProps.dataSource,
-    openTbl.tableProps.dataSource,
-    closedTbl.tableProps.dataSource,
-    allTbl.tableProps.dataSource,
-  ]);
-
-  const { data: categoriesResolved } = useMany({
-    resource: "categories",
-    ids: categoryIds,
-    queryOptions: { enabled: categoryIds.length > 0 },
+    ]),
+    queryOptions: { enabled: true },
   });
 
   const categoryTitle = (id?: string) =>
     categoriesResolved?.data?.find((c: any) => c.id === id)?.title || "—";
 
-  const COL_W = {
-    category: 300,
-    created: 140,
-    actions: 140,
-  };
+  const COL_W = { category: 300, created: 140, actions: 140 };
   const columns = [
     {
       title: "Product ID",
       dataIndex: "productId",
       width: 140,
-      render: (_: any, rec: any) => company?.productId || "—",
+      render: (_: any) => company?.productId || "—",
       onCell: () => ({ style: { whiteSpace: "nowrap" } }),
     },
     {
       title: "Company",
       dataIndex: ["company", "id"],
       width: 220,
-      render: (_: any, rec: any) => company?.name || "—",
+      render: (_: any) => company?.name || "—",
       onCell: () => ({ style: { whiteSpace: "nowrap" } }),
     },
     {
@@ -304,19 +300,25 @@ export default function CompanyShow() {
   return (
     <Show
       title={company.name}
-      headerButtons={() => (
-        <>
-          <EditButton resource="companies" recordItemId={company.id} />
-          <DeleteButton
-            resource="companies"
-            recordItemId={company.id}
-            onSuccess={() => push("/companies")}
-          />
-        </>
-      )}
+      headerButtons={() => null}
+      contentProps={{
+        style: { background: "transparent", boxShadow: "none" },
+        bodyStyle: { padding: 0 },
+      }}
     >
       <Tabs
-        defaultActiveKey={initialTab}
+        activeKey={activeTab}
+        onChange={(k) => setActiveTab(k)}
+        tabBarExtraContent={
+          <Space>
+            <EditButton resource="companies" recordItemId={company.id} />
+            <DeleteButton
+              resource="companies"
+              recordItemId={company.id}
+              onSuccess={() => push("/companies")}
+            />
+          </Space>
+        }
         items={[
           {
             key: "overview",
@@ -360,7 +362,6 @@ export default function CompanyShow() {
                               : "—"}
                           </div>
                         </div>
-
                         <div className="product-summary__tz">
                           <div className="kv clock-line">
                             <span></span>
@@ -395,7 +396,6 @@ export default function CompanyShow() {
                             onClick={() => carouselRef.current?.prev()}
                             aria-label="Previous image"
                           />
-
                           <Button
                             shape="circle"
                             className="carousel-nav next"
@@ -575,27 +575,24 @@ export default function CompanyShow() {
             label: "Incidents",
             children: (
               <div className="company-incidents">
-                <div
-                  className="panel-header"
-                  style={{ display: "flex", alignItems: "center", gap: 8 }}
-                >
-                  <CreateButton
-                    resource="incident_logs"
-                    size="small"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      push(
-                        `/incident-logs/create?companyId=${encodeURIComponent(
-                          company.id,
-                        )}&productId=${encodeURIComponent(company.productId || "")}`,
-                      );
-                    }}
-                  >
-                    Add Incident
-                  </CreateButton>
-                </div>
-
                 <Tabs
+                  tabBarExtraContent={
+                    <CreateButton
+                      resource="incident_logs"
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        push(
+                          `/incident-logs/create?companyId=${encodeURIComponent(
+                            company.id,
+                          )}&productId=${encodeURIComponent(company.productId || "")}`,
+                        );
+                      }}
+                    >
+                      Add Incident
+                    </CreateButton>
+                  }
                   items={[
                     {
                       key: "all",

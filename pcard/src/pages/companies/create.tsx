@@ -7,7 +7,6 @@ import {
   Col,
   Select,
   Radio,
-  Divider,
   DatePicker,
   Typography,
   Button,
@@ -23,7 +22,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { useContext, useEffect, useState } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
 import { AnalogClock } from "./analogclock";
-import AV_TIMEZONES from "./timezones";
+import { AV_TIMEZONES } from "./timezones";
 import dayjs, { Dayjs } from "dayjs";
 
 const { Title } = Typography;
@@ -63,16 +62,24 @@ export default function CompanyCreate() {
   const TAB_KEYS = ["primary", "ui", "installer", "updates", "rtod"] as const;
   const [activeKey, setActiveKey] =
     useState<(typeof TAB_KEYS)[number]>("primary");
+  const TAB_LABELS = {
+    primary: "Primary Info",
+    ui: "Interface",
+    installer: "Installation",
+    updates: "Updates",
+    rtod: "RT & OD",
+  } as const;
+  const tabHeaders = TAB_KEYS.map((k) => ({ key: k, label: TAB_LABELS[k] }));
+
   const idx = TAB_KEYS.indexOf(activeKey);
   const goPrev = () => setActiveKey(TAB_KEYS[Math.max(0, idx - 1)]);
   const goNext = () =>
     setActiveKey(TAB_KEYS[Math.min(TAB_KEYS.length - 1, idx + 1)]);
   const [tz, setTz] = useState<string>("Europe/London");
-  const [Now, setNow] = useState<Date>(new Date());
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
+    const id = setInterval(() => {}, 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -99,10 +106,30 @@ export default function CompanyCreate() {
   return (
     <Create
       breadcrumb={false}
-      title="Add Product"
+      title="Add Company"
       headerButtons={() => null}
       footerButtons={() => null}
     >
+      <Tabs
+        activeKey={activeKey}
+        onChange={(k) => setActiveKey(k as any)}
+        items={tabHeaders}
+        tabBarExtraContent={
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button onClick={() => goBack()}>Cancel</Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              form="company-create-form"
+              loading={saveButtonProps.loading}
+              disabled={saveButtonProps.disabled}
+            >
+              Save
+            </Button>
+          </div>
+        }
+      />
+
       <Card className="wizard-card">
         <Button
           shape="circle"
@@ -260,13 +287,13 @@ export default function CompanyCreate() {
           <Tabs
             activeKey={activeKey}
             onChange={(k) => setActiveKey(k as any)}
+            renderTabBar={() => <></>}
             items={[
               {
                 key: "primary",
-                label: "PRIMARY INFO",
+                label: "Primary Info",
                 children: (
                   <>
-                    <Divider orientation="left">Card Details</Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={12}>
                         <Form.Item
@@ -326,7 +353,6 @@ export default function CompanyCreate() {
                       </Col>
                     </Row>
 
-                    <Divider orientation="left">Meta Data</Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={8}>
                         <Form.Item
@@ -380,10 +406,9 @@ export default function CompanyCreate() {
               },
               {
                 key: "ui",
-                label: "INTERFACE",
+                label: "Interface",
                 children: (
                   <>
-                    <Divider orientation="left">Interface</Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={12}>
                         <Form.Item name="interfaceType" initialValue="gui">
@@ -420,7 +445,6 @@ export default function CompanyCreate() {
                       }
                     </Form.Item>
 
-                    <Divider orientation="left">Vendor Timezone</Divider>
                     <Row gutter={[16, 8]} align="middle">
                       <Col xs={24} md={12}>
                         <Form.Item name="timeZone" style={{ marginBottom: 0 }}>
@@ -448,12 +472,9 @@ export default function CompanyCreate() {
               },
               {
                 key: "installer",
-                label: "INSTALLATION",
+                label: "Installation",
                 children: (
                   <>
-                    <Divider orientation="left">
-                      Windows Defender & Process Creation Trigger
-                    </Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={8}>
                         <Form.Item
@@ -485,7 +506,6 @@ export default function CompanyCreate() {
                       </Col>
                     </Row>
 
-                    <Divider orientation="left">Installer Images</Divider>
                     <Form.Item
                       name="installerImages"
                       valuePropName="fileList"
@@ -515,7 +535,6 @@ export default function CompanyCreate() {
                       </Dragger>
                     </Form.Item>
 
-                    <Divider orientation="left">Installation Notes</Divider>
                     <Form.Item name="installProcedure">
                       <MDEditor data-color-mode={mode as "light" | "dark"} />
                     </Form.Item>
@@ -524,7 +543,7 @@ export default function CompanyCreate() {
               },
               {
                 key: "updates",
-                label: "UPDATES",
+                label: "Updates",
                 children: (
                   <>
                     <Row gutter={[16, 8]}>
@@ -538,19 +557,15 @@ export default function CompanyCreate() {
                       </Col>
                     </Row>
 
-                    <Divider orientation="left">Activation Type</Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24}>
                         <Form.Item name="activationType">
                           <Radio.Group buttonStyle="solid">
-                            <Radio value="oem">OEM</Radio>
-                            <Radio value="floating">Floating</Radio>
-                            <Radio value="trial">Trial</Radio>
-                            <Radio value="none">No Activation</Radio>
-                            <Radio value="serial">Serial Key</Radio>
-                            <Radio value="license_file">License File</Radio>
-                            <Radio value="vendor_account">Vendor Account</Radio>
-                            <Radio value="email_based">E-mail Based</Radio>
+                            {ACTIVATION_OPTIONS.map((o) => (
+                              <Radio key={o.value} value={o.value}>
+                                {o.label}
+                              </Radio>
+                            ))}
                           </Radio.Group>
                         </Form.Item>
                       </Col>
@@ -566,9 +581,6 @@ export default function CompanyCreate() {
                           t === "email_based";
                         return showAct ? (
                           <>
-                            <Divider orientation="left">
-                              License Activation
-                            </Divider>
                             <Row gutter={[16, 8]}>
                               <Col xs={24} md={12}>
                                 <Form.Item
@@ -650,7 +662,7 @@ export default function CompanyCreate() {
                                     getValueFromEvent={(e) => e?.fileList}
                                   >
                                     <Dragger
-                                      accept={acceptLicenseFiles}
+                                      accept=".lic,.dat,.bin"
                                       maxCount={1}
                                       beforeUpload={validateLicenseFile}
                                     >
@@ -706,7 +718,6 @@ export default function CompanyCreate() {
                       }}
                     </Form.Item>
 
-                    <Divider orientation="left">Update Procedure</Divider>
                     <Form.Item name="updateProcedure">
                       <MDEditor data-color-mode={mode as "light" | "dark"} />
                     </Form.Item>
@@ -718,7 +729,6 @@ export default function CompanyCreate() {
                 label: "RT & OD",
                 children: (
                   <>
-                    <Divider orientation="left">Real-Time & On-Demand</Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={12}>
                         <Form.Item
@@ -740,7 +750,6 @@ export default function CompanyCreate() {
                       </Col>
                     </Row>
 
-                    <Divider orientation="left">Custom Scan</Divider>
                     <Form.Item noStyle shouldUpdate>
                       {({ getFieldValue }) => {
                         const odEnabled = !!getFieldValue("hasOD");
@@ -805,7 +814,6 @@ export default function CompanyCreate() {
                       }}
                     </Form.Item>
 
-                    <Divider orientation="left">Logs</Divider>
                     <Row gutter={[16, 8]}>
                       <Col span={24}>
                         <Form.Item label="Log Files Path" name="log">
@@ -819,7 +827,6 @@ export default function CompanyCreate() {
             ]}
           />
 
-          <Divider />
           <div
             className="wizard-footer"
             style={{ justifyContent: "flex-end", gap: 8 }}
@@ -834,18 +841,6 @@ export default function CompanyCreate() {
         </Form>
       </Card>
 
-      <div className="page-actions">
-        <Button onClick={() => goBack()}>Cancel</Button>
-        <Button
-          type="primary"
-          htmlType="submit"
-          form="company-create-form"
-          loading={saveButtonProps.loading}
-          disabled={saveButtonProps.disabled}
-        >
-          Save
-        </Button>
-      </div>
       {submitError && (
         <div className="form-submit-error" style={{ textAlign: "right" }}>
           {submitError}

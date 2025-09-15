@@ -7,7 +7,6 @@ import {
   Col,
   Select,
   Radio,
-  Divider,
   DatePicker,
   Typography,
   Button,
@@ -59,6 +58,15 @@ export default function CompanyEdit() {
   const TAB_KEYS = ["primary", "ui", "installer", "updates", "rtod"] as const;
   const [activeKey, setActiveKey] =
     useState<(typeof TAB_KEYS)[number]>("primary");
+  const TAB_LABELS = {
+    primary: "Primary Info",
+    ui: "Interface",
+    installer: "Installation",
+    updates: "Updates",
+    rtod: "RT & OD",
+  } as const;
+  const tabHeaders = TAB_KEYS.map((k) => ({ key: k, label: TAB_LABELS[k] }));
+
   const idx = TAB_KEYS.indexOf(activeKey);
   const goPrev = () => setActiveKey(TAB_KEYS[Math.max(0, idx - 1)]);
   const goNext = () =>
@@ -299,10 +307,11 @@ export default function CompanyEdit() {
           <Tabs
             activeKey={activeKey}
             onChange={(k) => setActiveKey(k as any)}
+            renderTabBar={() => <></>}
             items={[
               {
                 key: "primary",
-                label: "PRIMARY INFO",
+                label: "Primary Info",
                 children: (
                   <>
                     <Row gutter={[16, 8]}>
@@ -364,7 +373,6 @@ export default function CompanyEdit() {
                       </Col>
                     </Row>
 
-                    <Divider orientation="left">Meta Data</Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={8}>
                         <Form.Item
@@ -398,7 +406,7 @@ export default function CompanyEdit() {
                                 file.type &&
                                 !file.type.startsWith("image/")
                               ) {
-                                message.error("Only images are allowed");
+                                toast.error("Only images are allowed");
                               }
                             }}
                           >
@@ -418,10 +426,9 @@ export default function CompanyEdit() {
               },
               {
                 key: "ui",
-                label: "INTERFACE",
+                label: "Interface",
                 children: (
                   <>
-                    <Divider orientation="left">Interface</Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={12}>
                         <Form.Item name="interfaceType">
@@ -458,7 +465,6 @@ export default function CompanyEdit() {
                       }
                     </Form.Item>
 
-                    <Divider orientation="left">Timezone (AV vendors)</Divider>
                     <Row gutter={[16, 8]} align="middle">
                       <Col xs={24} md={12}>
                         <Form.Item name="timeZone" style={{ marginBottom: 0 }}>
@@ -486,12 +492,9 @@ export default function CompanyEdit() {
               },
               {
                 key: "installer",
-                label: "INSTALLATION",
+                label: "Installation",
                 children: (
                   <>
-                    <Divider orientation="left">
-                      Windows Defender & Process Creation Trigger
-                    </Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={8}>
                         <Form.Item
@@ -522,7 +525,6 @@ export default function CompanyEdit() {
                         </Form.Item>
                       </Col>
                     </Row>
-                    <Divider orientation="left">Installer Images</Divider>
                     <Form.Item
                       name="installerImages"
                       valuePropName="fileList"
@@ -552,7 +554,6 @@ export default function CompanyEdit() {
                       </Dragger>
                     </Form.Item>
 
-                    <Divider orientation="left">Installation Notes</Divider>
                     <Form.Item name="installProcedure">
                       <MDEditor data-color-mode={mode as "light" | "dark"} />
                     </Form.Item>
@@ -561,7 +562,7 @@ export default function CompanyEdit() {
               },
               {
                 key: "updates",
-                label: "UPDATES",
+                label: "Updates",
                 children: (
                   <>
                     <Row gutter={[16, 8]}>
@@ -575,7 +576,6 @@ export default function CompanyEdit() {
                       </Col>
                     </Row>
 
-                    <Divider orientation="left">Activation Type</Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24}>
                         <Form.Item name="activationType">
@@ -603,9 +603,6 @@ export default function CompanyEdit() {
                           t === "email_based";
                         return showAct ? (
                           <>
-                            <Divider orientation="left">
-                              License Activation
-                            </Divider>
                             <Row gutter={[16, 8]}>
                               <Col xs={24} md={12}>
                                 <Form.Item
@@ -743,7 +740,6 @@ export default function CompanyEdit() {
                       }}
                     </Form.Item>
 
-                    <Divider orientation="left">Update Procedure</Divider>
                     <Form.Item name="updateProcedure">
                       <MDEditor data-color-mode={mode as "light" | "dark"} />
                     </Form.Item>
@@ -755,9 +751,6 @@ export default function CompanyEdit() {
                 label: "RT & OD",
                 children: (
                   <>
-                    <Divider orientation="left">
-                      Real-Time & Custom Scan
-                    </Divider>
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={12}>
                         <Form.Item
@@ -778,7 +771,6 @@ export default function CompanyEdit() {
                         </Form.Item>
                       </Col>
                     </Row>
-                    <Divider orientation="left">Custom Scan</Divider>
                     <Form.Item noStyle shouldUpdate>
                       {({ getFieldValue }) => {
                         const odEnabled = !!getFieldValue("hasOD");
@@ -848,7 +840,6 @@ export default function CompanyEdit() {
                         );
                       }}
                     </Form.Item>
-                    <Divider orientation="left">Logs</Divider>
                     <Row gutter={[16, 8]}>
                       <Col span={24}>
                         <Form.Item label="Path To Collect Logs" name="log">
@@ -862,7 +853,6 @@ export default function CompanyEdit() {
             ]}
           />
 
-          <Divider />
           <div
             className="wizard-footer"
             style={{ justifyContent: "flex-end", gap: 8 }}
@@ -876,18 +866,7 @@ export default function CompanyEdit() {
           </div>
         </Form>
       </Card>
-      <div className="page-actions">
-        <Button onClick={() => goBack()}>Cancel</Button>
-        <Button
-          type="primary"
-          htmlType="submit"
-          form="company-edit-form"
-          loading={saveButtonProps.loading}
-          disabled={saveButtonProps.disabled}
-        >
-          Save
-        </Button>
-      </div>
+
       {submitError && (
         <div className="form-submit-error" style={{ textAlign: "right" }}>
           {submitError}
