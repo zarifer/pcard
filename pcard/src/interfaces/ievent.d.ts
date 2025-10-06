@@ -1,10 +1,10 @@
-export interface IEvent {
-  id: string;
+export type CalendarEvent = {
+  id: number;
   title: string;
-  description?: string;
-  date: string | string[];
-  endDate?: string;
-  type: string;
-  participants?: string | string[];
-  multi?: boolean;
-}
+  date: string;
+  performedBy?: string | null;
+  performedAtUtc?: string | null;
+  description?: string | null;
+};
+
+export type IEvent = CalendarEvent;

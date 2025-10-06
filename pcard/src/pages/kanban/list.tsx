@@ -655,13 +655,6 @@ export default function KanbanList() {
         }}
         confirmLoading={importing}
       >
-        <Input.Search
-          placeholder="Search companies…"
-          value={searchCompanies}
-          onChange={(e) => setSearchCompanies(e.target.value)}
-          allowClear
-          style={{ marginBottom: 12 }}
-        />
         <div style={{ maxHeight: 360, overflow: "auto", paddingRight: 4 }}>
           {sortedCompanies.map(({ company: c, imported }) => {
             const labelText =
@@ -720,7 +713,7 @@ export default function KanbanList() {
 
   return (
     <>
-      <Typography.Title level={4} style={{ margin: 0, marginBottom: 12 }}>
+      <Typography.Title level={4} style={{ marginBottom: 20 }}>
         Kanban Board
       </Typography.Title>
 

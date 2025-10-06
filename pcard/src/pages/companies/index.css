@@ -443,30 +443,30 @@ note-card {
 
 .wizard-card {
   position: relative;
-  margin-top: 8px
+  margin-top: 8px;
 }
 
 .wizard-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 2
+  z-index: 2;
 }
 
 .wizard-arrow-left {
-  left: -12px
+  left: -12px;
 }
 
 .wizard-arrow-right {
-  right: -12px
+  right: -12px;
 }
 
 .wizard-footer {
   display: flex;
-  align-items: center
+  align-items: center;
 }
 
-.ant-card:has(#company-create-form)>.ant-card-actions,
-.ant-card:has(#company-edit-form)>.ant-card-actions {
-  display: none !important
+.ant-card:has(#company-create-form) > .ant-card-actions,
+.ant-card:has(#company-edit-form) > .ant-card-actions {
+  display: none !important;
 }

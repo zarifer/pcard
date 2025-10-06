@@ -13,6 +13,7 @@
   --btn-gradient: linear-gradient(90deg, #7c41f7, #bc80fc);
   --btn-text: #fff;
   --btn-shadow: #bc80fc44;
+  --week-slot-h: 24px;
 }
 
 [data-theme="dark"] {
@@ -36,8 +37,7 @@
   display: flex;
   gap: 32px;
   align-items: flex-start;
-  margin-top: 32px;
-  /* kicsit nagyobb legyen a felső margó */
+  margin-top: 12px;
 }
 
 /*-----------------------------------------------------------
@@ -67,105 +67,13 @@
 }
 
 /*-----------------------------------------------------------
-  CATEGORIES CARD
------------------------------------------------------------*/
-.calendar-categories-card {
-  background: var(--card-bg) !important;
-  color: var(--card-text) !important;
-  border-radius: 14px !important;
-  box-shadow: 0 2px 12px var(--calendar-shadow);
-  width: 100%;
-  border: none !important;
-  margin-top: 0;
-  margin-bottom: 16px;
-  transition:
-    background 0.2s,
-    color 0.2s;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.calendar-categories-card .ant-card-head-title {
-  color: var(--card-text) !important;
-}
-
-.ant-checkbox-wrapper {
-  color: var(--card-text) !important;
-}
-
-[data-theme="dark"] .calendar-categories-card,
-[data-theme="dark"] .calendar-categories-card .ant-card,
-[data-theme="dark"] .calendar-categories-card .ant-card-body,
-[data-theme="dark"] .calendar-categories-card .ant-card-head {
-  background: var(--card-bg) !important;
-  color: var(--card-text) !important;
-  border: none !important;
-  box-shadow: 0 2px 12px #15111d !important;
-}
-
-[data-theme="dark"] .calendar-categories-card .ant-card-head-title {
-  color: #fff !important;
-}
-
-[data-theme="dark"] .calendar-categories-card .ant-checkbox-inner {
-  background: #332b59 !important;
-  border-color: #7c41f7 !important;
-}
-
-[data-theme="dark"]
-  .calendar-categories-card
-  .ant-checkbox-checked
-  .ant-checkbox-inner {
-  background: #7c41f7 !important;
-  border-color: #7c41f7 !important;
-}
-
-[data-theme="dark"] .calendar-categories-card .ant-checkbox-wrapper {
-  color: #fff !important;
-}
-
-/*-----------------------------------------------------------
-  CREATE EVENT BUTTON
------------------------------------------------------------*/
-.calendar-create-btn {
-  background: var(--btn-gradient);
-  border: none;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: 1px;
-  padding: 0 28px;
-  box-shadow: 0 4px 24px var(--btn-shadow);
-  color: var(--btn-text);
-  height: 44px;
-  width: 100%;
-  margin-bottom: 0;
-  margin-top: 0;
-  display: block;
-  transition:
-    filter 0.2s,
-    background 0.2s;
-}
-
-.calendar-create-btn:hover {
-  filter: brightness(1.1);
-}
-
-[data-theme="dark"] .calendar-create-btn {
-  background: var(--btn-gradient) !important;
-  color: #fff !important;
-  box-shadow: 0 4px 24px #1a162f44 !important;
-}
-
-/*-----------------------------------------------------------
   CALENDAR (ANTD)
 -----------------------------------------------------------*/
 .ant-picker-calendar {
   background: var(--calendar-bg) !important;
   border-radius: 16px;
   box-shadow: 0 4px 36px var(--calendar-shadow);
-  padding: 18px;
+  padding: 8px;
   transition: background 0.2s;
 }
 /*-----------------------------------------------------------
@@ -210,13 +118,13 @@
   CALENDAR CELLS (notes/month)
 -----------------------------------------------------------*/
 .notes-month {
-  font-size: 28px;
+  font-size: 18px;
   text-align: center;
   color: var(--calendar-title);
 }
 
 .notes-month section {
-  font-size: 28px;
+  font-size: 26px;
 }
 
 [data-theme="dark"] .notes-month {
@@ -251,6 +159,15 @@
   color: #fff !important;
   border-color: #42377c !important;
 }
+[data-theme="dark"] .ant-btn-primary {
+  background: #7c41f7 !important;
+  border-color: #7c41f7 !important;
+}
+
+[data-theme="dark"] .ant-list-item {
+  background: transparent !important;
+  color: #fff !important;
+}
 
 /*-----------------------------------------------------------
   RESPONSIVE
@@ -276,19 +193,6 @@
 }
 
 /*-----------------------------------------------------------
-  ANTD EXTRA FIXES FOR DARK THEME
------------------------------------------------------------*/
-[data-theme="dark"] .ant-btn-primary {
-  background: #7c41f7 !important;
-  border-color: #7c41f7 !important;
-}
-
-[data-theme="dark"] .ant-list-item {
-  background: transparent !important;
-  color: #fff !important;
-}
-
-/*-----------------------------------------------------------
   CALENDAR HEADER: TITLE, MONTH
 -----------------------------------------------------------*/
 .calendar-header-row {
@@ -301,7 +205,7 @@
 .calendar-title {
   color: var(--calendar-title) !important;
   font-weight: 700;
-  font-size: 28px;
+  font-size: 20px;
   letter-spacing: 1px;
   margin: 0;
 }
@@ -365,39 +269,40 @@
   CALENDAR WEEK VIEW
 -----------------------------------------------------------*/
 
-.gc-week-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  padding-bottom: 12px;
-}
-
 .gc-week-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 16px;
-  min-height: 400px;
+  gap: 8px;
+  min-height: 300px;
   background: var(--card-bg);
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: 0 2px 12px var(--calendar-shadow);
-  padding: 10px 8px 16px 8px;
+  padding: 8px 6px 12px 6px;
 }
 
 .gc-week-day-col {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   min-width: 120px;
+}
+
+.gc-week-day-col-sep {
+  border-left: 1px solid #eee;
+}
+
+[data-theme="dark"] .gc-week-day-col-sep {
+  border-left: 1px solid #2a2547;
 }
 
 .gc-week-day-label {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   color: var(--calendar-title);
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   border-bottom: 1px solid #ede5fd;
-  padding-bottom: 6px;
+  padding: 6px 0;
 }
 
 [data-theme="dark"] .gc-week-day-label {
@@ -406,26 +311,43 @@
 }
 
 .gc-week-events-col {
+  position: relative;
+  min-height: calc(var(--week-slot-h) * 7 + 6px * 6);
+}
+
+.gc-week-slots {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.gc-week-slot {
+  height: var(--week-slot-h);
+  border-bottom: 1px dashed #e8e8e8;
+  border-radius: 6px;
+}
+
+[data-theme="dark"] .gc-week-slot {
+  border-bottom: 1px dashed #2b254a;
 }
 
 .gc-week-event {
+  position: relative;
   background: #f7f5fe;
   border-radius: 8px;
   box-shadow: 0 2px 8px #c5b2ff33;
-  padding: 8px 12px;
-  font-size: 15px;
+  padding: 6px 10px;
+  font-size: 14px;
   font-weight: 600;
-  transition:
-    box-shadow 0.2s,
-    background 0.2s;
   border-left: 4px solid #7c41f7;
   cursor: pointer;
-  margin-bottom: 4px;
   display: flex;
   align-items: center;
+  height: var(--week-slot-h);
+  margin-bottom: 6px;
 }
 
 .gc-week-event-title {
@@ -440,31 +362,4 @@
   border-left-color: #bc80fc;
   color: #fff;
   box-shadow: 0 2px 8px #20153366;
-}
-
-/*-----------------------------------------------------------
-  CALENDAR EDIT SECTION
------------------------------------------------------------*/
-
-.drawer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.drawer-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--calendar-title);
-}
-
-.edit-btn {
-  background: var(--btn-gradient);
-  border: none;
-  font-weight: 600;
-  color: #fff !important;
-}
-
-.edit-btn:hover {
-  filter: brightness(1.1);
 }

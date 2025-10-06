@@ -1,7 +1,3 @@
-export * from "./create";
-export * from "./edit";
-export * from "./list";
-export * from "./show";
+export { default as CalendarList } from "./list";
+export { CalendarShow } from "./show";
 export * from "./index.css";
-//Extra
-export * from "./categoriesbox";

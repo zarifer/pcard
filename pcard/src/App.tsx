@@ -25,7 +25,7 @@ import { parseJwt } from "./utils/parse-jwt";
 
 //My imports
 import { Login } from "./pages/login";
-import { CalendarList, CalendarCreate, CalendarEdit } from "./pages/calendar";
+import { CalendarList } from "./pages/calendar";
 import {
   CompanyList,
   CompanyCreate,
@@ -176,8 +176,6 @@ function App() {
                   {
                     name: "calendar",
                     list: "/calendar",
-                    create: "/calendar/create",
-                    edit: "/calendar/edit/:id",
                     meta: { canDelete: true, label: "Calendar" },
                   },
                 ]}
@@ -211,8 +209,6 @@ function App() {
                     />
                     <Route path="/calendar">
                       <Route index element={<CalendarList />} />
-                      <Route path="create" element={<CalendarCreate />} />
-                      <Route path="edit/:id" element={<CalendarEdit />} />
                     </Route>
                     <Route path="/companies">
                       <Route index element={<CompanyList />} />

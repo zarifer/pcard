@@ -420,7 +420,9 @@ export default function CompanyEdit() {
                       <p className="ant-upload-drag-icon">
                         <InboxOutlined />
                       </p>
-                      <p className="ant-upload-text">Click or drag a logo image</p>
+                      <p className="ant-upload-text">
+                        Click or drag a logo image
+                      </p>
                       <p className="ant-upload-hint">PNG/JPG – 1 file</p>
                     </Dragger>
                   </Form.Item>
@@ -482,7 +484,11 @@ export default function CompanyEdit() {
                   md={12}
                   style={{ display: "flex", justifyContent: "center" }}
                 >
-                  <AnalogClock tz={tz} size={96} mode={mode as "light" | "dark"} />
+                  <AnalogClock
+                    tz={tz}
+                    size={96}
+                    mode={mode as "light" | "dark"}
+                  />
                 </Col>
               </Row>
             </>
@@ -536,7 +542,9 @@ export default function CompanyEdit() {
                   <p className="ant-upload-drag-icon">
                     <InboxOutlined />
                   </p>
-                  <p className="ant-upload-text">Click or Drag & Drop Images Here</p>
+                  <p className="ant-upload-text">
+                    Click or Drag & Drop Images Here
+                  </p>
                   <p className="ant-upload-hint">
                     PNG/JPG only. Files are stored client-side until save.
                   </p>
@@ -553,7 +561,10 @@ export default function CompanyEdit() {
             <>
               <Row gutter={[16, 8]}>
                 <Col xs={24} md={12}>
-                  <Form.Item label="Current Version Check" name="versionCheckPath">
+                  <Form.Item
+                    label="Current Version Check"
+                    name="versionCheckPath"
+                  >
                     <Input placeholder="e.g. Help → About • or URL/KB" />
                   </Form.Item>
                 </Col>
@@ -588,7 +599,10 @@ export default function CompanyEdit() {
                     <>
                       <Row gutter={[16, 8]}>
                         <Col xs={24} md={12}>
-                          <Form.Item label="License Expiry Date" name="licenseExpiry">
+                          <Form.Item
+                            label="License Expiry Date"
+                            name="licenseExpiry"
+                          >
                             <DatePicker style={{ width: "100%" }} />
                           </Form.Item>
                         </Col>
@@ -644,7 +658,10 @@ export default function CompanyEdit() {
                       {t === "serial" && (
                         <Row gutter={[16, 8]}>
                           <Col xs={24} md={12}>
-                            <Form.Item label="Serial key" name="activationSerial">
+                            <Form.Item
+                              label="Serial key"
+                              name="activationSerial"
+                            >
                               <Input placeholder="XXXX-XXXX-XXXX-XXXX" />
                             </Form.Item>
                           </Col>
@@ -660,11 +677,17 @@ export default function CompanyEdit() {
                               valuePropName="fileList"
                               getValueFromEvent={(e) => e?.fileList}
                             >
-                              <Dragger accept=".lic,.dat,.bin" maxCount={1} beforeUpload={validateLicenseFile}>
+                              <Dragger
+                                accept=".lic,.dat,.bin"
+                                maxCount={1}
+                                beforeUpload={validateLicenseFile}
+                              >
                                 <p className="ant-upload-drag-icon">
                                   <InboxOutlined />
                                 </p>
-                                <p className="ant-upload-text">Click or drag .lic/.dat/.bin</p>
+                                <p className="ant-upload-text">
+                                  Click or drag .lic/.dat/.bin
+                                </p>
                               </Dragger>
                             </Form.Item>
                           </Col>
@@ -752,16 +775,24 @@ export default function CompanyEdit() {
                         <Col xs={24} md={16}>
                           <Form.Item
                             name="scanType"
-                            initialValue={record?.customScan?.type || "context_menu"}
+                            initialValue={
+                              record?.customScan?.type || "context_menu"
+                            }
                           >
                             <Radio.Group
                               disabled={!odEnabled}
                               optionType="button"
                               buttonStyle="solid"
                             >
-                              <Radio value="context_menu">Right-Click Context Menu</Radio>
-                              <Radio value="gui_custom_scan">GUI → Custom Scan</Radio>
-                              <Radio value="unique">Unique (specify path)</Radio>
+                              <Radio value="context_menu">
+                                Right-Click Context Menu
+                              </Radio>
+                              <Radio value="gui_custom_scan">
+                                GUI → Custom Scan
+                              </Radio>
+                              <Radio value="unique">
+                                Unique (specify path)
+                              </Radio>
                             </Radio.Group>
                           </Form.Item>
                         </Col>
@@ -773,11 +804,16 @@ export default function CompanyEdit() {
                               name="customScanPath"
                               initialValue={record?.customScan?.path}
                               rules={[
-                                { required: true, message: "Path is required for Unique" },
+                                {
+                                  required: true,
+                                  message: "Path is required for Unique",
+                                },
                               ]}
                             >
                               <AutoComplete
-                                options={UNIQUE_PATH_SUGGESTIONS.map((v) => ({ value: v }))}
+                                options={UNIQUE_PATH_SUGGESTIONS.map((v) => ({
+                                  value: v,
+                                }))}
                                 filterOption={(input, option) =>
                                   (option?.value ?? "")
                                     .toLowerCase()
@@ -805,7 +841,10 @@ export default function CompanyEdit() {
             </>
           )}
 
-          <div className="wizard-footer" style={{ justifyContent: "flex-end", gap: 8 }}>
+          <div
+            className="wizard-footer"
+            style={{ justifyContent: "flex-end", gap: 8 }}
+          >
             <Button onClick={goPrev} disabled={idx === 0}>
               <LeftOutlined /> Prev
             </Button>

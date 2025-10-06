@@ -262,35 +262,25 @@ export default function LicenseExpiryList() {
 
   return (
     <List title="Licenses">
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          flexWrap: "wrap",
-          marginBottom: 8,
-        }}
-      >
-        <Tabs
-          className="tabs-default"
-          activeKey={active}
-          onChange={(k) => setActive(k as TabKey)}
-          items={[
-            { key: "all", label: "All", children: null },
-            { key: "soon", label: "Expiring Soon", children: null },
-            { key: "expired", label: "Expired", children: null },
-          ]}
-          tabBarStyle={{ margin: 0 }}
-        />
-
-        <RangePicker
-          size="small"
-          value={range ?? [null, null]}
-          onChange={(v) => setRange(v as any)}
-          allowEmpty={[true, true]}
-        />
-      </div>
+      <Tabs
+        className="tabs-default"
+        activeKey={active}
+        onChange={(k) => setActive(k as TabKey)}
+        items={[
+          { key: "all", label: "All", children: null },
+          { key: "soon", label: "Expiring Soon", children: null },
+          { key: "expired", label: "Expired", children: null },
+        ]}
+        tabBarStyle={{ marginBottom: 16 }}
+        tabBarExtraContent={
+          <RangePicker
+            size="small"
+            value={range ?? [null, null]}
+            onChange={(v) => setRange(v as any)}
+            allowEmpty={[true, true]}
+          />
+        }
+      />
 
       <Card className="panel-card">
         <Table

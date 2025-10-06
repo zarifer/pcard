@@ -13,6 +13,7 @@ import {
   InputNumber,
   message,
 } from "antd";
+import { useCalendarLogger } from "../calendar/calendarlogger";
 
 type Stage = { key: string; title: string };
 type KanbanItem = {
@@ -656,6 +657,8 @@ export default function Results({
         takeSnapshot();
       },
     });
+    const { log } = useCalendarLogger();
+    log({ title: "Exported to CSV", description: "Exported results to CSV" });
   }, [effectiveLocked, takeSnapshot]);
 
   const onUnlockConfirm = async () => {

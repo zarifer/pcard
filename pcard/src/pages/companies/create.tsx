@@ -218,8 +218,8 @@ export default function CompanyCreate() {
                 values.interfaceType === "gui"
                   ? "GUI"
                   : values.interfaceType === "other"
-                  ? values.interfaceOther
-                  : undefined,
+                    ? values.interfaceOther
+                    : undefined,
               hasRT: !!values.hasRT,
               hasOD: !!values.hasOD,
               customScan: values.hasOD
@@ -300,7 +300,10 @@ export default function CompanyCreate() {
                           label="Vendor Name"
                           name="name"
                           rules={[
-                            { required: true, message: "Vendor name is required" },
+                            {
+                              required: true,
+                              message: "Vendor name is required",
+                            },
                           ]}
                         >
                           <Input />
@@ -311,7 +314,10 @@ export default function CompanyCreate() {
                           label="Product Name"
                           name="product"
                           rules={[
-                            { required: true, message: "Product name is required" },
+                            {
+                              required: true,
+                              message: "Product name is required",
+                            },
                           ]}
                         >
                           <Input />
@@ -353,7 +359,10 @@ export default function CompanyCreate() {
                           label="Product ID"
                           name="productId"
                           rules={[
-                            { required: true, message: "Product ID is required" },
+                            {
+                              required: true,
+                              message: "Product ID is required",
+                            },
                           ]}
                         >
                           <Input placeholder="e.g. XY-AV" />
@@ -373,7 +382,10 @@ export default function CompanyCreate() {
                             beforeUpload={validateImage}
                             onChange={({ file }) => {
                               if (file.status === "removed") return;
-                              if (file.type && !file.type.startsWith("image/")) {
+                              if (
+                                file.type &&
+                                !file.type.startsWith("image/")
+                              ) {
                                 message.error("Only images are allowed");
                               }
                             }}
@@ -746,7 +758,10 @@ export default function CompanyCreate() {
                           <>
                             <Row gutter={[16, 8]}>
                               <Col xs={24} md={16}>
-                                <Form.Item name="scanType" initialValue="context_menu">
+                                <Form.Item
+                                  name="scanType"
+                                  initialValue="context_menu"
+                                >
                                   <Radio.Group
                                     disabled={!odEnabled}
                                     optionType="button"
@@ -771,11 +786,16 @@ export default function CompanyCreate() {
                                   <Form.Item
                                     name="customScanPath"
                                     rules={[
-                                      { required: true, message: "Path is required for Unique" },
+                                      {
+                                        required: true,
+                                        message: "Path is required for Unique",
+                                      },
                                     ]}
                                   >
                                     <AutoComplete
-                                      options={UNIQUE_PATH_SUGGESTIONS.map((v) => ({ value: v }))}
+                                      options={UNIQUE_PATH_SUGGESTIONS.map(
+                                        (v) => ({ value: v }),
+                                      )}
                                       filterOption={(input, option) =>
                                         (option?.value ?? "")
                                           .toLowerCase()
@@ -807,7 +827,10 @@ export default function CompanyCreate() {
             ]}
           />
 
-          <div className="wizard-footer" style={{ justifyContent: "flex-end", gap: 8 }}>
+          <div
+            className="wizard-footer"
+            style={{ justifyContent: "flex-end", gap: 8 }}
+          >
             <Button onClick={goPrev} disabled={idx === 0}>
               <LeftOutlined /> Prev
             </Button>

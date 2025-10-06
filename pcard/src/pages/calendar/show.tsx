@@ -1,25 +1,18 @@
-import { useShow, useNavigation } from "@refinedev/core";
-import { Drawer, Typography, Tag, Avatar, Divider, Space, Button } from "antd";
+import {
+  Drawer,
+  Typography,
+  Tag,
+  Divider,
+  Space,
+  Button,
+  Popconfirm,
+} from "antd";
+import { useShow, useDelete } from "@refinedev/core";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import type { CalendarEvent } from "../../interfaces/ievent";
 
-export const CATEGORY_COLORS: Record<string, string> = {
-  "Pre-test": "#6f42c1",
-  "Main test": "#2fa7b9",
-  "Post-test": "#f88020",
-  Debug: "#e53e3e",
-  KanBan: "#4f46e5",
-};
-
-// Segédfüggvény a dátumkezeléshez
-const getStartDate = (e: any) =>
-  Array.isArray(e.date) ? dayjs(e.date[0]) : dayjs(e.date);
-
-const getEndDate = (e: any) =>
-  e.endDate
-    ? dayjs(e.endDate)
-    : Array.isArray(e.date)
-      ? dayjs(e.date[1])
-      : undefined;
+dayjs.extend(utc);
 
 export const CalendarShow = ({
   visible,
@@ -30,19 +23,17 @@ export const CalendarShow = ({
   onClose: () => void;
   eventId: string;
 }) => {
-  const { queryResult } = useShow({
-    resource: "calendar",
+  const { queryResult } = useShow<CalendarEvent>({
+    resource: "calendar_events",
     id: eventId,
   });
 
-  const { edit } = useNavigation();
+  const { mutate: deleteOne, isLoading: deleting } = useDelete();
   const event = queryResult?.data?.data;
 
   if (!event) return null;
 
-  const start = getStartDate(event);
-  const end = getEndDate(event);
-  const color = CATEGORY_COLORS[event.type] || "#808080";
+  const color = "#7c41f7";
 
   return (
     <Drawer
@@ -57,15 +48,23 @@ export const CalendarShow = ({
           }}
         >
           <span>{event.title}</span>
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => {
-              if (event.id) edit("calendar", event.id);
-            }}
+          <Popconfirm
+            title="Delete this event?"
+            okText="Delete"
+            okButtonProps={{ danger: true, loading: deleting }}
+            onConfirm={() =>
+              deleteOne(
+                {
+                  resource: "calendar_events",
+                  id: String(event.id),
+                  mutationMode: "pessimistic",
+                },
+                { onSuccess: () => onClose() },
+              )
+            }
           >
-            Edit
-          </Button>
+            <Button danger>Delete</Button>
+          </Popconfirm>
         </div>
       }
       placement="right"
@@ -86,38 +85,29 @@ export const CalendarShow = ({
             color={color}
             style={{ fontWeight: 600, fontSize: 16, padding: "2px 14px" }}
           >
-            {event.type}
+            {dayjs(event.date).format("YYYY-MM-DD")}
           </Tag>
 
           <Divider style={{ margin: "16px 0" }} />
 
           <div>
-            <strong>Date:</strong>
-            <br />
-            {start.isValid() && start.format("YYYY. MMM D. (ddd)")}
-            {end && end.isValid() && <> – {end.format("YYYY. MMM D. (ddd)")}</>}
+            <strong>Performed by:</strong>
+            <div style={{ marginTop: 4 }}>{event.performedBy || "—"}</div>
           </div>
 
-          {event.participants && event.participants.length > 0 && (
-            <div>
-              <strong>Participants:</strong>
-              <br />
-              <Space>
-                {event.participants.map((p: string, i: number) => (
-                  <Avatar key={i} size="small">
-                    {p[0]?.toUpperCase()}
-                  </Avatar>
-                ))}
-              </Space>
+          <div>
+            <strong>Performed at (UTC):</strong>
+            <div style={{ marginTop: 4 }}>
+              {event.performedAtUtc
+                ? dayjs.utc(event.performedAtUtc).format("YYYY-MM-DD HH:mm")
+                : "—"}
             </div>
-          )}
+          </div>
 
-          {event.description && (
-            <div>
-              <strong>Description:</strong>
-              <div style={{ marginTop: 4 }}>{event.description}</div>
-            </div>
-          )}
+          <div>
+            <strong>Description:</strong>
+            <div style={{ marginTop: 4 }}>{event.description || "—"}</div>
+          </div>
         </Space>
       </div>
     </Drawer>
