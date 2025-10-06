@@ -23,7 +23,6 @@ export const useCalendarLogger = () => {
         description: p.description,
       },
       successNotification: false,
-      mutationMode: "pessimistic",
     });
   };
 

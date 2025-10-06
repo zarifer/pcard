@@ -143,6 +143,8 @@ export default function Results({
     Record<string, string>
   >({});
 
+ const { log } = useCalendarLogger();
+
   const isPast = useCallback(
     (y: number, m: number) => y < nowYear || (y === nowYear && m < nowMonth),
     [nowMonth, nowYear],
@@ -643,6 +645,8 @@ export default function Results({
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+
+    log({ title: "Exported to CSV", description: "Exported results to CSV" });
   }, [rows, config, gradeFromCertMiss, year, monthIdx]);
 
   const onLockSnapshot = useCallback(() => {
@@ -655,10 +659,9 @@ export default function Results({
       cancelText: "Cancel",
       onOk: () => {
         takeSnapshot();
+        log({ title: "Snapshot Locked", description: "Locked current month in Results" });
       },
     });
-    const { log } = useCalendarLogger();
-    log({ title: "Exported to CSV", description: "Exported results to CSV" });
   }, [effectiveLocked, takeSnapshot]);
 
   const onUnlockConfirm = async () => {
@@ -679,6 +682,7 @@ export default function Results({
       }
       setUnlockPass("");
       setUnlockOpen(false);
+      log({ title: "Snapshot Unlocked", description: "Unlocked month in Results" });
     } else {
       message.error("Incorrect password.");
     }
@@ -694,11 +698,6 @@ export default function Results({
     setYearBase(nb);
     if (year < nb - 1 || year > nb + 1) setYear(nb);
   };
-
-  const monthOptions = useMemo(
-    () => MONTHS.map((m, i) => ({ label: m.slice(0, 3), value: i })),
-    [],
-  );
 
   const onCellChange = useCallback(
     async (key: string, patch: Partial<ResultRow>) => {
@@ -722,6 +721,7 @@ export default function Results({
           privateFlag: mergedRow.privateFlag,
           invResFlag: mergedRow.invResFlag,
         });
+        log({ title: mergedRow.productName || mergedRow.productId, description: "Edited in Results" });
       }
     },
     [saveRow],
@@ -826,7 +826,7 @@ export default function Results({
       }
       if (snapshotLocked)
         return { label: "Unlock", onClick: () => setUnlockOpen(true) };
-      return { label: "Take Snapshot", onClick: onLockSnapshot };
+      return { label: "Take a Snapshot", onClick: onLockSnapshot };
     };
     onReady?.({
       exportCsv,

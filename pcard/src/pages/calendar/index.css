@@ -14,6 +14,7 @@
   --btn-text: #fff;
   --btn-shadow: #bc80fc44;
   --week-slot-h: 24px;
+  --week-rows: 7;
 }
 
 [data-theme="dark"] {
@@ -28,6 +29,8 @@
   --btn-gradient: linear-gradient(90deg, #7c41f7, #bc80fc);
   --btn-text: #fff;
   --btn-shadow: #1a162f44;
+  --week-slot-h: 24px;
+  --week-rows: 7;
 }
 
 /*-----------------------------------------------------------
@@ -192,6 +195,16 @@
   }
 }
 
+@media (max-width: 900px) {
+  :root {
+    --week-slot-h: 20px;
+  }
+
+  .gc-week-grid {
+    min-width: 820px;
+  }
+}
+
 /*-----------------------------------------------------------
   CALENDAR HEADER: TITLE, MONTH
 -----------------------------------------------------------*/
@@ -278,6 +291,13 @@
   border-radius: 12px;
   box-shadow: 0 2px 12px var(--calendar-shadow);
   padding: 8px 6px 12px 6px;
+  min-width: 980px;
+}
+
+.gc-week-wrapper {
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+  padding-bottom: 4px;
 }
 
 .gc-week-day-col {
@@ -312,22 +332,22 @@
 
 .gc-week-events-col {
   position: relative;
-  min-height: calc(var(--week-slot-h) * 7 + 6px * 6);
+  min-height: calc(var(--week-rows) * var(--week-slot-h) + (var(--week-rows) - 1) * 6px);
 }
 
 .gc-week-slots {
   position: absolute;
   inset: 0;
-  display: flex;
+  display: grid;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   pointer-events: none;
 }
 
 .gc-week-slot {
   height: var(--week-slot-h);
   border-bottom: 1px dashed #e8e8e8;
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
 [data-theme="dark"] .gc-week-slot {

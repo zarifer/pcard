@@ -85,7 +85,7 @@ export const CalendarShow = ({
             color={color}
             style={{ fontWeight: 600, fontSize: 16, padding: "2px 14px" }}
           >
-            {dayjs(event.date).format("YYYY-MM-DD")}
+            {dayjs(event.date).format("DD-MM-YYYY")}
           </Tag>
 
           <Divider style={{ margin: "16px 0" }} />
@@ -99,7 +99,7 @@ export const CalendarShow = ({
             <strong>Performed at (UTC):</strong>
             <div style={{ marginTop: 4 }}>
               {event.performedAtUtc
-                ? dayjs.utc(event.performedAtUtc).format("YYYY-MM-DD HH:mm")
+                ? dayjs.utc(event.performedAtUtc).format("DD-MM-YYYY HH:mm")
                 : "—"}
             </div>
           </div>

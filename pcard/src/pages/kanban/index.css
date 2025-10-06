@@ -318,3 +318,17 @@
 .ant-layout .ant-layout-content {
   isolation: isolate;
 }
+/*-----------------------------------------------------------
+  KANBAN COMMENT
+-----------------------------------------------------------*/
+[data-theme="dark"] .comment-item .markdown-body {
+  background: transparent !important;
+  border: none !important;
+  color: #eaeaea !important;
+}
+
+[data-theme="dark"] .comment-item {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
