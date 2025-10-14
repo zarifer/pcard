@@ -143,7 +143,7 @@ export default function Results({
     Record<string, string>
   >({});
 
- const { log } = useCalendarLogger();
+  const { log } = useCalendarLogger();
 
   const isPast = useCallback(
     (y: number, m: number) => y < nowYear || (y === nowYear && m < nowMonth),
@@ -659,7 +659,10 @@ export default function Results({
       cancelText: "Cancel",
       onOk: () => {
         takeSnapshot();
-        log({ title: "Snapshot Locked", description: "Locked current month in Results" });
+        log({
+          title: "Snapshot Locked",
+          description: "Locked current month in Results",
+        });
       },
     });
   }, [effectiveLocked, takeSnapshot]);
@@ -682,7 +685,10 @@ export default function Results({
       }
       setUnlockPass("");
       setUnlockOpen(false);
-      log({ title: "Snapshot Unlocked", description: "Unlocked month in Results" });
+      log({
+        title: "Snapshot Unlocked",
+        description: "Unlocked month in Results",
+      });
     } else {
       message.error("Incorrect password.");
     }
@@ -721,7 +727,10 @@ export default function Results({
           privateFlag: mergedRow.privateFlag,
           invResFlag: mergedRow.invResFlag,
         });
-        log({ title: mergedRow.productName || mergedRow.productId, description: "Edited in Results" });
+        log({
+          title: mergedRow.productName || mergedRow.productId,
+          description: "Edited in Results",
+        });
       }
     },
     [saveRow],

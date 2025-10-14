@@ -169,13 +169,18 @@ export default function CalendarList() {
   const renderWeek = () => {
     const weekStart = value.startOf("week");
     const days = Array.from({ length: 7 }, (_, i) => weekStart.add(i, "day"));
-    const counts = days.map((d) =>
-      (data?.data ?? []).filter((e) => dayjs(e.date).isSame(d, "day")).length,);
+    const counts = days.map(
+      (d) =>
+        (data?.data ?? []).filter((e) => dayjs(e.date).isSame(d, "day")).length,
+    );
     const maxRows = Math.max(7, ...counts);
 
     return (
       <div className="gc-week-wrapper">
-        <div className="gc-week-grid" style={{ ["--week-rows" as any]: String(maxRows) }}>
+        <div
+          className="gc-week-grid"
+          style={{ ["--week-rows" as any]: String(maxRows) }}
+        >
           {days.map((day, idx) => {
             const dayEvents = (data?.data ?? []).filter((e) =>
               dayjs(e.date).isSame(day, "day"),
@@ -190,11 +195,11 @@ export default function CalendarList() {
                 </div>
 
                 <div className="gc-week-events-col">
-                <div className="gc-week-slots">
+                  <div className="gc-week-slots">
                     {Array.from({ length: maxRows }).map((_, i) => (
-                       <div className="gc-week-slot" key={i} />
-                     ))}
-                   </div>
+                      <div className="gc-week-slot" key={i} />
+                    ))}
+                  </div>
 
                   {dayEvents.map((e) => (
                     <div

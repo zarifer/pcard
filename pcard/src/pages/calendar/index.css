@@ -332,7 +332,9 @@
 
 .gc-week-events-col {
   position: relative;
-  min-height: calc(var(--week-rows) * var(--week-slot-h) + (var(--week-rows) - 1) * 6px);
+  min-height: calc(
+    var(--week-rows) * var(--week-slot-h) + (var(--week-rows) - 1) * 6px
+  );
 }
 
 .gc-week-slots {

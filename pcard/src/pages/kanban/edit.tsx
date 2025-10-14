@@ -136,8 +136,10 @@ export default function KanbanEdit({
       { resource: "kanban", id: item.id, values: { description: clean } },
       { onSuccess: () => setDescEdit(false) },
     );
-    log({ title: item.title, description: `Edited description in ${item.stage || "Unknown"}` });
-
+    log({
+      title: item.title,
+      description: `Edited description in ${item.stage || "Unknown"}`,
+    });
   };
 
   const addComment = () => {
@@ -160,7 +162,10 @@ export default function KanbanEdit({
         onSuccess: () => {
           setCommentText("");
           setComments(next);
-          log({ title: item.title, description: `Added comment in ${item.stage || "Unknown"}` });
+          log({
+            title: item.title,
+            description: `Added comment in ${item.stage || "Unknown"}`,
+          });
         },
         onError: () => message.error("Failed to add comment."),
       },
@@ -173,7 +178,10 @@ export default function KanbanEdit({
     );
     setComments(next);
     updateCard({ resource: "kanban", id: item.id, values: { comments: next } });
-    log({ title: item.title, description: `Edited pin on a comment in ${item.stage || "Unknown"}` });
+    log({
+      title: item.title,
+      description: `Edited pin on a comment in ${item.stage || "Unknown"}`,
+    });
   };
 
   const deleteOwnComment = (cid: string) => {
@@ -186,8 +194,10 @@ export default function KanbanEdit({
     const next = (comments || []).filter((c) => c.id !== cid);
     setComments(next);
     updateCard({ resource: "kanban", id: item.id, values: { comments: next } });
-    log({ title: item.title, description: `Deleted his/her comment in ${ item.stage || "Unknown"}` });
-
+    log({
+      title: item.title,
+      description: `Deleted his/her comment in ${item.stage || "Unknown"}`,
+    });
   };
 
   const persistChecklist = (next: KanbanItem["checklist"]) => {
@@ -202,15 +212,19 @@ export default function KanbanEdit({
   const addChecklistItem = () => {
     const next = [...checklist, { id: rid(), text: "", done: false }];
     persistChecklist(next);
-    log({ title: item.title, description: `Added checklist item in ${item.stage || "Unknown"}` });
-
+    log({
+      title: item.title,
+      description: `Added checklist item in ${item.stage || "Unknown"}`,
+    });
   };
 
   const toggleChecklistItem = (id: string, done: boolean) => {
     const next = checklist.map((c) => (c.id === id ? { ...c, done } : c));
     persistChecklist(next);
-    log({ title: item.title, description: `Toggled a checklist item in ${item.stage || "Unknown"}` });
-
+    log({
+      title: item.title,
+      description: `Toggled a checklist item in ${item.stage || "Unknown"}`,
+    });
   };
 
   const renameChecklistItem = (id: string, text: string) => {
@@ -218,15 +232,19 @@ export default function KanbanEdit({
       c.id === id ? { ...c, text: sanitize(text) } : c,
     );
     persistChecklist(next);
-    log({ title: item.title, description: `Edited a checklist item in ${item.stage || "Unknown"}` });
-
+    log({
+      title: item.title,
+      description: `Edited a checklist item in ${item.stage || "Unknown"}`,
+    });
   };
 
   const deleteChecklistItem = (id: string) => {
     const next = checklist.filter((c) => c.id !== id);
     persistChecklist(next);
-    log({ title: item.title, description: `Deleted a checklist item in ${item.stage || "Unknown"}` });
-
+    log({
+      title: item.title,
+      description: `Deleted a checklist item in ${item.stage || "Unknown"}`,
+    });
   };
 
   const doDelete = () =>
@@ -235,7 +253,10 @@ export default function KanbanEdit({
       {
         onSuccess: () => {
           invalidate({ resource: "kanban", invalidates: ["list"] });
-          log({ title: item.title, description: `Deleted from ${item.stage || "Unknown"}` });
+          log({
+            title: item.title,
+            description: `Deleted from ${item.stage || "Unknown"}`,
+          });
           onClose();
         },
       },
