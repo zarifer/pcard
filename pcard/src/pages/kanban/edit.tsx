@@ -196,7 +196,7 @@ export default function KanbanEdit({
     updateCard({ resource: "kanban", id: item.id, values: { comments: next } });
     log({
       title: item.title,
-      description: `Deleted his/her comment in ${item.stage || "Unknown"}`,
+      description: `Deleted the comment in ${item.stage || "Unknown"}`,
     });
   };
 
@@ -232,10 +232,6 @@ export default function KanbanEdit({
       c.id === id ? { ...c, text: sanitize(text) } : c,
     );
     persistChecklist(next);
-    log({
-      title: item.title,
-      description: `Edited a checklist item in ${item.stage || "Unknown"}`,
-    });
   };
 
   const deleteChecklistItem = (id: string) => {
