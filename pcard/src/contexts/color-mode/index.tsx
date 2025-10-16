@@ -44,6 +44,15 @@ export const ColorModeContextProvider: React.FC<PropsWithChildren> = ({
 
   const { darkAlgorithm, defaultAlgorithm } = theme;
 
+  const darkOverrides = {
+    token: {
+      colorBgElevated: "#1f1f1f",
+      colorBgContainer: "#141414",
+      colorBorder: "#303030",
+      colorText: "#d9d9d9",
+    },
+  };
+
   return (
     <ColorModeContext.Provider
       value={{
@@ -56,21 +65,24 @@ export const ColorModeContextProvider: React.FC<PropsWithChildren> = ({
           ...RefineThemes.Purple,
           algorithm: mode === "light" ? defaultAlgorithm : darkAlgorithm,
           components: {
-      Menu: {
-        itemBorderRadius: 10,
-        itemPaddingInline: 12,
-        itemHeight: 40,
-        itemHoverBg: "rgba(124,58,237,0.10)",
-        itemActiveBg: "rgba(124,58,237,0.18)",
-        itemSelectedBg: "rgba(124,58,237,0.22)",
-        itemColor: mode === "light" ? "rgba(17,24,39,0.82)" : "rgba(229,231,235,0.75)",
-        itemHoverColor: mode === "light" ? "#111827" : "#F9FAFB",
-        itemSelectedColor: mode === "light" ? "#111827" : "#FFFFFF",
-      },
-      Layout: {
-        siderBg: mode === "light" ? "#ffffff" : "#111319",
-      },
-    },
+            Menu: {
+              itemBorderRadius: 10,
+              itemPaddingInline: 12,
+              itemHeight: 40,
+              itemHoverBg: "rgba(124,58,237,0.10)",
+              itemActiveBg: "rgba(124,58,237,0.18)",
+              itemSelectedBg: "rgba(124,58,237,0.22)",
+              itemColor:
+                mode === "light"
+                  ? "rgba(17,24,39,0.82)"
+                  : "rgba(229,231,235,0.75)",
+              itemHoverColor: mode === "light" ? "#111827" : "#F9FAFB",
+              itemSelectedColor: mode === "light" ? "#111827" : "#FFFFFF",
+            },
+            Layout: {
+              siderBg: mode === "light" ? "#ffffff" : "#111319",
+            },
+          },
         }}
       >
         {children}

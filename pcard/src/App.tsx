@@ -149,7 +149,10 @@ function App() {
           <ColorModeContextProvider>
             <AntdApp>
               <Refine
-                dataProvider={dataProvider((import.meta as any).env?.VITE_API_URL || "http://localhost:3001")}
+                dataProvider={dataProvider(
+                  (import.meta as any).env?.VITE_API_URL ||
+                    "http://localhost:3001",
+                )}
                 notificationProvider={useNotificationProvider()}
                 routerProvider={routerBindings}
                 authProvider={authProvider}
@@ -160,12 +163,20 @@ function App() {
                     create: "/companies/create",
                     edit: "/companies/edit/:id",
                     show: "/companies/show/:id",
-                    meta: { canDelete: true, label: "Companies", icon: <ApartmentOutlined /> },
+                    meta: {
+                      canDelete: true,
+                      label: "Companies",
+                      icon: <ApartmentOutlined />,
+                    },
                   },
                   {
                     name: "licenses",
                     list: "/licenses",
-                    meta: { canDelete: true, label: "Licenses", icon: <SafetyCertificateOutlined /> },
+                    meta: {
+                      canDelete: true,
+                      label: "Licenses",
+                      icon: <SafetyCertificateOutlined />,
+                    },
                   },
                   {
                     name: "incident_logs",
@@ -173,17 +184,29 @@ function App() {
                     create: "/incident-logs/create",
                     edit: "/incident-logs/edit/:id",
                     show: "/incident-logs/show/:id",
-                    meta: { canDelete: true, label: "Incident Logs", icon: <FileSearchOutlined /> },
+                    meta: {
+                      canDelete: true,
+                      label: "Incident Logs",
+                      icon: <FileSearchOutlined />,
+                    },
                   },
                   {
                     name: "kanban",
                     list: "/kanban",
-                    meta: { canDelete: true, label: "Kanban Board", icon: <ProjectOutlined /> },
+                    meta: {
+                      canDelete: true,
+                      label: "Kanban Board",
+                      icon: <ProjectOutlined />,
+                    },
                   },
                   {
                     name: "calendar",
                     list: "/calendar",
-                    meta: { canDelete: true, label: "Calendar", icon: <CalendarOutlined /> },
+                    meta: {
+                      canDelete: true,
+                      label: "Calendar",
+                      icon: <CalendarOutlined />,
+                    },
                   },
                 ]}
                 options={{
