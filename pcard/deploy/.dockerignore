@@ -1,0 +1,21 @@
+# defaults
+.git
+.gitignore
+README.md
+**/node_modules
+**/.DS_Store
+
+# build artefacts
+**/dist
+**/build
+
+# env files
+.env
+.env.*
+!.env.sample
+
+# database dumps
+**/pgdata
+**/*.sqlite
+**/*.db
+backup.sql
