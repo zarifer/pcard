@@ -64,7 +64,7 @@ const LogoTitle = () => (
     <img
       src="/logo.png"
       alt="VirusBulletin"
-      style={{ height: 32, marginRight: 8 }}
+      style={{ height: 40, marginRight: 8 }}
     />
   </a>
 );

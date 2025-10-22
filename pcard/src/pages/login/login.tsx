@@ -30,11 +30,11 @@ export const Login: React.FC = () => {
             style={{ marginTop: 12 }}
           >
             <Form.Item
-              label="Email"
+              label="E-mail"
               name="email"
               rules={[
-                { required: true, message: "Email is required" },
-                { type: "email", message: "Invalid email format" },
+                { required: true, message: "E-mail is required" },
+                { type: "email", message: "Invalid e-mail format" },
                 {
                   validator: (_, value) => {
                     const v = String(value || "")
@@ -45,7 +45,7 @@ export const Login: React.FC = () => {
                       return Promise.resolve();
                     return Promise.reject(
                       new Error(
-                        `Only @${ALLOWED_DOMAIN} email addresses are allowed`,
+                        `Only @${ALLOWED_DOMAIN} e-mail addresses are allowed`,
                       ),
                     );
                   },

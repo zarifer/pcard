@@ -156,3 +156,9 @@
 .vb-modal-close:hover {
   opacity: 0.85;
 }
+
+
+/* Force form labels to white on login page (both themes) */
+.login-card .ant-form-item-label > label {
+  color: #ffffff !important;
+}
