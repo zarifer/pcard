@@ -69,7 +69,8 @@ export default function IncidentLogList() {
     queryOptions: { enabled: categoryIds.length > 0 },
   });
   const catTitle = (id?: string) =>
-    categoriesRes?.data?.find((c: any) => c.id === id)?.title ?? "—";
+    categoriesRes?.data?.find((c: any) => String(c.id) === String(id))?.title ??
+    "—";
 
   const [q, setQ] = useState("");
   const filterRows = (src: any[]) => {

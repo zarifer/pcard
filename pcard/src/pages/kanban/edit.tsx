@@ -186,11 +186,27 @@ export default function KanbanEdit({
 
   const deleteOwnComment = (cid: string) => {
     const target = (comments || []).find((c) => c.id === cid);
-    const me = identity?.email;
-    if (!target || !me || target.authorEmail !== me) {
+
+    const meEmail = identity?.email?.toLowerCase();
+    const meName = (
+      identity?.name ||
+      meEmail?.split("@")?.[0] ||
+      ""
+    ).toLowerCase();
+    const targetEmail = target?.authorEmail?.toLowerCase();
+    const targetName = (target?.authorName || "").toLowerCase();
+
+    const owns =
+      !!target &&
+      ((!!meEmail && !!targetEmail && meEmail === targetEmail) ||
+        // Legacy fallback: no email on the comment → compare names
+        (!targetEmail && !!meName && !!targetName && meName === targetName));
+
+    if (!owns) {
       message.warning("You can only delete your OWN comments.");
       return;
     }
+
     const next = (comments || []).filter((c) => c.id !== cid);
     setComments(next);
     updateCard({ resource: "kanban", id: item.id, values: { comments: next } });
@@ -470,7 +486,7 @@ export default function KanbanEdit({
         <section>
           <Typography.Title level={5}>Comments</Typography.Title>
           <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-            <Avatar src={identity?.avatar || identity?.picture}>
+            <Avatar size={40} src={identity?.avatar || identity?.picture}>
               {(identity?.name?.[0] || "U").toUpperCase()}
             </Avatar>
             <Input.TextArea
@@ -488,15 +504,29 @@ export default function KanbanEdit({
             dataSource={sortedComments}
             locale={{ emptyText: "No comments yet." }}
             renderItem={(c) => {
-              const mine =
-                !!identity?.email && c.authorEmail === identity.email;
+              const mine = (() => {
+                const meEmail = identity?.email?.toLowerCase();
+                const meName = (
+                  identity?.name ||
+                  meEmail?.split("@")?.[0] ||
+                  ""
+                ).toLowerCase();
+                const cEmail = c.authorEmail?.toLowerCase();
+                const cName = (c.authorName || "").toLowerCase();
+                if (meEmail && cEmail) return cEmail === meEmail;
+                // Legacy fallback: if no email saved on the comment → compare names
+                if (!cEmail && meName && cName) return cName === meName;
+
+                return false;
+              })();
+
               return (
                 <List.Item
                   className={`comment-item ${c.pinned ? "pinned" : ""}`}
                 >
                   <List.Item.Meta
                     avatar={
-                      <Avatar src={c.authorAvatar}>
+                      <Avatar size={40} src={c.authorAvatar}>
                         {(c.authorName?.[0] || "?").toUpperCase()}
                       </Avatar>
                     }

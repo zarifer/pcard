@@ -19,7 +19,21 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "25mb" }));
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgres://vb100:vb100@localhost:5432/vb100";
+app.use((req, res, next) => {
+  res.set(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate",
+  );
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
+  if (req.method === "GET") {
+    res.set("Surrogate-Control", "no-store");
+  }
+  next();
+});
+
+const DATABASE_URL =
+  process.env.DATABASE_URL || "postgres://vb100:vb100@localhost:5432/vb100";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -53,21 +67,77 @@ app.get("/healthz", async (_req, res) => {
   }
 })();
 
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+
+const JWT_SECRET = process.env.AUTH_JWT_SECRET || "dev-secret";
+
+// ---- Auth helpers ----
+async function findUserByEmail(email) {
+  const r = await pgq(
+    `SELECT id, email, name, avatar, password_hash, must_change_password, is_active
+     FROM users WHERE email = $1`,
+    [String(email || "").toLowerCase()],
+  );
+  return r.rows[0] || null;
+}
+
+async function updateUserPassword(id, hash, mustChange = false) {
+  await pgq(
+    `UPDATE users SET password_hash = $1, must_change_password = $2, updated_at = now() WHERE id = $3`,
+    [hash, mustChange, id],
+  );
+}
+
+async function updateUserProfile(id, { name, avatar }) {
+  await pgq(
+    `UPDATE users SET name = $1, avatar = $2, updated_at = now() WHERE id = $3`,
+    [name ?? null, avatar ?? null, id],
+  );
+}
+
+function issueToken(u) {
+  return jwt.sign({ sub: u.id, email: u.email, name: u.name }, JWT_SECRET, {
+    expiresIn: "8h",
+  });
+}
+
+function authRequired(req, res, next) {
+  const h = req.headers?.authorization || "";
+  const tok = h.startsWith("Bearer ") ? h.slice(7) : null;
+  if (!tok) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const payload = jwt.verify(tok, JWT_SECRET);
+    req.user = payload;
+    next();
+  } catch {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+}
+
 function sanitize(raw) {
-  return String(raw ?? "").replace(/<[^>]*>/g, "").trim();
+  return String(raw ?? "")
+    .replace(/<[^>]*>/g, "")
+    .trim();
 }
 function slugify(s) {
-  return sanitize(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return sanitize(s)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 function parseRange(q) {
   const start = Math.max(0, Number(q._start ?? 0) | 0);
-  const end = Number.isFinite(Number(q._end)) ? Math.max(start, Number(q._end) | 0) : start + 50;
+  const end = Number.isFinite(Number(q._end))
+    ? Math.max(start, Number(q._end) | 0)
+    : start + 50;
   const limit = Math.max(0, end - start);
   return { start, limit };
 }
 function parseSort(q, allowed) {
   const s = String(q._sort || "");
-  const order = String(q._order || "asc").toUpperCase() === "DESC" ? "DESC" : "ASC";
+  const order =
+    String(q._order || "asc").toUpperCase() === "DESC" ? "DESC" : "ASC";
   return { expr: allowed.includes(s) ? s : null, order };
 }
 function tryJsonParse(v, fb) {
@@ -105,18 +175,35 @@ app.get("/health", async (_req, res) => {
 // UI expects id = key (string)
 app.get("/stages", async (req, res) => {
   try {
-    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM stages`)).rows[0].c;
+    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM stages`)).rows[0]
+      .c;
     const { start, limit } = parseRange(req.query);
-    const { expr, order } = parseSort(req.query, ["id", "key", "title", "order"]);
+    const { expr, order } = parseSort(req.query, [
+      "id",
+      "key",
+      "title",
+      "order",
+    ]);
     const orderExpr =
-      expr === "id" ? "id" : expr === "key" ? "key" : expr === "title" ? "title" : `"order"`;
+      expr === "id"
+        ? "id"
+        : expr === "key"
+          ? "key"
+          : expr === "title"
+            ? "title"
+            : `"order"`;
     const list = await pgq(
       `SELECT key, title, "order" FROM stages
        ORDER BY ${orderExpr} ${order}
        LIMIT $1 OFFSET $2`,
       [limit, start],
     );
-    const rows = list.rows.map((r) => ({ id: r.key, key: r.key, title: r.title, order: r.order }));
+    const rows = list.rows.map((r) => ({
+      id: r.key,
+      key: r.key,
+      title: r.title,
+      order: r.order,
+    }));
     res.set("X-Total-Count", String(total));
     res.set("Access-Control-Expose-Headers", "X-Total-Count");
     res.json(rows);
@@ -129,7 +216,9 @@ app.post("/stages", async (req, res) => {
   try {
     const title = sanitize(req.body?.title).slice(0, 40);
     if (!title) return res.status(400).json({ error: "title is required" });
-    const m = await pgq(`SELECT COALESCE(MAX("order"), -1)::int AS m FROM stages`);
+    const m = await pgq(
+      `SELECT COALESCE(MAX("order"), -1)::int AS m FROM stages`,
+    );
     const nextOrder = Number(m.rows[0].m) + 1;
     // unique key
     const base = slugify(title) || `stage-${Date.now()}`;
@@ -144,7 +233,9 @@ app.post("/stages", async (req, res) => {
       [key, title, nextOrder],
     );
     const row = r.rows[0];
-    res.status(201).json({ id: row.key, key: row.key, title: row.title, order: row.order });
+    res
+      .status(201)
+      .json({ id: row.key, key: row.key, title: row.title, order: row.order });
   } catch (e) {
     res.status(500).json({ error: e?.message || String(e) });
   }
@@ -186,7 +277,10 @@ function mapChecklistRows(rows) {
 }
 function mapCommentRows(rows) {
   return rows
-    .sort((a, b) => new Date(b.created_at).valueOf() - new Date(a.created_at).valueOf())
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).valueOf() - new Date(a.created_at).valueOf(),
+    )
     .map((r) => ({
       id: String(r.id),
       text: r.comment_text,
@@ -194,6 +288,7 @@ function mapCommentRows(rows) {
       authorName: r.author || "User",
     }));
 }
+
 function normalizeKanban(r, checklist, comments) {
   return {
     id: r.id,
@@ -210,11 +305,23 @@ function normalizeKanban(r, checklist, comments) {
 
 app.get("/kanban", async (req, res) => {
   try {
-    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM kanban`)).rows[0].c;
+    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM kanban`)).rows[0]
+      .c;
     const { start, limit } = parseRange(req.query);
-    const { expr, order } = parseSort(req.query, ["id", "title", "stage", "dueDate"]);
+    const { expr, order } = parseSort(req.query, [
+      "id",
+      "title",
+      "stage",
+      "dueDate",
+    ]);
     const orderExpr =
-      expr === "title" ? "k.title" : expr === "stage" ? "s.key" : expr === "dueDate" ? "k.due_date" : "k.id";
+      expr === "title"
+        ? "k.title"
+        : expr === "stage"
+          ? "s.key"
+          : expr === "dueDate"
+            ? "k.due_date"
+            : "k.id";
 
     const base = await pgq(
       `SELECT k.id, k.title, s.key AS stage, k.description,
@@ -240,9 +347,10 @@ app.get("/kanban", async (req, res) => {
       }
       const cm = await pgq(
         `SELECT id, kanban_id, author, comment_text, created_at
-         FROM kanban_comments WHERE kanban_id = ANY($1::int[])`,
+FROM kanban_comments WHERE kanban_id = ANY($1::int[])`,
         [ids],
       );
+
       for (const r of cm.rows) {
         const arr = commentsMap.get(r.kanban_id) || [];
         arr.push(r);
@@ -250,7 +358,11 @@ app.get("/kanban", async (req, res) => {
       }
     }
     const rows = base.rows.map((r) =>
-      normalizeKanban(r, checklistMap.get(r.id) || [], commentsMap.get(r.id) || []),
+      normalizeKanban(
+        r,
+        checklistMap.get(r.id) || [],
+        commentsMap.get(r.id) || [],
+      ),
     );
     res.set("X-Total-Count", String(total));
     res.set("Access-Control-Expose-Headers", "X-Total-Count");
@@ -279,9 +391,10 @@ app.get("/kanban/:id", async (req, res) => {
     );
     const com = await pgq(
       `SELECT id, kanban_id, author, comment_text, created_at
-       FROM kanban_comments WHERE kanban_id = $1`,
+FROM kanban_comments WHERE kanban_id = $1`,
       [id],
     );
+
     res.json(normalizeKanban(r.rows[0], chk.rows, com.rows));
   } catch (e) {
     res.status(500).json({ error: e?.message || String(e) });
@@ -300,11 +413,15 @@ app.post("/kanban", async (req, res) => {
     const ins = await pgq(
       `INSERT INTO kanban (title, description, stage_id, due_date, calendar_event_id)
        VALUES ($1,$2,$3,$4,$5) RETURNING id`,
-      [title, b.description ?? null, stageId, b.dueDate ?? null, b.calendarId ?? null],
+      [
+        title,
+        b.description ?? null,
+        stageId,
+        b.dueDate ?? null,
+        b.calendarId ?? null,
+      ],
     );
     const id = ins.rows[0].id;
-
-    // insert checklist
     const checklist = Array.isArray(b.checklist) ? b.checklist : [];
     for (let i = 0; i < checklist.length; i++) {
       const it = checklist[i] || {};
@@ -313,17 +430,22 @@ app.post("/kanban", async (req, res) => {
         [id, i, sanitize(it.text || ""), !!it.done],
       );
     }
-    // insert comments
     const comments = Array.isArray(b.comments) ? b.comments : [];
     for (const c of comments) {
       await pgq(
         `INSERT INTO kanban_comments (kanban_id, author, comment_text, created_at)
-         VALUES ($1,$2,$3,$4)`,
-        [id, c.authorName ?? "User", sanitize(c.text || ""), c.at ?? new Date().toISOString()],
+VALUES ($1,$2,$3,$4)`,
+        [
+          id,
+          c.authorName ?? "User",
+          sanitize(c.text || ""),
+          c.at ?? new Date().toISOString(),
+          c.authorEmail ?? null,
+          c.authorAvatar ?? null,
+        ],
       );
     }
 
-    // return full row
     const base = await pgq(
       `SELECT k.id, k.title, s.key AS stage, k.description,
               k.due_date AS "dueDate", k.calendar_event_id AS "calendarId"
@@ -335,9 +457,11 @@ app.post("/kanban", async (req, res) => {
       [id],
     );
     const com = await pgq(
-      `SELECT id, kanban_id, author, comment_text, created_at FROM kanban_comments WHERE kanban_id = $1`,
+      `SELECT id, kanban_id, author, comment_text, created_at
+   FROM kanban_comments WHERE kanban_id = $1`,
       [id],
     );
+
     res.status(201).json(normalizeKanban(base.rows[0], chk.rows, com.rows));
   } catch (e) {
     res.status(500).json({ error: e?.message || String(e) });
@@ -363,16 +487,29 @@ app.patch("/kanban/:id", async (req, res) => {
 
     const next = {
       title:
-        req.body?.title != null ? sanitize(req.body.title).slice(0, 160) : c.title,
-      description: req.body?.description != null ? req.body.description : c.description,
+        req.body?.title != null
+          ? sanitize(req.body.title).slice(0, 160)
+          : c.title,
+      description:
+        req.body?.description != null ? req.body.description : c.description,
       stage_id: stageId,
       due_date: req.body?.dueDate != null ? req.body.dueDate : c.due_date,
-      calendar_event_id: req.body?.calendarId != null ? req.body.calendarId : c.calendar_event_id,
+      calendar_event_id:
+        req.body?.calendarId != null
+          ? req.body.calendarId
+          : c.calendar_event_id,
     };
 
     await pgq(
       `UPDATE kanban SET title=$1, description=$2, stage_id=$3, due_date=$4, calendar_event_id=$5 WHERE id=$6`,
-      [next.title, next.description, next.stage_id, next.due_date, next.calendar_event_id, id],
+      [
+        next.title,
+        next.description,
+        next.stage_id,
+        next.due_date,
+        next.calendar_event_id,
+        id,
+      ],
     );
 
     // checklist replace if provided
@@ -394,7 +531,12 @@ app.patch("/kanban/:id", async (req, res) => {
         await pgq(
           `INSERT INTO kanban_comments (kanban_id, author, comment_text, created_at)
            VALUES ($1,$2,$3,$4)`,
-          [id, c.authorName ?? "User", sanitize(c.text || ""), c.at ?? new Date().toISOString()],
+          [
+            id,
+            c.authorName ?? "User",
+            sanitize(c.text || ""),
+            c.at ?? new Date().toISOString(),
+          ],
         );
       }
     }
@@ -410,9 +552,11 @@ app.patch("/kanban/:id", async (req, res) => {
       [id],
     );
     const com = await pgq(
-      `SELECT id, kanban_id, author, comment_text, created_at FROM kanban_comments WHERE kanban_id = $1`,
+      `SELECT id, kanban_id, author, comment_text, created_at
+FROM kanban_comments WHERE kanban_id = $1`,
       [id],
     );
+
     res.json(normalizeKanban(base.rows[0], chk.rows, com.rows));
   } catch (e) {
     res.status(500).json({ error: e?.message || String(e) });
@@ -435,11 +579,23 @@ app.delete("/kanban/:id", async (req, res) => {
 // ================== CALENDAR (alias to calendar_events) ==================
 app.get("/calendar", async (req, res) => {
   try {
-    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM calendar_events`)).rows[0].c;
+    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM calendar_events`))
+      .rows[0].c;
     const { start, limit } = parseRange(req.query);
-    const { expr, order } = parseSort(req.query, ["id", "title", "date", "performedAtUtc"]);
+    const { expr, order } = parseSort(req.query, [
+      "id",
+      "title",
+      "date",
+      "performedAtUtc",
+    ]);
     const orderExpr =
-      expr === "title" ? "title" : expr === "date" ? "date" : expr === "performedAtUtc" ? "performed_at_utc" : "id";
+      expr === "title"
+        ? "title"
+        : expr === "date"
+          ? "date"
+          : expr === "performedAtUtc"
+            ? "performed_at_utc"
+            : "id";
     const list = await pgq(
       `SELECT id, title, date, performed_by AS "performedBy",
               performed_at_utc AS "performedAtUtc", description
@@ -475,11 +631,25 @@ app.post("/calendar", async (req, res) => {
     const b = req.body || {};
     const title = sanitize(b.title).slice(0, 120);
     if (!title) return res.status(400).json({ error: "title is required" });
-    const date = b.date ?? new Date().toISOString();
+
+    let date;
+    if (Array.isArray(b.date)) {
+      date = b.date[0] ?? new Date().toISOString();
+    } else if (typeof b.date === "string") {
+      date = b.date.includes(",") ? b.date.split(",")[0].trim() : b.date;
+    } else {
+      date = new Date().toISOString();
+    }
+
     const ins = await pgq(
-      `INSERT INTO calendar_events (title, date, performed_by, performed_at_utc, description)
-       VALUES ($1,$2,$3,$4,$5) RETURNING id`,
-      [title, String(date), b.performedBy ?? null, b.performedAtUtc ?? new Date().toISOString(), b.description ?? null],
+      `INSERT INTO calendar_events (title, date, performed_by, performed_at_utc, description) VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+      [
+        title,
+        date,
+        b.performedBy ?? null,
+        b.performedAtUtc ?? new Date().toISOString(),
+        b.description ?? null,
+      ],
     );
     const id = ins.rows[0].id;
     const r = await pgq(
@@ -495,7 +665,9 @@ app.post("/calendar", async (req, res) => {
 });
 app.delete("/calendar/:id", async (req, res) => {
   try {
-    const del = await pgq(`DELETE FROM calendar_events WHERE id = $1`, [req.params.id]);
+    const del = await pgq(`DELETE FROM calendar_events WHERE id = $1`, [
+      req.params.id,
+    ]);
     if (!del.rowCount) return res.status(404).json({ error: "Not found" });
     res.status(204).send();
   } catch (e) {
@@ -506,11 +678,23 @@ app.delete("/calendar/:id", async (req, res) => {
 // ================== CALENDAR_EVENTS ==================
 app.get("/calendar_events", async (req, res) => {
   try {
-    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM calendar_events`)).rows[0].c;
+    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM calendar_events`))
+      .rows[0].c;
     const { start, limit } = parseRange(req.query);
-    const { expr, order } = parseSort(req.query, ["id", "title", "date", "performedAtUtc"]);
+    const { expr, order } = parseSort(req.query, [
+      "id",
+      "title",
+      "date",
+      "performedAtUtc",
+    ]);
     const orderExpr =
-      expr === "title" ? "title" : expr === "date" ? "date" : expr === "performedAtUtc" ? "performed_at_utc" : "id";
+      expr === "title"
+        ? "title"
+        : expr === "date"
+          ? "date"
+          : expr === "performedAtUtc"
+            ? "performed_at_utc"
+            : "id";
     const list = await pgq(
       `SELECT id, title, date, performed_by AS "performedBy",
               performed_at_utc AS "performedAtUtc", description
@@ -545,11 +729,25 @@ app.post("/calendar_events", async (req, res) => {
     const b = req.body || {};
     const title = sanitize(b.title).slice(0, 120);
     if (!title) return res.status(400).json({ error: "title is required" });
-    const date = b.date ?? new Date().toISOString();
-    const ins = await pgq(
-      `INSERT INTO calendar_events (title, date, performed_by, performed_at_utc, description)
-       VALUES ($1,$2,$3,$4,$5) RETURNING id`,
-      [title, String(date), b.performedBy ?? null, b.performedAtUtc ?? new Date().toISOString(), b.description ?? null],
+
+    let date;
+    if (Array.isArray(b.date)) {
+      date = b.date[0] ?? new Date().toISOString();
+    } else if (typeof b.date === "string") {
+      date = b.date.includes(",") ? b.date.split(",")[0].trim() : b.date;
+    } else {
+      date = new Date().toISOString();
+    }
+
+    await pgq(
+      `INSERT INTO calendar_events (title, date, performed_by, performed_at_utc, description) VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+      [
+        title,
+        date,
+        b.performedBy ?? null,
+        b.performedAtUtc ?? new Date().toISOString(),
+        b.description ?? null,
+      ],
     );
     const id = ins.rows[0].id;
     const r = await pgq(
@@ -565,7 +763,9 @@ app.post("/calendar_events", async (req, res) => {
 });
 app.delete("/calendar_events/:id", async (req, res) => {
   try {
-    const del = await pgq(`DELETE FROM calendar_events WHERE id = $1`, [req.params.id]);
+    const del = await pgq(`DELETE FROM calendar_events WHERE id = $1`, [
+      req.params.id,
+    ]);
     if (!del.rowCount) return res.status(404).json({ error: "Not found" });
     res.status(204).send();
   } catch (e) {
@@ -577,45 +777,47 @@ app.delete("/calendar_events/:id", async (req, res) => {
 function normalizeCompanyRow(r) {
   return {
     id: r.id,
-name: r.name,
-product: r.product,
-productId: r.productId,
-productName: r.productName ?? null,
-title: r.title ?? null,
-company: r.company ?? null,
-label: r.label ?? null,
-interfaceType: r.interfaceType,
-interfaceOther: r.interfaceOther ?? null,
-timeZone: r.timeZone,
-wdManuallyOff: !!r.wdManuallyOff,
-pctManuallyOff: !!r.pctManuallyOff,
-installProcedure: r.installProcedure,
-versionCheckPath: r.versionCheckPath,
-licenseExpiry: r.licenseExpiry,
-licenseExpiryMode: r.licenseExpiryMode,
-expiryPerpetual: !!r.expiryPerpetual,
-expiryNone: !!r.expiryNone,
-updateProcedure: r.updateProcedure,
-activationType: r.activationType,
-activationEmail: r.activationEmail ?? null,
-activationPassword: r.activationPassword ?? null,
-activationSerial: r.activationSerial,
-hasRT: !!r.hasRT,
-hasOD: !!r.hasOD,
-scanType: r.scanType,
-log: r.log,
-hasGui: !!r.hasGui,
-gui: r.gui,
-logo: r.logo,
-emails: Array.isArray(r.emails) ? r.emails : [],
-installSteps: r.installSteps ?? [],
-customScan: r.customScan ?? null,
-};
+    name: r.name,
+    product: r.product,
+    productId: r.productId,
+    productName: r.productName ?? null,
+    title: r.title ?? null,
+    company: r.company ?? null,
+    label: r.label ?? null,
+    interfaceType: r.interfaceType,
+    interfaceOther: r.interfaceOther ?? null,
+    timeZone: r.timeZone,
+    wdManuallyOff: !!r.wdManuallyOff,
+    pctManuallyOff: !!r.pctManuallyOff,
+    installProcedure: r.installProcedure,
+    versionCheckPath: r.versionCheckPath,
+    licenseExpiry: r.licenseExpiry,
+    licenseExpiryMode: r.licenseExpiryMode,
+    expiryPerpetual: !!r.expiryPerpetual,
+    expiryNone: !!r.expiryNone,
+    updateProcedure: r.updateProcedure,
+    activationType: r.activationType,
+    activationEmail: r.activationEmail ?? null,
+    activationPassword: r.activationPassword ?? null,
+    activationSerial: r.activationSerial,
+    hasRT: !!r.hasRT,
+    hasOD: !!r.hasOD,
+    scanType: r.scanType,
+    log: r.log,
+    hasGui: !!r.hasGui,
+    gui: r.gui,
+    logo: r.logo,
+    emails: Array.isArray(r.emails) ? r.emails : [],
+    installSteps: r.installSteps ?? [],
+    customScan: r.customScan ?? null,
+  };
 }
 
 app.get("/companies", async (req, res) => {
   try {
-    const qPid = req.query?.productId ? String(req.query.productId).trim() : null;
+    const qPid = req.query?.productId
+      ? String(req.query.productId).trim()
+      : null;
     const where = [];
     const vals = [];
     if (qPid) {
@@ -623,7 +825,9 @@ app.get("/companies", async (req, res) => {
       vals.push(qPid);
     }
     const whereSql = where.length ? ` WHERE ${where.join(" AND ")}` : "";
-    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM companies${whereSql}`, vals)).rows[0].c;
+    const total = (
+      await pgq(`SELECT COUNT(1)::int AS c FROM companies${whereSql}`, vals)
+    ).rows[0].c;
     const { start, limit } = parseRange(req.query);
     const { expr, order } = parseSort(req.query, [
       "productId",
@@ -689,7 +893,7 @@ app.post("/companies", async (req, res) => {
     if (!name) return res.status(400).json({ error: "name is required" });
 
     const r = await pgq(
-  `INSERT INTO companies (
+      `INSERT INTO companies (
      name, product, product_id,
      interface_type, interface_other, time_zone,
      wd_manually_off, pct_manually_off, install_procedure, version_check_path,
@@ -721,41 +925,41 @@ app.post("/companies", async (req, res) => {
      log_path AS "log", has_gui AS "hasGui", gui, logo,
      company_emails AS "emails",
      install_steps AS "installSteps", custom_scan_json AS "customScan"`,
-  [
-    name,
-    b.product ?? null,
-    b.productId ?? null,
-    b.interfaceType ?? null,
-    b.interfaceOther ?? null,
-    b.timeZone ?? null,
-    toBool(b.wdManuallyOff),
-    toBool(b.pctManuallyOff),
-    b.installProcedure ?? null,
-    b.versionCheckPath ?? null,
-    b.licenseExpiry ?? null,
-    b.licenseExpiryMode ?? null,
-    toBool(b.expiryPerpetual),
-    toBool(b.expiryNone),
-    b.updateProcedure ?? null,
-    b.activationType ?? null,
-    b.activationEmail ?? null,
-    b.activationPassword ?? null,
-    b.activationSerial ?? null,
-    toBool(b.hasRT),
-    toBool(b.hasOD),
-    b.scanType ?? null,
-    b.log ?? null,
-    toBool(b.hasGui),
-    b.gui ?? null,
-    b.logo ?? null,
-    Array.isArray(b.emails) ? b.emails : [],
-    JSON.stringify(Array.isArray(b.installSteps) ? b.installSteps : []),
-    JSON.stringify(b.customScan ?? null),
-  ],
-);
+      [
+        name,
+        b.product ?? null,
+        b.productId ?? null,
+        b.interfaceType ?? null,
+        b.interfaceOther ?? null,
+        b.timeZone ?? null,
+        toBool(b.wdManuallyOff),
+        toBool(b.pctManuallyOff),
+        b.installProcedure ?? null,
+        b.versionCheckPath ?? null,
+        b.licenseExpiry ?? null,
+        b.licenseExpiryMode ?? null,
+        toBool(b.expiryPerpetual),
+        toBool(b.expiryNone),
+        b.updateProcedure ?? null,
+        b.activationType ?? null,
+        b.activationEmail ?? null,
+        b.activationPassword ?? null,
+        b.activationSerial ?? null,
+        toBool(b.hasRT),
+        toBool(b.hasOD),
+        b.scanType ?? null,
+        b.log ?? null,
+        toBool(b.hasGui),
+        b.gui ?? null,
+        b.logo ?? null,
+        Array.isArray(b.emails) ? b.emails : [],
+        JSON.stringify(Array.isArray(b.installSteps) ? b.installSteps : []),
+        JSON.stringify(b.customScan ?? null),
+      ],
+    );
 
-const row = r.rows[0];
-res.status(201).json(normalizeCompanyRow(row));
+    const row = r.rows[0];
+    res.status(201).json(normalizeCompanyRow(row));
   } catch (e) {
     res.status(500).json({ error: e?.message || String(e) });
   }
@@ -774,13 +978,21 @@ app.patch("/companies/:id", async (req, res) => {
     if (!cur.rowCount) return res.status(404).json({ error: "Not found" });
     const c = cur.rows[0];
     const next = {
-      licenseExpiry: req.body?.licenseExpiry !== undefined ? req.body.licenseExpiry : c.licenseExpiry,
+      licenseExpiry:
+        req.body?.licenseExpiry !== undefined
+          ? req.body.licenseExpiry
+          : c.licenseExpiry,
       licenseExpiryMode:
-        req.body?.licenseExpiryMode !== undefined ? req.body.licenseExpiryMode : c.licenseExpiryMode,
-      activationType: req.body?.activationType !== undefined ? req.body.activationType : c.activationType,
+        req.body?.licenseExpiryMode !== undefined
+          ? req.body.licenseExpiryMode
+          : c.licenseExpiryMode,
+      activationType:
+        req.body?.activationType !== undefined
+          ? req.body.activationType
+          : c.activationType,
       activationSerial:
         req.body?.activationType === "serial"
-          ? req.body?.activationSerial ?? c.activationSerial
+          ? (req.body?.activationSerial ?? c.activationSerial)
           : req.body?.activationType
             ? null
             : c.activationSerial,
@@ -789,7 +1001,13 @@ app.patch("/companies/:id", async (req, res) => {
       `UPDATE companies
        SET license_expiry = $1, license_expiry_mode = $2, activation_type = $3, activation_serial = $4
        WHERE id = $5`,
-      [next.licenseExpiry, next.licenseExpiryMode, next.activationType, next.activationSerial, id],
+      [
+        next.licenseExpiry,
+        next.licenseExpiryMode,
+        next.activationType,
+        next.activationSerial,
+        id,
+      ],
     );
     res.json({ id, ...next });
   } catch (e) {
@@ -799,7 +1017,9 @@ app.patch("/companies/:id", async (req, res) => {
 
 app.delete("/companies/:id", async (req, res) => {
   try {
-    const del = await pgq(`DELETE FROM companies WHERE id = $1`, [req.params.id]);
+    const del = await pgq(`DELETE FROM companies WHERE id = $1`, [
+      req.params.id,
+    ]);
     if (!del.rowCount) return res.status(404).json({ error: "Not found" });
     res.status(204).send();
   } catch (e) {
@@ -814,12 +1034,16 @@ app.get("/categories", async (req, res) => {
     const ids = Array.isArray(idsRaw) ? idsRaw : idsRaw ? [idsRaw] : null;
     if (ids && ids.length) {
       const params = ids.map((_, i) => `$${i + 1}`).join(",");
-      const r = await pgq(`SELECT id, title FROM categories WHERE id IN (${params})`, ids);
+      const r = await pgq(
+        `SELECT id, title FROM categories WHERE id IN (${params})`,
+        ids,
+      );
       res.set("X-Total-Count", String(r.rowCount));
       res.set("Access-Control-Expose-Headers", "X-Total-Count");
       return res.json(r.rows);
     }
-    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM categories`)).rows[0].c;
+    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM categories`))
+      .rows[0].c;
     const { start, limit } = parseRange(req.query);
     const list = await pgq(
       `SELECT id, title FROM categories ORDER BY title ASC LIMIT $1 OFFSET $2`,
@@ -836,7 +1060,10 @@ app.post("/categories", async (req, res) => {
   try {
     const title = sanitize(req.body?.title);
     if (!title) return res.status(400).json({ error: "title is required" });
-    const r = await pgq(`INSERT INTO categories (title) VALUES ($1) RETURNING id, title`, [title]);
+    const r = await pgq(
+      `INSERT INTO categories (title) VALUES ($1) RETURNING id, title`,
+      [title],
+    );
     res.status(201).json(r.rows[0]);
   } catch (e) {
     res.status(500).json({ error: e?.message || String(e) });
@@ -846,21 +1073,23 @@ app.patch("/categories/:id", async (req, res) => {
   try {
     const title = sanitize(req.body?.title);
     if (!title) return res.status(400).json({ error: "title is required" });
-    const r = await pgq(`UPDATE categories SET title=$1 WHERE id=$2 RETURNING id, title`, [
-      title,
-      req.params.id,
-    ]);
+    const r = await pgq(
+      `UPDATE categories SET title=$1 WHERE id=$2 RETURNING id, title`,
+      [title, req.params.id],
+    );
     if (!r.rowCount) return res.status(404).json({ error: "Not found" });
     res.json(r.rows[0]);
   } catch (e) {
     res.status(500).json({ error: e?.message || String(e) });
   }
 });
-app.delete("/categories/:id", async (req, res) => {
+app.get("/categories/:id", async (req, res) => {
   try {
-    const del = await pgq(`DELETE FROM categories WHERE id = $1`, [req.params.id]);
-    if (!del.rowCount) return res.status(404).json({ error: "Not found" });
-    res.status(204).send();
+    const r = await pgq("SELECT id, title FROM categories WHERE id = $1", [
+      req.params.id,
+    ]);
+    if (!r.rowCount) return res.status(404).json({ error: "Not found" });
+    res.json(r.rows[0]);
   } catch (e) {
     res.status(500).json({ error: e?.message || String(e) });
   }
@@ -890,37 +1119,42 @@ app.get("/incident_logs", async (req, res) => {
       where.push(`status = $${vals.length + 1}`);
       vals.push(status);
     }
-    const companyId =
-      req.query?.companyId
-        ? String(req.query.companyId).trim()
-        : req.query?.["company.id"]
-          ? String(req.query["company.id"]).trim()
-          : null;
+    const companyId = req.query?.companyId
+      ? String(req.query.companyId).trim()
+      : req.query?.["company.id"]
+        ? String(req.query["company.id"]).trim()
+        : null;
     if (companyId) {
       where.push(`company_id = $${vals.length + 1}`);
       vals.push(companyId);
     }
-    const productId = req.query?.productId ? String(req.query.productId).trim() : null;
+    const productId = req.query?.productId
+      ? String(req.query.productId).trim()
+      : null;
     if (productId) {
       where.push(`product_id = $${vals.length + 1}`);
       vals.push(productId);
     }
-    const categoryId =
-      req.query?.categoryId
-        ? String(req.query.categoryId).trim()
-        : req.query?.["category.id"]
-          ? String(req.query["category.id"]).trim()
-          : null;
+    const categoryId = req.query?.categoryId
+      ? String(req.query.categoryId).trim()
+      : req.query?.["category.id"]
+        ? String(req.query["category.id"]).trim()
+        : null;
     if (categoryId) {
       where.push(`category_id = $${vals.length + 1}`);
       vals.push(categoryId);
     }
     const whereSql = where.length ? ` WHERE ${where.join(" AND ")}` : "";
 
-    const total = (await pgq(`SELECT COUNT(1)::int AS c FROM incident_logs${whereSql}`, vals)).rows[0]
-      .c;
+    const total = (
+      await pgq(`SELECT COUNT(1)::int AS c FROM incident_logs${whereSql}`, vals)
+    ).rows[0].c;
     const { start, limit } = parseRange(req.query);
-    const { expr, order } = parseSort(req.query, ["productId", "status", "createdAt"]);
+    const { expr, order } = parseSort(req.query, [
+      "productId",
+      "status",
+      "createdAt",
+    ]);
     const orderExpr =
       expr === "productId"
         ? "product_id"
@@ -968,9 +1202,9 @@ app.post("/incident_logs", async (req, res) => {
     const categoryId = b.category?.id ?? b.categoryId ?? null;
     const detail = b.detail ?? null;
     if (!productId || !companyId || !categoryId || !detail) {
-      return res
-        .status(400)
-        .json({ error: "productId, company.id, category.id and detail are required" });
+      return res.status(400).json({
+        error: "productId, company.id, category.id and detail are required",
+      });
     }
     const now = new Date().toISOString();
     const createdAt = b.createdAt ?? now;
@@ -980,7 +1214,17 @@ app.post("/incident_logs", async (req, res) => {
          (company_id, product_id, category_id, title, status, detail, solution, created_at, updated_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
        RETURNING id`,
-      [companyId, productId, categoryId, b.title ?? null, b.status ?? "draft", detail, b.solution ?? null, createdAt, updatedAt],
+      [
+        companyId,
+        productId,
+        categoryId,
+        b.title ?? null,
+        b.status ?? "draft",
+        detail,
+        b.solution ?? null,
+        createdAt,
+        updatedAt,
+      ],
     );
     const id = r.rows[0].id;
     const one = await pgq(
@@ -1006,7 +1250,8 @@ app.patch("/incident_logs/:id", async (req, res) => {
     if (!cur.rowCount) return res.status(404).json({ error: "Not found" });
     const c = cur.rows[0];
     const next = {
-      productId: req.body?.productId != null ? String(req.body.productId) : c.productId,
+      productId:
+        req.body?.productId != null ? String(req.body.productId) : c.productId,
       companyId:
         req.body?.company?.id != null
           ? String(req.body.company.id)
@@ -1023,7 +1268,10 @@ app.patch("/incident_logs/:id", async (req, res) => {
       status: req.body?.status != null ? req.body.status : c.status,
       detail: req.body?.detail != null ? req.body.detail : c.detail,
       solution: req.body?.solution != null ? req.body.solution : c.solution,
-      updatedAt: req.body?.updatedAt != null ? req.body.updatedAt : new Date().toISOString(),
+      updatedAt:
+        req.body?.updatedAt != null
+          ? req.body.updatedAt
+          : new Date().toISOString(),
     };
     await pgq(
       `UPDATE incident_logs
@@ -1059,7 +1307,9 @@ app.patch("/incident_logs/:id", async (req, res) => {
 });
 app.delete("/incident_logs/:id", async (req, res) => {
   try {
-    const del = await pgq(`DELETE FROM incident_logs WHERE id = $1`, [req.params.id]);
+    const del = await pgq(`DELETE FROM incident_logs WHERE id = $1`, [
+      req.params.id,
+    ]);
     if (!del.rowCount) return res.status(404).json({ error: "Not found" });
     res.status(204).send();
   } catch (e) {
@@ -1109,7 +1359,8 @@ app.post("/resultsMeta", async (req, res) => {
     const b = req.body || {};
     const y = Number(b.year);
     const m = Number(b.month);
-    if (!Number.isFinite(y) || !Number.isFinite(m)) return res.status(400).json({ error: "year/month required" });
+    if (!Number.isFinite(y) || !Number.isFinite(m))
+      return res.status(400).json({ error: "year/month required" });
     const ins = await pgq(
       `INSERT INTO results_meta
          (year, month, test_set_name, clean_sample_size, locked, snapshot_at, last_unlock_at, private_flag, inv_res_flag)
@@ -1145,7 +1396,13 @@ app.post("/resultsMeta", async (req, res) => {
         [meta.id, "unlock", b.lastUnlockAt],
       );
     }
-    res.status(201).json({ ...meta, locked: toBool(meta.locked), privateFlag: toBool(meta.privateFlag), invResFlag: toBool(meta.invResFlag), eventLog: [] });
+    res.status(201).json({
+      ...meta,
+      locked: toBool(meta.locked),
+      privateFlag: toBool(meta.privateFlag),
+      invResFlag: toBool(meta.invResFlag),
+      eventLog: [],
+    });
   } catch (e) {
     res.status(500).json({ error: e?.message || String(e) });
   }
@@ -1166,12 +1423,19 @@ app.patch("/resultsMeta/:id", async (req, res) => {
     const c = cur.rows[0];
     const next = {
       testSetName: req.body?.testSetName ?? c.testSetName,
-      cleanSampleSize: intOrNull(req.body?.cleanSampleSize) ?? c.cleanSampleSize,
+      cleanSampleSize:
+        intOrNull(req.body?.cleanSampleSize) ?? c.cleanSampleSize,
       locked: req.body?.locked != null ? toBool(req.body.locked) : c.locked,
       lastSnapshotAt: req.body?.lastSnapshotAt ?? c.lastSnapshotAt,
       lastUnlockAt: req.body?.lastUnlockAt ?? c.lastUnlockAt,
-      privateFlag: req.body?.privateFlag != null ? toBool(req.body.privateFlag) : c.privateFlag,
-      invResFlag: req.body?.invResFlag != null ? toBool(req.body.invResFlag) : c.invResFlag,
+      privateFlag:
+        req.body?.privateFlag != null
+          ? toBool(req.body.privateFlag)
+          : c.privateFlag,
+      invResFlag:
+        req.body?.invResFlag != null
+          ? toBool(req.body.invResFlag)
+          : c.invResFlag,
     };
     const upd = await pgq(
       `UPDATE results_meta
@@ -1229,7 +1493,9 @@ app.get("/resultsRows", async (req, res) => {
   try {
     const y = Number(req.query.year);
     const m = Number(req.query.month);
-    const pid = req.query.productId ? String(req.query.productId).trim().toUpperCase() : null;
+    const pid = req.query.productId
+      ? String(req.query.productId).trim().toUpperCase()
+      : null;
     if (!Number.isFinite(y) || !Number.isFinite(m)) return res.json([]);
     const where = ["year = $1", "month = $2"];
     const vals = [y, m];
@@ -1261,7 +1527,9 @@ app.post("/resultsRows", async (req, res) => {
     const b = req.body || {};
     const y = Number(b.year);
     const m = Number(b.month);
-    const pid = String(b.productId || "").trim().toUpperCase();
+    const pid = String(b.productId || "")
+      .trim()
+      .toUpperCase();
     if (!Number.isFinite(y) || !Number.isFinite(m) || !pid)
       return res.status(400).json({ error: "year/month/productId required" });
     const r = await pgq(
@@ -1316,12 +1584,23 @@ app.patch("/resultsRows/:id", async (req, res) => {
       productName: req.body?.productName ?? c.productName,
       vmName: req.body?.vmName ?? c.vmName,
       stage: req.body?.stage ?? c.stage,
-      certMiss: req.body?.certMiss != null ? intOrNull(req.body.certMiss) : c.certMiss,
+      certMiss:
+        req.body?.certMiss != null ? intOrNull(req.body.certMiss) : c.certMiss,
       fps: req.body?.fps != null ? numOrNull(req.body.fps) : c.fps,
-      cfnPreview: req.body?.cfnPreview != null ? numOrNull(req.body.cfnPreview) : c.cfnPreview,
-      cfnFinal: req.body?.cfnFinal != null ? numOrNull(req.body.cfnFinal) : c.cfnFinal,
-      privateFlag: req.body?.privateFlag != null ? toBool(req.body.privateFlag) : c.privateFlag,
-      invResFlag: req.body?.invResFlag != null ? toBool(req.body.invResFlag) : c.invResFlag,
+      cfnPreview:
+        req.body?.cfnPreview != null
+          ? numOrNull(req.body.cfnPreview)
+          : c.cfnPreview,
+      cfnFinal:
+        req.body?.cfnFinal != null ? numOrNull(req.body.cfnFinal) : c.cfnFinal,
+      privateFlag:
+        req.body?.privateFlag != null
+          ? toBool(req.body.privateFlag)
+          : c.privateFlag,
+      invResFlag:
+        req.body?.invResFlag != null
+          ? toBool(req.body.invResFlag)
+          : c.invResFlag,
     };
     const upd = await pgq(
       `UPDATE results_rows
@@ -1346,9 +1625,143 @@ app.patch("/resultsRows/:id", async (req, res) => {
       ],
     );
     const row = upd.rows[0];
-    res.json({ ...row, privateFlag: toBool(row.privateFlag), invResFlag: toBool(row.invResFlag) });
+    res.json({
+      ...row,
+      privateFlag: toBool(row.privateFlag),
+      invResFlag: toBool(row.invResFlag),
+    });
   } catch (e) {
     res.status(500).json({ error: e?.message || String(e) });
+  }
+});
+
+// ---- Auth routes ----
+// ---- Auth routes ----
+app.post("/auth/login", async (req, res) => {
+  try {
+    const email = String(req.body?.email || "")
+      .trim()
+      .toLowerCase();
+    const password = String(req.body?.password || "");
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password required" });
+    }
+    if (!email.endsWith("@virusbulletin.com")) {
+      return res.status(403).json({ error: "Email domain not allowed" });
+    }
+
+    const u = await findUserByEmail(email);
+    if (!u || !u.is_active)
+      return res.status(401).json({ error: "Invalid credentials" });
+
+    const ok = await bcrypt.compare(password, u.password_hash);
+    if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+
+    const token = issueToken(u);
+    const user = {
+      email: u.email,
+      name: u.name,
+      avatar: u.avatar,
+      picture: u.avatar || "",
+    };
+    res.json({ token, user, mustChangePassword: !!u.must_change_password });
+  } catch (e) {
+    res.status(500).json({ error: e?.message || String(e) });
+  }
+});
+
+app.get("/auth/me", authRequired, async (req, res) => {
+  try {
+    const u = await findUserByEmail(req.user.email);
+    if (!u) return res.status(404).json({ error: "Not found" });
+    const user = {
+      email: u.email,
+      name: u.name,
+      avatar: u.avatar,
+      picture: u.avatar || "",
+      mustChangePassword: !!u.must_change_password,
+    };
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: e?.message || String(e) });
+  }
+});
+
+app.post("/auth/change-password", authRequired, async (req, res) => {
+  try {
+    const currentPassword = String(req.body?.currentPassword || "");
+    const newPassword = String(req.body?.newPassword || "");
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ error: "Current and new password required" });
+    }
+
+    const u = await findUserByEmail(req.user.email);
+    if (!u) return res.status(404).json({ error: "Not found" });
+
+    const ok = await bcrypt.compare(currentPassword, u.password_hash);
+    if (!ok) return res.status(401).json({ error: "Invalid current password" });
+
+    const hash = await bcrypt.hash(newPassword, 10);
+    await updateUserPassword(u.id, hash, false);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e?.message || String(e) });
+  }
+});
+
+app.patch("/me", authRequired, async (req, res) => {
+  try {
+    const name = req.body?.name ?? null;
+    const avatar = req.body?.avatar ?? null;
+
+    const u = await findUserByEmail(req.user.email);
+    if (!u) return res.status(404).json({ error: "Not found" });
+
+    await updateUserProfile(u.id, { name, avatar });
+    const updated = await findUserByEmail(u.email);
+    res.json({
+      email: updated.email,
+      name: updated.name,
+      avatar: updated.avatar,
+      picture: updated.avatar || "",
+    });
+  } catch (e) {
+    res.status(500).json({ error: e?.message || String(e) });
+  }
+});
+
+// ---- First-login password set (no current password required) ----
+app.post("/auth/set-password", authRequired, async (req, res) => {
+  try {
+    const newPassword = String(req.body?.newPassword || "");
+    if (!newPassword) {
+      return res.status(400).json({ error: "New password is required" });
+    }
+
+    // Basic strength checks (adjust as needed)
+    if (newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 8 characters" });
+    }
+
+    const u = await findUserByEmail(req.user.email);
+    if (!u) return res.status(404).json({ error: "Not found" });
+
+    // Only allow this route if user is in first-login state
+    if (!u.must_change_password) {
+      return res
+        .status(409)
+        .json({ error: "Password already set; use /auth/change-password" });
+    }
+
+    const hash = await bcrypt.hash(newPassword, 10);
+    await updateUserPassword(u.id, hash, false); // false => must_change_password = false
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(500).json({ error: e?.message || String(e) });
   }
 });
 
@@ -1364,12 +1777,9 @@ if (require.main === module && !global.__VB100_SERVER_STARTED__) {
 
   server.on("error", (err) => {
     if (err && err.code === "EADDRINUSE") {
-      console.error(
-        `Port ${PORT} foglalt ebben a processzben (valószínű dupla listen). ` +
-        `Adj meg másik PORT-ot (.env), pl. 4001, vagy javítsd a duplázást.`
-      );
+      console.error(`Port ${PORT} already used. Use a different one.`);
     } else {
-      console.error("HTTP szerver hiba:", err);
+      console.error("HTTP server error:", err);
     }
     process.exit(1);
   });
@@ -1381,11 +1791,12 @@ if (require.main === module && !global.__VB100_SERVER_STARTED__) {
     if (shuttingDown) return;
     shuttingDown = true;
     server.close(async () => {
-      try { await pool.end(); } catch {}
+      try {
+        await pool.end();
+      } catch {}
       process.exit(0);
     });
   }
 }
 
 module.exports = app;
-

@@ -20,11 +20,10 @@ import routerBindings, {
 import axios from "axios";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 import { Helmet } from "react-helmet";
-import { CredentialResponse } from "./interfaces/google";
-import { parseJwt } from "./utils/parse-jwt";
 
-//My imports
+// My imports
 import { Login } from "./pages/login";
+import { Profile } from "./pages/profile";
 import { CalendarList } from "./pages/calendar";
 import {
   CompanyList,
@@ -48,6 +47,9 @@ import {
   CalendarOutlined,
 } from "@ant-design/icons";
 
+import TermsPage from "./pages/login/terms";
+import PrivacyPage from "./pages/login/privacy";
+
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
@@ -57,7 +59,6 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-// Logo + company name
 const LogoTitle = () => (
   <a href="/" style={{ display: "flex", alignItems: "center" }}>
     <img
@@ -72,63 +73,86 @@ const APP_TITLE = "VirusBulletin";
 
 function App() {
   const authProvider: AuthBindings = {
-    login: async ({ credential }: CredentialResponse) => {
-      const profileObj = credential ? parseJwt(credential) : null;
-      if (profileObj) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...profileObj,
-            avatar: profileObj.picture,
-          }),
-        );
-        localStorage.setItem("token", `${credential}`);
+    login: async (params: any) => {
+      const email = String(params?.email || "")
+        .trim()
+        .toLowerCase();
+      const password = String(params?.password || "");
+
+      if (!email || !password) {
         return {
-          success: true,
-          redirectTo: "/",
+          success: false,
+          error: {
+            name: "Invalid",
+            message: "E-mail and password are required.",
+          },
         };
       }
-      return {
-        success: false,
-      };
-    },
-    logout: async () => {
-      const token = localStorage.getItem("token");
-      if (token && typeof window !== "undefined") {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        axios.defaults.headers.common = {};
-        window.google?.accounts.id.revoke(token, () => {
-          return {};
-        });
+
+      if (!email.endsWith("@virusbulletin.com")) {
+        return {
+          success: false,
+          error: {
+            name: "Denied",
+            message: "Only @virusbulletin.com email authorized.",
+          },
+        };
       }
-      return {
-        success: true,
-        redirectTo: "/login",
-      };
+
+      try {
+        const API_URL =
+          (import.meta as any).env?.VITE_API_URL || "http://localhost:4000";
+        const r = await axios.post(`${API_URL}/auth/login`, {
+          email,
+          password,
+        });
+        const { token, user, mustChangePassword } = r.data || {};
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+
+        return {
+          success: true,
+          redirectTo: mustChangePassword ? "/profile" : "/companies",
+        };
+      } catch (e: any) {
+        return {
+          success: false,
+          error: {
+            name: "LoginFailed",
+            message: e?.response?.data?.error || "Login failed",
+          },
+        };
+      }
     },
+
+    logout: async () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      axios.defaults.headers.common = {};
+      return { success: true, redirectTo: "/login" };
+    },
+
     onError: async (error) => {
       console.error(error);
       return { error };
     },
+
     check: async () => {
       const token = localStorage.getItem("token");
       if (token) {
-        return {
-          authenticated: true,
-        };
+        return { authenticated: true };
       }
       return {
         authenticated: false,
-        error: {
-          message: "Check failed",
-          name: "Token not found",
-        },
+        error: { message: "Check failed", name: "Token not found" },
         logout: true,
         redirectTo: "/login",
       };
     },
+
     getPermissions: async () => null,
+
     getIdentity: async () => {
       const user = localStorage.getItem("user");
       if (user) {
@@ -217,6 +241,7 @@ function App() {
                 }}
               >
                 <Routes>
+                  {/* Authenticated routes */}
                   <Route
                     element={
                       <Authenticated
@@ -235,8 +260,9 @@ function App() {
                   >
                     <Route
                       index
-                      element={<NavigateToResource resource="incident_logs" />}
+                      element={<NavigateToResource resource="profile" />}
                     />
+                    <Route path="/profile" element={<Profile />} />
                     <Route path="/calendar">
                       <Route index element={<CalendarList />} />
                     </Route>
@@ -260,6 +286,8 @@ function App() {
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
+
+                  {/* Public routes (login + modal pages) */}
                   <Route
                     element={
                       <Authenticated
@@ -271,8 +299,11 @@ function App() {
                     }
                   >
                     <Route path="/login" element={<Login />} />
+                    <Route path="/login/terms" element={<TermsPage />} />
+                    <Route path="/login/privacy" element={<PrivacyPage />} />
                   </Route>
                 </Routes>
+
                 <UnsavedChangesNotifier />
                 <DocumentTitleHandler
                   handler={({ resource, action }) => {

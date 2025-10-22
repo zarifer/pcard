@@ -8,6 +8,21 @@ volumes:
   vb100_pgdata:
 
 services:
+  edge:
+    image: caddy:2.8
+    container_name: vb100_edge
+    depends_on:
+      - web
+      - api
+    networks: [vb100_net]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../certs:/certs:ro
+    restart: unless-stopped
+
   db:
     image: postgres:16
     container_name: vb100_db
@@ -19,7 +34,11 @@ services:
     volumes:
       - vb100_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vb100} -d ${POSTGRES_DB:-vb100}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-vb100} -d ${POSTGRES_DB:-vb100}",
+        ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -38,7 +57,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: postgres://vb100:${POSTGRES_PASSWORD}@vb100_db:5432/${POSTGRES_DB:-vb100}
+      DATABASE_URL: postgres://vb100:${POSTGRES_PASSWORD}@vb100_db:5432/${POSTGRES_DB}
     ports:
       - "4000:4000"
     restart: always

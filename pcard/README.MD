@@ -50,3 +50,57 @@
 - **Ant Design** [Docs](https://refine.dev/docs/ui-frameworks/antd/tutorial/)
 - **React Router** [Docs](https://refine.dev/docs/core/providers/router-provider/)
 - **Google Auth Provider** [Docs](https://refine.dev/docs/core/providers/auth-provider/)
+
+## DB guide
+
+cd /vb100/pcard/deploy
+
+- Create tables
+  sudo docker compose exec -T db psql -U vb100 -d vb100 -f - < magic.sql
+
+- Check tables
+  sudo docker compose exec -T db psql -U vb100 -d vb100 -c '\dt'
+
+## Users guide
+
+VM:
+sudo docker compose exec -it api bash
+
+- List all users: npm run users -- list
+- Export users to JSON/CSV: npm run users -- export --format csv > users.csv
+- Add a single user (upsert): npm run users -- add --email xy@virusbulletin.com --name "XY" --password "Uborka23"
+- Reset password: npm run users -- reset --email xy@virusbulletin.com --password "NewTemp_456!"
+- Deactivate user: npm run users -- deactivate --email someone@virusbulletin.com
+- Reactivate user: npm run users -- reactivate --email someone@virusbulletin.com
+- Batch add/upsert from file:
+  Create pcard/server/users.batch.json:
+  [
+  { "email": "alice@virusbulletin.com", "name": "Alice", "password": "TmpA1!" },
+  { "email": "bob@virusbulletin.com", "name": "Bob", "password": "TmpB2!" }
+  ]
+  Run:
+  npm run users -- batch --file users.batch.json
+
+  ## Send new to the VM
+
+  Local:
+  delete node modules from pcard/ and pcard/server/ (you can install them again later with npm install)
+  scp -r pcard vblab@lab-microservices.vb.internal:~/vb100
+
+  VM:
+  sudo docker compose down
+  sudo docker compose up -d --build
+
+  or if you didn't touch all of them:
+  - sudo docker compose --env-file .env build --no-cache api
+  - sudo docker compose up -d --force-recreate --no-deps api
+
+  sudo docker compose ps
+
+## VM logs check
+
+VM:
+
+- sudo docker compose logs -f api (POSTGRESQL connection OK)
+- sudo docker compose logs -f db (DB stuff)
+- sudo docker compose logs -f edge (Web stuff)

@@ -1,45 +1,16 @@
-import { useEffect, useRef } from "react";
+import React from "react";
 import { useLogin } from "@refinedev/core";
-import { Typography, Card } from "antd";
-import { CredentialResponse } from "../../interfaces/google";
+import { Typography, Card, Form, Input, Button } from "antd";
 
-// Google client ID
-const GOOGLE_CLIENT_ID =
-  "979184695640-8k3tsbn5r11b7cf4ahsdrrj6p123o31i.apps.googleusercontent.com";
+type LoginParams = { email: string; password: string };
+
+const ALLOWED_DOMAIN = "virusbulletin.com";
 
 export const Login: React.FC = () => {
-  const { mutate: login } = useLogin<CredentialResponse>();
+  const { mutate: login, isLoading } = useLogin<LoginParams>();
 
-  const GoogleButton = (): JSX.Element => {
-    const divRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-      if (typeof window === "undefined" || !window.google || !divRef.current) {
-        return;
-      }
-      try {
-        window.google.accounts.id.initialize({
-          ux_mode: "popup",
-          client_id: GOOGLE_CLIENT_ID,
-          callback: async (res: CredentialResponse) => {
-            if (res.credential) {
-              login(res);
-            }
-          },
-        });
-        window.google.accounts.id.renderButton(divRef.current, {
-          type: "standard",
-          theme: "filled_blue",
-          size: "large",
-          shape: "pill",
-          width: "300",
-        });
-      } catch (error) {
-        console.log(error);
-      }
-    }, []);
-
-    return <div ref={divRef} />;
+  const onFinish = (values: LoginParams) => {
+    login(values);
   };
 
   return (
@@ -52,20 +23,65 @@ export const Login: React.FC = () => {
           <Typography.Title level={1} className="login-title">
             Sign In to VB Product Cards
           </Typography.Title>
-          <div className="google-btn-wrapper">
-            <GoogleButton />
-          </div>
+          <Form
+            layout="vertical"
+            onFinish={onFinish}
+            requiredMark={false}
+            style={{ marginTop: 12 }}
+          >
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[
+                { required: true, message: "Email is required" },
+                { type: "email", message: "Invalid email format" },
+                {
+                  validator: (_, value) => {
+                    const v = String(value || "")
+                      .trim()
+                      .toLowerCase();
+                    if (!v) return Promise.resolve();
+                    if (v.endsWith("@" + ALLOWED_DOMAIN))
+                      return Promise.resolve();
+                    return Promise.reject(
+                      new Error(
+                        `Only @${ALLOWED_DOMAIN} email addresses are allowed`,
+                      ),
+                    );
+                  },
+                },
+              ]}
+              validateTrigger={["onBlur", "onSubmit"]}
+            >
+              <Input
+                placeholder={`you@${ALLOWED_DOMAIN}`}
+                autoComplete="email"
+                inputMode="email"
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[{ required: true, message: "Password is required" }]}
+            >
+              <Input.Password
+                placeholder="Password"
+                autoComplete="current-password"
+              />
+            </Form.Item>
+
+            <Button type="primary" htmlType="submit" block loading={isLoading}>
+              Sign In
+            </Button>
+          </Form>
+
           <div
             style={{ margin: "32px 0 0 0", textAlign: "center", color: "#aaa" }}
           >
-            By registering you with our{" "}
-            <a href="#" style={{ color: "#bc80fc" }}>
-              Terms
-            </a>{" "}
-            and{" "}
-            <a href="#" style={{ color: "#bc80fc" }}>
-              Conditions
-            </a>
+            By signing in you agree to the{" "}
+            <a href="/login/terms">Terms of Use</a>
+            and <a href="/login/privacy">Privacy Policy</a>.
           </div>
         </Card>
       </div>

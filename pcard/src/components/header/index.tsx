@@ -1,23 +1,18 @@
 import type { RefineThemedLayoutV2HeaderProps } from "@refinedev/antd";
 import { useGetIdentity } from "@refinedev/core";
-import {
-  Avatar,
-  Layout as AntdLayout,
-  Space,
-  Switch,
-  theme,
-  Typography,
-} from "antd";
+import { Avatar, Layout as AntdLayout, Space, Switch, theme } from "antd";
 import React, { useContext } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
+import { Link } from "react-router-dom";
 
-const { Text } = Typography;
 const { useToken } = theme;
 
 type IUser = {
-  id: number;
-  name: string;
-  avatar: string;
+  id?: number;
+  name?: string;
+  email?: string;
+  avatar?: string;
+  picture?: string;
 };
 
 export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
@@ -52,8 +47,16 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
           defaultChecked={mode === "dark"}
         />
         <Space style={{ marginLeft: "8px" }} size="middle">
-          {user?.name && <Text strong>{user.name}</Text>}
-          {user?.avatar && <Avatar src={user?.avatar} alt={user?.name} />}
+          <Link to="/profile" aria-label="Open profile">
+            <Avatar
+              size={56}
+              src={user?.avatar || user?.picture}
+              alt={user?.name || user?.email || "User"}
+              style={{ cursor: "pointer" }}
+            >
+              {(user?.name?.[0] || user?.email?.[0] || "U").toUpperCase()}
+            </Avatar>
+          </Link>
         </Space>
       </Space>
     </AntdLayout.Header>
