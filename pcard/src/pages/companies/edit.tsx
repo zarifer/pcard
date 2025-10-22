@@ -1,5 +1,5 @@
 import { Edit, useForm } from "@refinedev/antd";
-import { useNavigation } from "@refinedev/core";
+import { useNavigation, useApiUrl } from "@refinedev/core";
 import {
   Form,
   Input,
@@ -8,7 +8,6 @@ import {
   Select,
   Radio,
   DatePicker,
-  Typography,
   Button,
   Tabs,
   Card,
@@ -26,8 +25,8 @@ import { ColorModeContext } from "../../contexts/color-mode";
 import dayjs, { Dayjs } from "dayjs";
 import { AnalogClock } from "./analogclock";
 import { AV_TIMEZONES } from "./timezones";
+import axios from "axios";
 
-const { Title } = Typography;
 const { Dragger } = Upload;
 
 const UNIQUE_PATH_SUGGESTIONS = [
@@ -66,7 +65,7 @@ export default function CompanyEdit() {
     rtod: "RT & OD",
   } as const;
   const tabHeaders = TAB_KEYS.map((k) => ({ key: k, label: TAB_LABELS[k] }));
-
+const API_URL = useApiUrl();
   const idx = TAB_KEYS.indexOf(activeKey);
   const goPrev = () => setActiveKey(TAB_KEYS[Math.max(0, idx - 1)]);
   const goNext = () =>
@@ -310,7 +309,15 @@ export default function CompanyEdit() {
               payload.activationFile = activationFile ?? record?.activationFile;
             }
 
-            return formProps.onFinish?.(payload);
+            try {
+  await axios.patch(`${API_URL}/companies/${record.id}/full`, payload);
+  toast.success("Saved");
+   const { show } = useNavigation();
+     show("companies", record.id);
+} catch (e: any) {
+  setSubmitError(e?.response?.data?.error || "Failed to save");
+}
+
           }}
           onFinishFailed={(info) => {
             const hasFormatError = info.errorFields.some((f) =>
@@ -358,33 +365,32 @@ export default function CompanyEdit() {
                 </Col>
               </Row>
 
-              <Title level={5} style={{ marginTop: 8 }}>
-                Contact email(s)
-              </Title>
-              <Row gutter={[16, 8]}>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    name="emailPrimary"
-                    rules={[
-                      {
-                        required: true,
-                        type: "email",
-                        message: "Valid email required",
-                      },
-                    ]}
-                  >
-                    <Input placeholder="primary@company.com" />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    name="emailSecondary"
-                    rules={[{ type: "email", message: "Invalid email" }]}
-                  >
-                    <Input placeholder="optional@company.com (optional)" />
-                  </Form.Item>
-                </Col>
-              </Row>
+              <Form.Item label="Contact Email(s)" required>
+                <Row gutter={[16, 8]}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="emailPrimary"
+                      rules={[
+                        {
+                          required: true,
+                          type: "email",
+                          message: "Valid email required",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="primary@company.com" />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="emailSecondary"
+                      rules={[{ type: "email", message: "Invalid email" }]}
+                    >
+                      <Input placeholder="optional@company.com (optional)" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Form.Item>
 
               <Row gutter={[16, 8]}>
                 <Col xs={24} md={8}>

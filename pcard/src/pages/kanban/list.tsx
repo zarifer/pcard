@@ -27,6 +27,7 @@ import "./index.css";
 import KanbanEdit from "./edit";
 import KanbanResults from "./results";
 import type { ResultsApi } from "./results";
+import { useGetIdentity } from "@refinedev/core";
 
 type ColumnId = string;
 
@@ -84,7 +85,7 @@ const fmtDate = (v?: string) =>
 export default function KanbanList() {
   const API_URL = useApiUrl();
   const { message, modal } = App.useApp();
-
+const { data: identity } = useGetIdentity<any>();
   const { data, isLoading } = useList<KanbanItem>({
     resource: "kanban",
     config: { pagination: { pageSize: 500 } },
@@ -446,12 +447,15 @@ export default function KanbanList() {
         const newId = res.data?.id;
         if (newId) {
           try {
-            const cres = await axios.post(`${API_URL}/calendar`, {
-              title,
-              date: [dueISO, dueISO],
-              type: "Kanban",
-              refKanbanId: newId,
-            });
+            const nowIso = new Date().toISOString();
+const cres = await axios.post(`${API_URL}/calendar`, {
+  title,
+  date: nowIso,
+  performedBy: identity?.email ?? null,
+  performedAtUtc: nowIso,
+  description: `Imported company: ${sanitize(c.name || "—")} (${title})`,
+});
+
             const calId = cres.data?.id;
             if (calId) {
               await axios.patch(`${API_URL}/kanban/${newId}`, {

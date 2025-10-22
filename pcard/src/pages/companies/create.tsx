@@ -325,33 +325,34 @@ export default function CompanyCreate() {
                       </Col>
                     </Row>
 
-                    <Title level={5} style={{ marginTop: 8 }}>
-                      Contact Email(s)
-                    </Title>
-                    <Row gutter={[16, 8]}>
-                      <Col xs={24} md={12}>
-                        <Form.Item
-                          name="emailPrimary"
-                          rules={[
-                            {
-                              required: true,
-                              type: "email",
-                              message: "Valid email required",
-                            },
-                          ]}
-                        >
-                          <Input placeholder="primary@company.com" />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} md={12}>
-                        <Form.Item
-                          name="emailSecondary"
-                          rules={[{ type: "email", message: "Invalid email" }]}
-                        >
-                          <Input placeholder="secondary@company.com (optional)" />
-                        </Form.Item>
-                      </Col>
-                    </Row>
+                    <Form.Item label="Contact Email(s)" required>
+                      <Row gutter={[16, 8]}>
+                        <Col xs={24} md={12}>
+                          <Form.Item
+                            name="emailPrimary"
+                            rules={[
+                              {
+                                required: true,
+                                type: "email",
+                                message: "Valid email required",
+                              },
+                            ]}
+                          >
+                            <Input placeholder="primary@company.com" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={12}>
+                          <Form.Item
+                            name="emailSecondary"
+                            rules={[
+                              { type: "email", message: "Invalid email" },
+                            ]}
+                          >
+                            <Input placeholder="secondary@company.com (optional)" />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </Form.Item>
 
                     <Row gutter={[16, 8]}>
                       <Col xs={24} md={8}>

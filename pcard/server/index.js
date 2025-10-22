@@ -775,42 +775,68 @@ app.delete("/calendar_events/:id", async (req, res) => {
 
 // ================== COMPANIES ==================
 function normalizeCompanyRow(r) {
-  return {
-    id: r.id,
-    name: r.name,
-    product: r.product,
-    productId: r.productId,
-    productName: r.productName ?? null,
-    title: r.title ?? null,
-    company: r.company ?? null,
-    label: r.label ?? null,
-    interfaceType: r.interfaceType,
-    interfaceOther: r.interfaceOther ?? null,
-    timeZone: r.timeZone,
-    wdManuallyOff: !!r.wdManuallyOff,
-    pctManuallyOff: !!r.pctManuallyOff,
-    installProcedure: r.installProcedure,
-    versionCheckPath: r.versionCheckPath,
-    licenseExpiry: r.licenseExpiry,
-    licenseExpiryMode: r.licenseExpiryMode,
-    expiryPerpetual: !!r.expiryPerpetual,
-    expiryNone: !!r.expiryNone,
-    updateProcedure: r.updateProcedure,
-    activationType: r.activationType,
-    activationEmail: r.activationEmail ?? null,
-    activationPassword: r.activationPassword ?? null,
-    activationSerial: r.activationSerial,
-    hasRT: !!r.hasRT,
-    hasOD: !!r.hasOD,
-    scanType: r.scanType,
-    log: r.log,
-    hasGui: !!r.hasGui,
-    gui: r.gui,
-    logo: r.logo,
-    emails: Array.isArray(r.emails) ? r.emails : [],
-    installSteps: r.installSteps ?? [],
-    customScan: r.customScan ?? null,
-  };
+// Coerce installSteps to array
+let steps = [];
+if (Array.isArray(r.installSteps)) {
+steps = r.installSteps;
+} else if (typeof r.installSteps === "string") {
+try {
+const parsed = JSON.parse(r.installSteps);
+steps = Array.isArray(parsed) ? parsed : [];
+} catch {
+steps = [];
+}
+}
+
+// Coerce customScan to object|null
+let customScan = null;
+if (r.customScan && typeof r.customScan === "object") {
+customScan = r.customScan;
+} else if (typeof r.customScan === "string") {
+try {
+const parsed = JSON.parse(r.customScan);
+customScan = parsed && typeof parsed === "object" ? parsed : null;
+} catch {
+customScan = null;
+}
+}
+
+return {
+id: r.id,
+name: r.name,
+product: r.product,
+productId: r.productId,
+productName: r.productName ?? null,
+title: r.title ?? null,
+company: r.company ?? null,
+label: r.label ?? null,
+interfaceType: r.interfaceType,
+interfaceOther: r.interfaceOther ?? null,
+timeZone: r.timeZone,
+wdManuallyOff: !!r.wdManuallyOff,
+pctManuallyOff: !!r.pctManuallyOff,
+installProcedure: r.installProcedure,
+versionCheckPath: r.versionCheckPath,
+licenseExpiry: r.licenseExpiry,
+licenseExpiryMode: r.licenseExpiryMode,
+expiryPerpetual: !!r.expiryPerpetual,
+expiryNone: !!r.expiryNone,
+updateProcedure: r.updateProcedure,
+activationType: r.activationType,
+activationEmail: r.activationEmail ?? null,
+activationPassword: r.activationPassword ?? null,
+activationSerial: r.activationSerial,
+hasRT: !!r.hasRT,
+hasOD: !!r.hasOD,
+scanType: r.scanType,
+log: r.log,
+hasGui: !!r.hasGui,
+gui: r.gui,
+logo: r.logo,
+emails: Array.isArray(r.emails) ? r.emails : [],
+installSteps: steps,
+customScan,
+};
 }
 
 app.get("/companies", async (req, res) => {
@@ -1026,6 +1052,124 @@ app.delete("/companies/:id", async (req, res) => {
     res.status(500).json({ error: e?.message || String(e) });
   }
 });
+
+// ================== COMPANIES (FULL UPDATE) ==================
+app.patch("/companies/:id/full", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    // Load current row
+    const cur = await pgq(
+      `SELECT
+         id, name, product, product_id, interface_type, interface_other, time_zone,
+         wd_manually_off, pct_manually_off, install_procedure, version_check_path,
+         license_expiry, license_expiry_mode, expiry_perpetual, expiry_none,
+         update_procedure, activation_type, activation_email, activation_password, activation_serial,
+         has_rt, has_od, scan_type, log_path, has_gui, gui, logo,
+         company_emails, install_steps, custom_scan_json
+       FROM companies WHERE id = $1`,
+      [id],
+    );
+    if (!cur.rowCount) return res.status(404).json({ error: "Not found" });
+    const c = cur.rows[0];
+    const b = req.body || {};
+
+    // Merge (undefined => keep current)
+    const next = {
+      name: b.name !== undefined ? sanitize(b.name) : c.name,
+      product: b.product !== undefined ? (sanitize(b.product ?? "") || null) : c.product,
+      product_id: b.productId !== undefined ? (b.productId || null) : c.product_id,
+
+      interface_type: b.interfaceType !== undefined ? b.interfaceType : c.interface_type,
+      interface_other: b.interfaceOther !== undefined ? b.interfaceOther : c.interface_other,
+      time_zone: b.timeZone !== undefined ? b.timeZone : c.time_zone,
+
+      wd_manually_off: b.wdManuallyOff !== undefined ? !!b.wdManuallyOff : c.wd_manually_off,
+      pct_manually_off: b.pctManuallyOff !== undefined ? !!b.pctManuallyOff : c.pct_manually_off,
+
+      install_procedure: b.installProcedure !== undefined ? b.installProcedure : c.install_procedure,
+      version_check_path: b.versionCheckPath !== undefined ? b.versionCheckPath : c.version_check_path,
+
+      license_expiry: b.licenseExpiry !== undefined ? b.licenseExpiry : c.license_expiry,
+      license_expiry_mode: b.licenseExpiryMode !== undefined ? b.licenseExpiryMode : c.license_expiry_mode,
+      expiry_perpetual: b.expiryPerpetual !== undefined ? !!b.expiryPerpetual : c.expiry_perpetual,
+      expiry_none: b.expiryNone !== undefined ? !!b.expiryNone : c.expiry_none,
+
+      update_procedure: b.updateProcedure !== undefined ? b.updateProcedure : c.update_procedure,
+
+      activation_type: b.activationType !== undefined ? b.activationType : c.activation_type,
+      activation_email: b.activationEmail !== undefined ? b.activationEmail : c.activation_email,
+      activation_password: b.activationPassword !== undefined ? b.activationPassword : c.activation_password,
+      activation_serial: b.activationSerial !== undefined ? b.activationSerial : c.activation_serial,
+
+      has_rt: b.hasRT !== undefined ? !!b.hasRT : c.has_rt,
+      has_od: b.hasOD !== undefined ? !!b.hasOD : c.has_od,
+      scan_type: b.scanType !== undefined ? b.scanType : c.scan_type,
+
+      log_path: b.log !== undefined ? b.log : c.log_path,
+
+      has_gui: b.hasGui !== undefined ? !!b.hasGui : c.has_gui,
+      gui: b.gui !== undefined ? b.gui : c.gui,
+      logo: b.logo !== undefined ? b.logo : c.logo,
+
+      company_emails: Array.isArray(b.emails) ? b.emails : c.company_emails,
+      install_steps: b.installSteps !== undefined
+        ? JSON.stringify(b.installSteps)
+        : c.install_steps,
+      custom_scan_json: b.customScan !== undefined
+        ? JSON.stringify(b.customScan)
+        : c.custom_scan_json,
+    };
+
+    await pgq(
+      `UPDATE companies SET
+         name=$1, product=$2, product_id=$3,
+         interface_type=$4, interface_other=$5, time_zone=$6,
+         wd_manually_off=$7, pct_manually_off=$8, install_procedure=$9, version_check_path=$10,
+         license_expiry=$11, license_expiry_mode=$12, expiry_perpetual=$13, expiry_none=$14,
+         update_procedure=$15, activation_type=$16, activation_email=$17, activation_password=$18, activation_serial=$19,
+         has_rt=$20, has_od=$21, scan_type=$22, log_path=$23, has_gui=$24, gui=$25, logo=$26,
+         company_emails=$27::text[], install_steps=$28::jsonb, custom_scan_json=$29::jsonb,
+         updated_at=now()
+       WHERE id=$30`,
+      [
+        next.name, next.product, next.product_id,
+        next.interface_type, next.interface_other, next.time_zone,
+        next.wd_manually_off, next.pct_manually_off, next.install_procedure, next.version_check_path,
+        next.license_expiry, next.license_expiry_mode, next.expiry_perpetual, next.expiry_none,
+        next.update_procedure, next.activation_type, next.activation_email, next.activation_password, next.activation_serial,
+        next.has_rt, next.has_od, next.scan_type, next.log_path, next.has_gui, next.gui, next.logo,
+        next.company_emails, next.install_steps, next.custom_scan_json,
+        id,
+      ],
+    );
+
+    // Return normalized row (same shape as GET)
+    const r = await pgq(
+      `SELECT
+         id, name, product, product_id AS "productId",
+         NULL::text AS "productName", NULL::text AS "title", NULL::text AS "company", NULL::text AS "label",
+         interface_type AS "interfaceType", interface_other AS "interfaceOther",
+         time_zone AS "timeZone", wd_manually_off AS "wdManuallyOff", pct_manually_off AS "pctManuallyOff",
+         install_procedure AS "installProcedure", version_check_path AS "versionCheckPath",
+         license_expiry AS "licenseExpiry", license_expiry_mode AS "licenseExpiryMode",
+         expiry_perpetual AS "expiryPerpetual", expiry_none AS "expiryNone",
+         update_procedure AS "updateProcedure",
+         activation_type AS "activationType", activation_email AS "activationEmail",
+         activation_password AS "activationPassword", activation_serial AS "activationSerial",
+         has_rt AS "hasRT", has_od AS "hasOD", scan_type AS "scanType",
+         log_path AS "log", has_gui AS "hasGui", gui, logo,
+         company_emails AS "emails", install_steps AS "installSteps", custom_scan_json AS "customScan"
+       FROM companies WHERE id = $1`,
+      [id],
+    );
+
+    res.json(normalizeCompanyRow(r.rows[0]));
+  } catch (e) {
+    res.status(500).json({ error: e?.message || String(e) });
+  }
+});
+
 
 // ================== CATEGORIES ==================
 app.get("/categories", async (req, res) => {
