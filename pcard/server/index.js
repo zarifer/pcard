@@ -739,7 +739,7 @@ app.post("/calendar_events", async (req, res) => {
       date = new Date().toISOString();
     }
 
-    await pgq(
+    const ins = await pgq(
       `INSERT INTO calendar_events (title, date, performed_by, performed_at_utc, description) VALUES ($1,$2,$3,$4,$5) RETURNING id`,
       [
         title,
